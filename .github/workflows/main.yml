@@ -2,11 +2,12 @@ name: Update Stock Screener Web Page
 
 on:
   # GitHub 시간(UTC)은 한국 시간(KST)보다 9시간 느립니다.
-  # 1. 매일 아침 8시 40분 (한국시간 08:40 = UTC 전날 23:40)
-  # 2. 매일 오후 4시 10분 (한국시간 16:10 = UTC 07:10)
+  # 피크 대기열 지연을 줄이기 위해 비정각 분으로 예약했습니다.
+  # 1. 매일 아침 8시 33분 (한국시간 08:33 = UTC 전날 23:33)
+  # 2. 매일 오후 4시 7분 (한국시간 16:07 = UTC 07:07)
   schedule:
-    - cron: '40 23 * * *'
-    - cron: '10 7 * * *'
+    - cron: '33 23 * * *'
+    - cron: '7 7 * * *'
   # 3. GitHub 웹화면에서 내가 원할 때 'Run workflow' 버튼을 눌러 즉시 실행
   workflow_dispatch:
 
