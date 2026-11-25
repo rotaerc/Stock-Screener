@@ -1,0 +1,12 @@
+# 로컬 전용 폴더 및 개인 파일은 GitHub에 올리지 않음
+Backup/
+MD/
+엑셀백업/
+__pycache__/
+*.docx
+~$*
+*_통합시트_*.xlsx
+*_전체_*.xlsx
+*.csv
+*.pyc
+깃허브_업로드.bat

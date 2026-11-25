@@ -1246,12 +1246,16 @@ def _extract_market_excel_for_web(here, market):
 
     if candidates:
         candidates.sort(key=lambda p: (os.path.basename(p), os.path.getmtime(p)), reverse=True)
-        src_path = candidates[0]
-        try:
-            if os.path.abspath(src_path) != os.path.abspath(latest_copy_path):
-                shutil.copy2(src_path, latest_copy_path)
-        except Exception:
-            pass
+        newest_cand = candidates[0]
+        if os.path.isfile(latest_copy_path) and (os.path.getmtime(latest_copy_path) > os.path.getmtime(newest_cand) + 10):
+            src_path = latest_copy_path
+        else:
+            src_path = newest_cand
+            try:
+                if os.path.abspath(src_path) != os.path.abspath(latest_copy_path):
+                    shutil.copy2(src_path, latest_copy_path)
+            except Exception:
+                pass
     elif os.path.isfile(latest_copy_path):
         src_path = latest_copy_path
     else:
@@ -1275,6 +1279,8 @@ def _extract_market_excel_for_web(here, market):
             return "A"
         if c_name.startswith("YoY_"):
             return "B"
+        if c_name.startswith("가속폭_"):
+            return "E"
         if c_name.startswith("분기영업이익률_"):
             return "C"
         if (c_name.startswith("연간OP_") and c_name not in ann_summary_names) or c_name.startswith("연간영업이익률_"):
@@ -1418,33 +1424,41 @@ def build_web_dashboard(here):
       --header-text: #f8fafc;
     }}
     * {{ box-sizing: border-box; }}
+    html, body {{
+      height: 100%;
+    }}
     body {{
       margin: 0;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
       background: var(--bg);
       color: var(--text);
       font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }}
     .topbar {{
       background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
       color: #fff;
-      padding: 16px 20px;
+      padding: 10px 18px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      gap: 10px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }}
     .title-area h1 {{
       margin: 0;
-      font-size: 18px;
+      font-size: 16.5px;
       font-weight: 800;
       letter-spacing: -0.3px;
     }}
     .title-area .subtitle {{
-      margin-top: 4px;
-      font-size: 12px;
+      margin-top: 2px;
+      font-size: 11.5px;
       color: #cbd5e1;
     }}
     .top-actions {{
@@ -1460,7 +1474,7 @@ def build_web_dashboard(here):
       background: rgba(255,255,255,0.14);
       color: #fff;
       text-decoration: none;
-      padding: 7px 12px;
+      padding: 6px 11px;
       border-radius: 8px;
       font-weight: 600;
       font-size: 12px;
@@ -1472,15 +1486,20 @@ def build_web_dashboard(here):
     }}
     .container {{
       max-width: 100%;
-      padding: 14px 16px 32px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px 10px;
     }}
     .market-bar {{
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }}
     .market-tabs {{
       display: flex;
@@ -1490,39 +1509,39 @@ def build_web_dashboard(here):
       border: 2px solid var(--border);
       background: var(--card);
       color: var(--text);
-      padding: 9px 18px;
-      border-radius: 10px;
-      font-size: 14px;
+      padding: 6px 15px;
+      border-radius: 9px;
+      font-size: 13.5px;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.15s;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }}
     .mkt-btn.active-KOSPI {{
       background: var(--kospi);
       color: #fff;
       border-color: var(--kospi);
-      box-shadow: 0 3px 10px rgba(29,78,216,0.25);
+      box-shadow: 0 2px 8px rgba(29,78,216,0.25);
     }}
     .mkt-btn.active-KOSDAQ {{
       background: var(--kosdaq);
       color: #fff;
       border-color: var(--kosdaq);
-      box-shadow: 0 3px 10px rgba(5,150,105,0.25);
+      box-shadow: 0 2px 8px rgba(5,150,105,0.25);
     }}
     .meta-badges {{
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
-      font-size: 12px;
+      font-size: 11.5px;
     }}
     .meta-pill {{
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 5px 10px;
+      padding: 4px 9px;
       border-radius: 999px;
       font-weight: 600;
     }}
@@ -1540,19 +1559,20 @@ def build_web_dashboard(here):
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       background: var(--card);
-      padding: 8px;
-      border-radius: 10px;
+      padding: 6px 8px;
+      border-radius: 9px;
       border: 1px solid var(--border-light);
+      flex-shrink: 0;
     }}
     .sheet-btn {{
       border: 1px solid var(--border);
       background: #f8fafc;
       color: var(--text);
-      padding: 7px 13px;
-      border-radius: 8px;
-      font-size: 12.5px;
+      padding: 5px 11px;
+      border-radius: 7px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -1570,7 +1590,7 @@ def build_web_dashboard(here):
     }}
     .sheet-count {{
       background: rgba(100,116,139,0.18);
-      padding: 2px 7px;
+      padding: 1px 6px;
       border-radius: 999px;
       font-size: 11px;
     }}
@@ -1581,30 +1601,31 @@ def build_web_dashboard(here):
     .controls-panel {{
       background: var(--card);
       border: 1px solid var(--border-light);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
+      border-radius: 9px;
+      padding: 7px 10px;
+      margin-bottom: 8px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
     }}
     .filter-left, .group-right {{
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }}
     .search-input, .select-box {{
-      padding: 6px 10px;
+      padding: 5px 9px;
       border: 1px solid var(--border);
       border-radius: 7px;
-      font-size: 12.5px;
+      font-size: 12px;
       outline: none;
     }}
     .search-input {{
-      width: 210px;
+      width: 195px;
     }}
     .search-input:focus, .select-box:focus {{
       border-color: var(--primary);
@@ -1614,9 +1635,9 @@ def build_web_dashboard(here):
       border: 1px solid var(--border);
       background: #f8fafc;
       color: #334155;
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 7px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.15s;
@@ -1629,19 +1650,61 @@ def build_web_dashboard(here):
     .table-wrap {{
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 9px;
       overflow: auto;
-      max-height: calc(100vh - 235px);
-      min-height: 420px;
+      flex: 1;
+      min-height: 0;
       position: relative;
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }}
+    .pagination-bar {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border-light);
+      border-radius: 9px;
+      flex-shrink: 0;
+      font-size: 12px;
+    }}
+    .page-controls {{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .pg-btn {{
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+    }}
+    .pg-btn:hover:not(:disabled) {{
+      background: #e2e8f0;
+    }}
+    .pg-btn:disabled {{
+      opacity: 0.45;
+      cursor: not-allowed;
+    }}
+    .pg-info {{
+      font-weight: 700;
+      color: #1e293b;
+      padding: 0 6px;
     }}
     table {{
       border-collapse: separate;
       border-spacing: 0;
       width: max-content;
       min-width: 100%;
-      font-size: 12.5px;
+      font-size: 12px;
     }}
     thead th {{
       position: sticky;
@@ -1649,20 +1712,26 @@ def build_web_dashboard(here):
       z-index: 20;
       background: var(--header-bg);
       color: var(--header-text);
-      padding: 9px 10px;
+      padding: 6px 5px;
       font-weight: 700;
+      font-size: 11.5px;
+      line-height: 1.25;
       text-align: center;
-      white-space: nowrap;
+      white-space: pre-line;
       border-bottom: 2px solid #0f172a;
       border-right: 1px solid #334155;
       cursor: pointer;
       user-select: none;
     }}
+    thead th.has-tip {{
+      text-decoration: underline dotted rgba(147,197,253,0.75);
+      text-underline-offset: 2px;
+    }}
     thead th:hover {{
       background: #334155;
     }}
     tbody td {{
-      padding: 7px 10px;
+      padding: 5px 6px;
       border-bottom: 1px solid var(--border-light);
       border-right: 1px solid var(--border-light);
       white-space: nowrap;
@@ -1676,16 +1745,19 @@ def build_web_dashboard(here):
     }}
     /* 틀 고정 (종목코드~섹터2) */
     .freeze-on th.sticky-col-0, .freeze-on td.sticky-col-0 {{
-      position: sticky; left: 0px; z-index: 15; min-width: 78px; max-width: 78px;
+      position: sticky; left: 0px; z-index: 15; min-width: 58px; max-width: 58px;
     }}
     .freeze-on th.sticky-col-1, .freeze-on td.sticky-col-1 {{
-      position: sticky; left: 78px; z-index: 15; min-width: 145px; max-width: 145px;
+      position: sticky; left: 58px; z-index: 15; min-width: 130px; max-width: 130px;
+      overflow: hidden; text-overflow: ellipsis;
     }}
     .freeze-on th.sticky-col-2, .freeze-on td.sticky-col-2 {{
-      position: sticky; left: 223px; z-index: 15; min-width: 95px; max-width: 95px;
+      position: sticky; left: 188px; z-index: 15; min-width: 72px; max-width: 72px;
+      overflow: hidden; text-overflow: ellipsis;
     }}
     .freeze-on th.sticky-col-3, .freeze-on td.sticky-col-3 {{
-      position: sticky; left: 318px; z-index: 15; min-width: 105px; max-width: 105px;
+      position: sticky; left: 260px; z-index: 15; min-width: 78px; max-width: 78px;
+      overflow: hidden; text-overflow: ellipsis;
       border-right: 2px solid #475569 !important;
     }}
     .freeze-on thead th.sticky-col-0,
@@ -1723,9 +1795,9 @@ def build_web_dashboard(here):
       background: var(--pass-bg);
       color: var(--pass-text);
       font-weight: 800;
-      padding: 2px 8px;
+      padding: 1px 6px;
       border-radius: 999px;
-      font-size: 11.5px;
+      font-size: 11px;
     }}
     .badge-false {{
       color: #cbd5e1;
@@ -1774,7 +1846,9 @@ def build_web_dashboard(here):
       display: none;
     }}
     @media (max-width: 768px) {{
-      .table-wrap {{ max-height: calc(100vh - 200px); }}
+      body {{ height: auto; overflow: auto; }}
+      .container {{ flex: none; }}
+      .table-wrap {{ max-height: 68vh; min-height: 320px; }}
       .search-input {{ width: 150px; }}
     }}
   </style>
@@ -1812,6 +1886,7 @@ def build_web_dashboard(here):
       <div class="group-right">
         <button class="grp-btn" id="btnGrpA" onclick="toggleGroup('A')">➕ 분기OP 상세</button>
         <button class="grp-btn" id="btnGrpB" onclick="toggleGroup('B')">➕ 분기YoY 상세</button>
+        <button class="grp-btn" id="btnGrpE" onclick="toggleGroup('E')">➕ 가속폭 상세</button>
         <button class="grp-btn" id="btnGrpC" onclick="toggleGroup('C')">➕ 분기이익률 상세</button>
         <button class="grp-btn" id="btnGrpD" onclick="toggleGroup('D')">➕ 연간 상세</button>
         <button class="grp-btn" id="btnGrpAll" onclick="toggleAllGroups()">📂 상세 전체 펼치기</button>
@@ -1825,6 +1900,29 @@ def build_web_dashboard(here):
         <tbody id="tableBody"></tbody>
       </table>
     </div>
+
+    <div class="pagination-bar" id="paginationBar">
+      <div class="page-controls">
+        <span style="font-weight:700; color:#475569;">보기 방식:</span>
+        <select id="pageSizeSelect" class="select-box" onchange="onPageSizeChange()">
+          <option value="0" selected>전체 스크롤 보기 (기본 · 세로 스크롤)</option>
+          <option value="20">20줄씩 페이지 나누기</option>
+          <option value="30">30줄씩 페이지 나누기</option>
+          <option value="50">50줄씩 페이지 나누기</option>
+        </select>
+        <span id="pageRangeInfo" style="color:#64748b; font-weight:600;"></span>
+      </div>
+      <div class="page-controls" id="pageNavGroup">
+        <button class="pg-btn" id="btnFirstPage" onclick="goToPage(1)">⏮ 처음</button>
+        <button class="pg-btn" id="btnPrevPage" onclick="goToPage(currentPage - 1)">◀ 이전</button>
+        <span class="pg-info" id="pageNumInfo">1 / 1</span>
+        <button class="pg-btn" id="btnNextPage" onclick="goToPage(currentPage + 1)">다음 ▶</button>
+        <button class="pg-btn" id="btnLastPage" onclick="goToPage(totalPages)">끝 ⏭</button>
+      </div>
+      <div class="page-controls" id="scrollTopGroup" style="display:none;">
+        <button class="pg-btn" onclick="document.getElementById('tableWrap').scrollTop = 0">⬆ 맨 위로</button>
+      </div>
+    </div>
   </div>
 
   <div class="tooltip-box" id="tooltipBox"></div>
@@ -1834,10 +1932,13 @@ def build_web_dashboard(here):
     const marketKeys = Object.keys(DB);
     let currentMarket = marketKeys.includes('KOSPI') ? 'KOSPI' : marketKeys[0];
     let currentSheetIdx = 0;
-    let openGroups = {{ A: false, B: false, C: false, D: false }};
+    let openGroups = {{ A: false, B: false, E: false, C: false, D: false }};
     let freezeOn = true;
     let sortColIdx = -1;
     let sortAsc = true;
+    let pageSize = 0;
+    let currentPage = 1;
+    let totalPages = 1;
 
     const SHEET_LABELS = {{
       "1_전체": "1_전체 (시총순)",
@@ -1861,9 +1962,23 @@ def build_web_dashboard(here):
       renderMarketTabs();
       selectMarket(currentMarket);
 
-      document.getElementById('searchInput').addEventListener('input', renderTableBody);
-      document.getElementById('sectorSelect').addEventListener('change', renderTableBody);
-      document.getElementById('toneSelect').addEventListener('change', renderTableBody);
+      document.getElementById('searchInput').addEventListener('input', () => {{ currentPage = 1; renderTableBody(); }});
+      document.getElementById('sectorSelect').addEventListener('change', () => {{ currentPage = 1; renderTableBody(); }});
+      document.getElementById('toneSelect').addEventListener('change', () => {{ currentPage = 1; renderTableBody(); }});
+    }}
+
+    function onPageSizeChange() {{
+      pageSize = parseInt(document.getElementById('pageSizeSelect').value, 10) || 0;
+      currentPage = 1;
+      renderTableBody();
+    }}
+
+    function goToPage(p) {{
+      if (p < 1) p = 1;
+      if (p > totalPages) p = totalPages;
+      currentPage = p;
+      renderTableBody();
+      document.getElementById('tableWrap').scrollTop = 0;
     }}
 
     function renderDownloadButtons() {{
@@ -1885,6 +2000,7 @@ def build_web_dashboard(here):
     function selectMarket(mkt) {{
       currentMarket = mkt;
       sortColIdx = -1;
+      currentPage = 1;
       renderMarketTabs();
       const d = DB[currentMarket];
 
@@ -1917,6 +2033,7 @@ def build_web_dashboard(here):
     function selectSheet(idx) {{
       currentSheetIdx = idx;
       sortColIdx = -1;
+      currentPage = 1;
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
@@ -1950,9 +2067,10 @@ def build_web_dashboard(here):
     }}
 
     function toggleAllGroups() {{
-      const anyClosed = !openGroups.A || !openGroups.B || !openGroups.C || !openGroups.D;
+      const anyClosed = !openGroups.A || !openGroups.B || !openGroups.E || !openGroups.C || !openGroups.D;
       openGroups.A = anyClosed;
       openGroups.B = anyClosed;
+      openGroups.E = anyClosed;
       openGroups.C = anyClosed;
       openGroups.D = anyClosed;
       updateGroupButtons();
@@ -1960,14 +2078,14 @@ def build_web_dashboard(here):
     }}
 
     function updateGroupButtons() {{
-      const labels = {{ A: '분기OP 상세', B: '분기YoY 상세', C: '분기이익률 상세', D: '연간 상세' }};
-      ['A', 'B', 'C', 'D'].forEach(g => {{
+      const labels = {{ A: '분기OP 상세', B: '분기YoY 상세', E: '가속폭 상세', C: '분기이익률 상세', D: '연간 상세' }};
+      ['A', 'B', 'E', 'C', 'D'].forEach(g => {{
         const btn = document.getElementById('btnGrp' + g);
         const isOpen = openGroups[g];
         btn.classList.toggle('open', isOpen);
         btn.textContent = (isOpen ? '➖ ' : '➕ ') + labels[g];
       }});
-      const allOpen = openGroups.A && openGroups.B && openGroups.C && openGroups.D;
+      const allOpen = openGroups.A && openGroups.B && openGroups.E && openGroups.C && openGroups.D;
       const btnAll = document.getElementById('btnGrpAll');
       btnAll.classList.toggle('open', allOpen);
       btnAll.textContent = allOpen ? '📁 상세 전체 접기' : '📂 상세 전체 펼치기';
@@ -1989,21 +2107,73 @@ def build_web_dashboard(here):
         sortColIdx = colIdx;
         sortAsc = false;
       }}
+      currentPage = 1;
       renderTable();
+    }}
+
+    const SHORT_HEADERS = {{
+      "종목코드": "코드",
+      "종목명": "종목명",
+      "섹터1": "섹터1",
+      "섹터2": "섹터2",
+      "현재가": "현재가",
+      "오늘등락율(%)": "등락\\n(%)",
+      "52주최고가": "52주\\n최고가",
+      "52주최고가대비하락률(%)": "고점대비\\n하락(%)",
+      "52주최고가대비30%이상하락": "30%↓",
+      "통과": "통과",
+      "E3반등": "E3\\n반등",
+      "통과+E3반등": "통과+\\nE3",
+      "연속이익성장(연간+분기)": "연속\\n성장",
+      "연속성장구간": "성장\\n구간",
+      "성장조건": "성장\\n조건",
+      "E3반등사유": "E3\\n사유",
+      "분기OP_연속성장": "분기OP\\n연속",
+      "OP성장률_최종대비E0(%)": "OP성장\\n(%)",
+      "가속폭_E1-기준(%p)": "가속폭\\nE1-E0",
+      "가속폭_E2-기준(%p)": "가속폭\\nE2-E0",
+      "가속폭_E3-E2(%p)": "가속폭\\nE3-E2",
+      "분기마진_기준<E1<E2": "분기\\n마진↑",
+      "연간OP_성장률(%)": "연간OP\\n성장(%)",
+      "연간OP_차년>당해": "연간OP\\n증가",
+      "연간마진_개선폭(%p)": "연간마진\\n(%p)",
+      "연간마진_차년>당해": "연간\\n마진↑"
+    }};
+
+    function getShortHeader(name) {{
+      if (SHORT_HEADERS[name]) return SHORT_HEADERS[name];
+      let s = name
+        .replace(/^OP_20/, 'OP\\n')
+        .replace(/^YoY_20/, 'YoY\\n')
+        .replace(/^분기영업이익률_20/, '분기마진\\n')
+        .replace(/^연간OP_20/, '연간OP\\n')
+        .replace(/^연간영업이익률_20/, '연간마진\\n')
+        .replace(/\\(기준,%\\)/g, '(기준)')
+        .replace(/\\(E,%\\)/g, '(E)');
+      return s;
     }}
 
     function formatCell(colName, val, rowVals, colIdx) {{
       if (val === null || val === undefined || val === '') return '<span class="badge-false">-</span>';
       if (typeof val === 'boolean') {{
-        return val ? '<span class="badge-true">✔ TRUE</span>' : '<span class="badge-false">-</span>';
+        return val ? '<span class="badge-true">✔</span>' : '<span class="badge-false">-</span>';
       }}
       if (colName === '종목명') {{
         const code = rowVals[0] || '';
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{code}}`;
         const fnUrl = `https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A${{code}}`;
-        return `<strong>${{escapeHtml(String(val))}}</strong>
+        return `<strong title="${{escapeHtml(String(val))}}">${{escapeHtml(String(val))}}</strong>
           <a class="ext-link" href="${{naverUrl}}" target="_blank" title="네이버 금융 열기">N</a>
           <a class="ext-link" href="${{fnUrl}}" target="_blank" title="에프앤가이드 열기">Fn</a>`;
+      }}
+      if (colName === '섹터1' || colName === '섹터2') {{
+        const s = escapeHtml(String(val));
+        return `<span title="${{s}}">${{s}}</span>`;
+      }}
+      if (colName === '연속성장구간') {{
+        const s = String(val);
+        if (s.includes('E3미집계')) return `<span title="${{escapeHtml(s)}}">E0~E2</span>`;
+        return escapeHtml(s);
       }}
       if (typeof val === 'number') {{
         if (colName === '현재가' || colName === '52주최고가') {{
@@ -2036,9 +2206,13 @@ def build_web_dashboard(here):
         if (c.borderL) classes.push('b-left');
         if (c.borderR) classes.push('b-right');
         const sortIcon = (sortColIdx === idx) ? (sortAsc ? ' ▲' : ' ▼') : '';
-        const commentAttr = c.comment ? `data-tip="${{escapeHtml(c.comment)}}"` : '';
-        const qBadge = c.comment ? `<span class="q-icon">?</span>` : '';
-        trHtml += `<th class="${{classes.join(' ')}}" onclick="onHeaderClick(${{idx}})" ${{commentAttr}}>${{escapeHtml(c.name)}}${{qBadge}}${{sortIcon}}</th>`;
+        const shortLabel = getShortHeader(c.name);
+        const fullTip = c.comment
+          ? `[${{c.name}}]\\n${{c.comment}}`
+          : (shortLabel.replace(/\\n/g, '') !== c.name ? `[${{c.name}}]` : '');
+        if (fullTip) classes.push('has-tip');
+        const commentAttr = fullTip ? `data-tip="${{escapeHtml(fullTip)}}"` : '';
+        trHtml += `<th class="${{classes.join(' ')}}" onclick="onHeaderClick(${{idx}})" ${{commentAttr}}>${{escapeHtml(shortLabel)}}${{sortIcon}}</th>`;
       }});
       trHtml += '</tr>';
       thead.innerHTML = trHtml;
@@ -2098,7 +2272,35 @@ def build_web_dashboard(here):
 
       document.getElementById('rowCountLabel').textContent = `표시 종목: ${{filtered.length}} / ${{sheet.count}}개`;
 
-      const rowsHtml = filtered.map(r => {{
+      let pageRows = filtered;
+      const pageNavGroup = document.getElementById('pageNavGroup');
+      const scrollTopGroup = document.getElementById('scrollTopGroup');
+      if (pageSize > 0) {{
+        totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * pageSize;
+        const endIdx = Math.min(filtered.length, startIdx + pageSize);
+        pageRows = filtered.slice(startIdx, endIdx);
+        document.getElementById('pageRangeInfo').textContent =
+          filtered.length > 0 ? `총 ${{filtered.length}}개 중 ${{startIdx + 1}} ~ ${{endIdx}}번 표시` : '표시할 종목 없음';
+        pageNavGroup.style.display = 'flex';
+        scrollTopGroup.style.display = 'none';
+      }} else {{
+        totalPages = 1;
+        currentPage = 1;
+        document.getElementById('pageRangeInfo').textContent =
+          `총 ${{filtered.length}}개 종목 · 세로 스크롤바/마우스 휠로 전체 확인`;
+        pageNavGroup.style.display = 'none';
+        scrollTopGroup.style.display = 'flex';
+      }}
+
+      document.getElementById('pageNumInfo').textContent = `${{currentPage}} / ${{totalPages}} 페이지`;
+      document.getElementById('btnFirstPage').disabled = (currentPage <= 1);
+      document.getElementById('btnPrevPage').disabled = (currentPage <= 1);
+      document.getElementById('btnNextPage').disabled = (currentPage >= totalPages);
+      document.getElementById('btnLastPage').disabled = (currentPage >= totalPages);
+
+      const rowsHtml = pageRows.map(r => {{
         let cells = '<tr>';
         cols.forEach((c, idx) => {{
           if (c.group && !openGroups[c.group]) return;
@@ -2169,19 +2371,111 @@ def build_web_dashboard(here):
     return out_html
 
 
+def auto_push_to_github(here, commit_msg=None):
+    """
+    로컬 PC에서 실행 완료 후 변경된 웹페이지(index.html), 소스, 최신 엑셀 파일을
+    GitHub 저장소(origin/main)에 자동으로 커밋 & 푸시합니다.
+    (GitHub Actions 환경에서는 워크플로우가 직접 푸시하므로 자동 건너뜁니다.)
+    """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return True
+
+    git_dir = os.path.join(here, ".git")
+    if not os.path.isdir(git_dir):
+        print("[GitHub 자동 업로드] .git 폴더가 없어 업로드를 건너뜁니다.")
+        return False
+
+    print(f"\n{'='*80}")
+    print(" ▶ GitHub 자동 업로드(git push) 시작...")
+
+    def run_git(args):
+        return subprocess.run(
+            ["git", "-C", here] + args,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+    try:
+        upload_targets = [
+            "kospi200_yoy.py",
+            "index.html",
+            "requirements.txt",
+            "kospi_top200_latest.xlsx",
+            "kosdaq_top200_latest.xlsx",
+            ".gitignore",
+            os.path.join(".github", "workflows", "main.yml"),
+        ]
+        existing_targets = [f for f in upload_targets if os.path.exists(os.path.join(here, f))]
+        if existing_targets:
+            r_add = run_git(["add"] + existing_targets)
+            if r_add.returncode != 0:
+                print(f"  [경고] git add 실패: {r_add.stderr.strip()}")
+                return False
+
+        r_diff = run_git(["diff", "--staged", "--quiet"])
+        if r_diff.returncode != 0:
+            msg = commit_msg or f"Update stock screener ({datetime.now().strftime('%Y-%m-%d %H:%M')})"
+            r_commit = run_git(["commit", "-m", msg])
+            if r_commit.returncode != 0:
+                print(f"  [경고] git commit 실패: {r_commit.stderr.strip()}")
+                return False
+            print(f"  - 변경사항 커밋 완료: {msg}")
+        else:
+            print("  - 새로 커밋할 변경사항이 없습니다. 원격 동기화만 확인합니다.")
+
+        # GitHub Actions가 먼저 업데이트한 커밋이 있어도 충돌 없이 최신 로컬 결과 우선 반영
+        r_fetch = run_git(["fetch", "origin", "main"])
+        if r_fetch.returncode == 0:
+            r_rev = run_git(["rev-list", "--count", "HEAD..origin/main"])
+            behind = int((r_rev.stdout or "0").strip() or "0")
+            if behind > 0:
+                print(f"  - 원격(GitHub)의 최신 변경사항 {behind}건과 자동 병합 중...")
+                r_rb = run_git(["rebase", "-X", "theirs", "origin/main"])
+                if r_rb.returncode != 0:
+                    run_git(["rebase", "--abort"])
+                    print(f"  [경고] 자동 병합 실패: {r_rb.stderr.strip()}")
+                    return False
+
+        r_push = run_git(["push", "origin", "main"])
+        if r_push.returncode == 0:
+            print(" ★ GitHub 자동 업로드 완료! (약 1분 뒤 웹페이지에 자동 반영됩니다)")
+            print("   👉 https://rotaerc.github.io/Stock-Screener/")
+            print(f"{'='*80}")
+            return True
+        else:
+            print(f"  [경고] GitHub 업로드(push) 실패:\n{r_push.stderr.strip()}")
+            print(f"{'='*80}")
+            return False
+    except Exception as e:
+        print(f"  [경고] GitHub 자동 업로드 중 오류: {e}")
+        print(f"{'='*80}")
+        return False
+
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
+    args = [a for a in sys.argv[1:] if a.lower() != "--no-push"]
+    skip_push = any(a.lower() == "--no-push" for a in sys.argv[1:])
 
-    # 기존 최신 엑셀(.xlsx) 파일만으로 웹페이지(index.html) 즉시 생성 (예: python kospi200_yoy.py --html)
-    if len(sys.argv) > 1 and sys.argv[1].lower() in ("--html", "html", "--web", "web"):
+    # GitHub 업로드만 즉시 실행 (예: python kospi200_yoy.py --push)
+    if args and args[0].lower() in ("--push", "push"):
+        auto_push_to_github(here)
+        return
+
+    # 기존 최신 엑셀(.xlsx) 파일만으로 웹페이지(index.html) 즉시 생성 + GitHub 자동 업로드
+    if args and args[0].lower() in ("--html", "html", "--web", "web"):
         build_web_dashboard(here)
+        if not skip_push:
+            auto_push_to_github(here)
         return
 
     sess = make_session()
 
     # 단일 종목 빠른 테스트 지원 (예: python kospi200_yoy.py 000660)
-    if len(sys.argv) > 1 and sys.argv[1].isdigit():
-        code = sys.argv[1].zfill(6)
+    if args and args[0].isdigit():
+        code = args[0].zfill(6)
         q = _fetch_snp_q(code, sess)
         a = _fetch(code, sess, "Y")
         price_info = get_price_info_from_snapshot(code, sess)
@@ -2198,8 +2492,8 @@ def main():
         return
 
     # 명령줄 인자로 특정 시장만 지정 가능 (예: python kospi200_yoy.py KOSPI), 미지정 시 KOSPI + KOSDAQ 모두 실행
-    if len(sys.argv) > 1 and sys.argv[1].upper() in ("KOSPI", "KOSDAQ"):
-        target_markets = [sys.argv[1].upper()]
+    if args and args[0].upper() in ("KOSPI", "KOSDAQ"):
+        target_markets = [args[0].upper()]
     else:
         target_markets = MARKETS
 
@@ -2214,8 +2508,10 @@ def main():
         print(f"  - [{mkt}] {os.path.basename(path)}")
     print(f"{'='*80}")
 
-    # 크롤링 및 엑셀 생성 완료 후 자동으로 웹페이지(index.html)도 최신화
+    # 크롤링 및 엑셀 생성 완료 후 자동으로 웹페이지(index.html) 최신화 + GitHub 자동 업로드
     build_web_dashboard(here)
+    if not skip_push:
+        auto_push_to_github(here)
 
 
 if __name__ == "__main__":
