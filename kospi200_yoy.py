@@ -786,8 +786,26 @@ def _find_current_q_op_col(cols, dt=None):
     return cur_q, None
 
 
+def _normalize_op_history_points(pts):
+    """타임스탬프(d) 기준 중복 제거·시간순 정렬 후 연속 동일 수치 압축"""
+    by_dt = {}
+    for pt in pts or []:
+        d = str(pt.get("d") or "").strip()
+        v = pt.get("v")
+        if not d or v is None:
+            continue
+        by_dt[d] = round(float(v), 2)
+    cleaned = []
+    for d in sorted(by_dt.keys()):
+        v = by_dt[d]
+        if not cleaned or round(cleaned[-1]["v"], 2) != v:
+            cleaned.append({"d": d, "v": v})
+    return cleaned
+
+
 def _recompute_op_history_entry(entry, quarter_label):
-    hist = entry.get("history") or []
+    hist = _normalize_op_history_points(entry.get("history") or [])
+    entry["history"] = hist
     up_cnt, down_cnt = 0, 0
     for i in range(1, len(hist)):
         prev_v = hist[i - 1].get("v")
@@ -806,26 +824,43 @@ def _recompute_op_history_entry(entry, quarter_label):
         total_pct = round((last_v - first_v) / abs(first_v) * 100.0, 2)
 
     prev_y_v = entry.get("prevYearVal")
+    net_up = bool(first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
+    net_down = bool(first_v is not None and last_v is not None and round(last_v, 2) < round(first_v, 2))
+
     # 전년 동기 대비 이익이 현저히 적거나(전년동기의 50% 미만) 최초 기준 이익이 20억 미만이면 % 왜곡 방지를 위해 강조 제외
     low_base_excluded = False
-    if first_v is None or last_v is None or last_v <= 0 or abs(first_v) < 20.0:
+    if first_v is None or last_v is None or abs(first_v) < 20.0:
         low_base_excluded = True
-    elif prev_y_v is not None and prev_y_v > 0 and last_v < prev_y_v * 0.5:
+    elif net_up and (last_v <= 0 or (prev_y_v is not None and prev_y_v > 0 and last_v < prev_y_v * 0.5)):
+        low_base_excluded = True
+    elif net_down and (first_v <= 0 or (prev_y_v is not None and prev_y_v > 0 and first_v < prev_y_v * 0.5)):
         low_base_excluded = True
 
-    net_up = bool(first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
     level = 0
-    if net_up and not low_base_excluded and total_pct is not None:
-        if total_pct >= 20.0:
-            level = 4
-        elif total_pct >= 15.0:
-            level = 3
-        elif total_pct >= 10.0:
-            level = 2
-        elif total_pct >= 5.0:
-            level = 1
+    if not low_base_excluded and total_pct is not None:
+        if net_up:
+            if total_pct >= 20.0:
+                level = 4
+            elif total_pct >= 15.0:
+                level = 3
+            elif total_pct >= 10.0:
+                level = 2
+            elif total_pct >= 5.0:
+                level = 1
+        elif net_down:
+            if total_pct <= -20.0:
+                level = -4
+            elif total_pct <= -15.0:
+                level = -3
+            elif total_pct <= -10.0:
+                level = -2
+            elif total_pct <= -5.0:
+                level = -1
 
-    lvl_labels = {1: "1단계(+5%↑)", 2: "2단계(+10%↑)", 3: "3단계(+15%↑)", 4: "4단계(+20%↑)"}
+    lvl_labels = {
+        1: "상향 1단계(+5%↑)", 2: "상향 2단계(+10%↑)", 3: "상향 3단계(+15%↑)", 4: "상향 4단계(+20%↑)",
+        -1: "하향 1단계(-5%↓)", -2: "하향 2단계(-10%↓)", -3: "하향 3단계(-15%↓)", -4: "하향 4단계(-20%↓)",
+    }
     name = entry.get("name") or ""
     lines = [f"[{name} · {quarter_label}(E) 분기 예상 영업이익 추적]"]
     if len(hist) <= 1:
@@ -838,7 +873,8 @@ def _recompute_op_history_entry(entry, quarter_label):
         lvl_txt = f" · {lvl_labels[level]}" if level in lvl_labels else ""
         lines.append(f"• 누적 변동률: {pct_txt}{lvl_txt} (상향 {up_cnt}회 ▲ / 하향 {down_cnt}회 ▼)")
         if prev_y_v is not None:
-            lines.append(f"• 전년동기({prev_year(quarter_label)}) 실적: {prev_y_v:,.2f}억" + (" (※ 저기저/전년비 급감으로 강조 제외)" if (low_base_excluded and net_up) else ""))
+            ex_note = " (※ 저기저/전년비 급감으로 강조 제외)" if (low_base_excluded and (net_up or net_down) and abs(total_pct or 0) >= 5.0) else ""
+            lines.append(f"• 전년동기({prev_year(quarter_label)}) 실적: {prev_y_v:,.2f}억{ex_note}")
         lines.append("────────────────────────")
         for idx_h, pt in enumerate(hist[-10:]):
             dt_s, v_s = pt.get("d", ""), pt.get("v")
@@ -912,17 +948,9 @@ def _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, quarter_ym,
         else:
             if nm:
                 ent["name"] = nm
-            h = ent.get("history") or []
-            if not h:
-                h.append({"d": snap_label, "v": v_r})
-            else:
-                last_pt = h[-1]
-                if round(float(last_pt.get("v", 0)), 2) != v_r:
-                    if last_pt.get("d") == snap_label:
-                        last_pt["v"] = v_r
-                    else:
-                        h.append({"d": snap_label, "v": v_r})
-            ent["history"] = h
+            h = list(ent.get("history") or [])
+            h.append({"d": snap_label, "v": v_r})
+            ent["history"] = _normalize_op_history_points(h)
         if prev_y_val is not None:
             ent["prevYearVal"] = round(float(prev_y_val), 2)
         _recompute_op_history_entry(ent, quarter_ym)
@@ -957,6 +985,8 @@ def update_op_estimate_history_from_df(here, df_all, snap_dt=None):
             rows_iter.append((cd, nm, v, pv))
 
     _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, q_ym, op_col)
+    for _cd, _ent in hist_data.get("stocks", {}).items():
+        _recompute_op_history_entry(_ent, q_ym)
     _save_op_estimate_history(here, hist_data)
     return hist_data
 
@@ -1024,6 +1054,8 @@ def sync_op_history_from_excels(here):
         except Exception:
             continue
 
+    for _cd, _ent in hist_data.get("stocks", {}).items():
+        _recompute_op_history_entry(_ent, cur_q)
     _save_op_estimate_history(here, hist_data)
     return hist_data
 
@@ -1366,7 +1398,7 @@ def run_market(market, sess, here):
                         cm.height = 160
                         cell_obj.comment = cm
 
-        # 5-2) 현재 분기 예상 영업이익 누적 상향 이력 -> 종목명 셀 단계별 진한 색상 + 변동 이력 메모
+        # 5-2) 현재 분기 예상 영업이익 누적 상향/하향 이력 -> 종목명 셀 단계별 진한 색상 + 변동 이력 메모
         if op_hist_stocks and "종목코드" in cols and "종목명" in cols and ws.max_row >= 2:
             from openpyxl.styles import Font as _Font
             name_fills = {
@@ -1374,12 +1406,20 @@ def run_market(market, sess, here):
                 2: PatternFill(start_color="FECDD3", end_color="FECDD3", fill_type="solid"),
                 3: PatternFill(start_color="FB7185", end_color="FB7185", fill_type="solid"),
                 4: PatternFill(start_color="DC2626", end_color="DC2626", fill_type="solid"),
+                -1: PatternFill(start_color="EFF6FF", end_color="EFF6FF", fill_type="solid"),
+                -2: PatternFill(start_color="BFDBFE", end_color="BFDBFE", fill_type="solid"),
+                -3: PatternFill(start_color="60A5FA", end_color="60A5FA", fill_type="solid"),
+                -4: PatternFill(start_color="1D4ED8", end_color="1D4ED8", fill_type="solid"),
             }
             name_fonts = {
                 1: _Font(color="9F1239", bold=True),
                 2: _Font(color="881337", bold=True),
                 3: _Font(color="4C0519", bold=True),
                 4: _Font(color="FFFFFF", bold=True),
+                -1: _Font(color="1E40AF", bold=True),
+                -2: _Font(color="1E3A8A", bold=True),
+                -3: _Font(color="0F172A", bold=True),
+                -4: _Font(color="FFFFFF", bold=True),
             }
             cd_idx_e = cols.index("종목코드") + 1
             nm_idx_e = cols.index("종목명") + 1
@@ -1393,9 +1433,9 @@ def run_market(market, sess, here):
                     continue
                 nm_cell = ws.cell(row=r_idx, column=nm_idx_e)
                 lvl = int(ent.get("level") or 0)
-                if lvl >= 1:
-                    nm_cell.fill = name_fills[min(4, lvl)]
-                    nm_cell.font = name_fonts[min(4, lvl)]
+                if lvl in name_fills:
+                    nm_cell.fill = name_fills[lvl]
+                    nm_cell.font = name_fonts[lvl]
                 memo_h = ent.get("memo") or ""
                 if memo_h and len(ent.get("history") or []) >= 2:
                     cm_h = Comment(memo_h, "OP Tracker")
@@ -2465,7 +2505,8 @@ def build_web_dashboard(here):
         },
     }
     up_tracked_cnt = sum(1 for v in op_hist_compact["stocks"].values() if v["lv"] >= 1)
-    print(f"  - [분기OP추적] {op_hist_compact['quarter']}(E) 추적 {len(op_hist_compact['stocks'])}종목 (누적 상향 강조 {up_tracked_cnt}종목)")
+    down_tracked_cnt = sum(1 for v in op_hist_compact["stocks"].values() if v["lv"] <= -1)
+    print(f"  - [분기OP추적] {op_hist_compact['quarter']}(E) 추적 {len(op_hist_compact['stocks'])}종목 (상향 강조 {up_tracked_cnt}종목 / 하향 강조 {down_tracked_cnt}종목)")
 
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
@@ -3024,10 +3065,10 @@ def build_web_dashboard(here):
     tbody tr:nth-child(even) td {{
       background: #f8fafc;
     }}
-    tbody tr:hover td:not(.tone-up1):not(.tone-up2):not(.tone-up3):not(.tone-down1):not(.tone-down2):not(.tone-down3):not(.name-up1):not(.name-up2):not(.name-up3):not(.name-up4) {{
+    tbody tr:hover td:not(.tone-up1):not(.tone-up2):not(.tone-up3):not(.tone-down1):not(.tone-down2):not(.tone-down3):not(.name-up1):not(.name-up2):not(.name-up3):not(.name-up4):not(.name-down1):not(.name-down2):not(.name-down3):not(.name-down4) {{
       background: #eef2ff !important;
     }}
-    /* 현재 분기 예상 영업이익 누적 상향 횟수별 종목명 단계별 농도 색상 (1회 → 2회 → 3회 → 4회↑) */
+    /* 현재 분기 예상 영업이익 누적 상향/하향 4단계 농도 색상 (±5% / ±10% / ±15% / ±20%↑↓) */
     td.name-up1 {{
       background: #fff1f2 !important;
       color: #9f1239;
@@ -3054,6 +3095,32 @@ def build_web_dashboard(here):
     }}
     td.name-up4 strong {{ color: #ffffff !important; }}
     td.name-up4 .ext-link {{ background: rgba(255,255,255,0.22); color: #ffffff; }}
+    td.name-down1 {{
+      background: #eff6ff !important;
+      color: #1e40af;
+      box-shadow: inset 3px 0 0 #93c5fd;
+      cursor: help;
+    }}
+    td.name-down2 {{
+      background: #bfdbfe !important;
+      color: #1e3a8a;
+      box-shadow: inset 3px 0 0 #3b82f6;
+      cursor: help;
+    }}
+    td.name-down3 {{
+      background: #60a5fa !important;
+      color: #0f172a;
+      box-shadow: inset 3px 0 0 #1d4ed8;
+      cursor: help;
+    }}
+    td.name-down4 {{
+      background: #1d4ed8 !important;
+      color: #ffffff !important;
+      box-shadow: inset 3px 0 0 #1e3a8a;
+      cursor: help;
+    }}
+    td.name-down4 strong {{ color: #ffffff !important; }}
+    td.name-down4 .ext-link {{ background: rgba(255,255,255,0.22); color: #ffffff; }}
     .op-cnt-badge {{
       display: inline-block;
       margin-left: 3px;
@@ -3450,10 +3517,14 @@ def build_web_dashboard(here):
         </select>
         <select id="toneSelect" class="select-box">
           <option value="">전체 (예상이익 변동 무관)</option>
-          <option value="qop1">🔥 현재분기 OP 누적 +5% 이상 (1단계↑)</option>
-          <option value="qop2">🔥 현재분기 OP 누적 +10% 이상 (2단계↑)</option>
-          <option value="qop3">🔥🔥 현재분기 OP 누적 +15% 이상 (3단계↑)</option>
-          <option value="qop4">🔥🔥 현재분기 OP 누적 +20% 이상 (4단계)</option>
+          <option value="qop1">🔥 현재분기 OP 누적 +5% 이상 (상향 1단계↑)</option>
+          <option value="qop2">🔥 현재분기 OP 누적 +10% 이상 (상향 2단계↑)</option>
+          <option value="qop3">🔥🔥 현재분기 OP 누적 +15% 이상 (상향 3단계↑)</option>
+          <option value="qop4">🔥🔥 현재분기 OP 누적 +20% 이상 (상향 4단계)</option>
+          <option value="qopd1">❄️ 현재분기 OP 누적 -5% 이하 (하향 1단계↓)</option>
+          <option value="qopd2">❄️ 현재분기 OP 누적 -10% 이하 (하향 2단계↓)</option>
+          <option value="qopd3">❄️❄️ 현재분기 OP 누적 -15% 이하 (하향 3단계↓)</option>
+          <option value="qopd4">❄️❄️ 현재분기 OP 누적 -20% 이하 (하향 4단계)</option>
           <option value="up">▲ 예상이익 상향 전체 (직전 대비)</option>
           <option value="up5">▲ 예상이익 +5% 이상 상향</option>
           <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향</option>
@@ -3493,11 +3564,15 @@ def build_web_dashboard(here):
         <span id="pageRangeInfo" style="color:#64748b; font-weight:600;"></span>
       </div>
       <div class="legend-bar">
-        <span style="color:#475569;">종목명(분기OP 누적상향):</span>
-        <span class="lg-chip" style="background:#fff1f2; color:#9f1239; border-left:3px solid #fda4af;">▲5%↑</span>
-        <span class="lg-chip" style="background:#fecdd3; color:#881337; border-left:3px solid #f43f5e;">▲10%↑</span>
-        <span class="lg-chip" style="background:#fb7185; color:#4c0519; border-left:3px solid #be123c;">▲15%↑</span>
-        <span class="lg-chip" style="background:#dc2626; color:#fff; border-left:3px solid #7f1d1d;">🔥20%↑</span>
+        <span style="color:#475569;">종목명(분기OP 누적):</span>
+        <span class="lg-chip" style="background:#fff1f2; color:#9f1239; border-left:3px solid #fda4af;">▲5%</span>
+        <span class="lg-chip" style="background:#fecdd3; color:#881337; border-left:3px solid #f43f5e;">▲10%</span>
+        <span class="lg-chip" style="background:#fb7185; color:#4c0519; border-left:3px solid #be123c;">▲15%</span>
+        <span class="lg-chip" style="background:#dc2626; color:#fff; border-left:3px solid #7f1d1d;">▲20%↑</span>
+        <span class="lg-chip" style="background:#eff6ff; color:#1e40af; border-left:3px solid #93c5fd;">▼5%</span>
+        <span class="lg-chip" style="background:#bfdbfe; color:#1e3a8a; border-left:3px solid #3b82f6;">▼10%</span>
+        <span class="lg-chip" style="background:#60a5fa; color:#0f172a; border-left:3px solid #1d4ed8;">▼15%</span>
+        <span class="lg-chip" style="background:#1d4ed8; color:#fff; border-left:3px solid #1e3a8a;">▼20%↓</span>
         <span style="color:#cbd5e1; margin:0 2px;">|</span>
         <span style="color:#475569;">셀 변동:</span>
         <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
@@ -4099,7 +4174,7 @@ def build_web_dashboard(here):
         const hlCls = (highlightReportCode && highlightReportCode === r.stock_code) ? 'highlight' : '';
         const summaryLis = (r.summary || []).map(s => `<li>${{escapeHtml(s)}}</li>`).join('');
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{r.stock_code}}`;
-        const fnUrl = `https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A${{r.stock_code}}`;
+        const fnUrl = `https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{r.stock_code}}`;
 
         return `<div class="rep-card ${{hlCls}}" id="rep-card-${{r.stock_code}}">
           <div class="rep-card-head">
@@ -4314,7 +4389,7 @@ def build_web_dashboard(here):
       if (colName === '종목명') {{
         const code = rowVals[0] || '';
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{code}}`;
-        const fnUrl = `https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A${{code}}`;
+        const fnUrl = `https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{code}}`;
         const reps = REPORTS_BY_CODE[code] || [];
         let repBtn = '';
         if (reps.length > 0) {{
@@ -4426,7 +4501,12 @@ def build_web_dashboard(here):
           if (secType === '섹터2' && String(r.v[s2Idx] || '') !== secVal) return false;
         }}
         if (toneFilter) {{
-          if (toneFilter.startsWith('qop')) {{
+          if (toneFilter.startsWith('qopd')) {{
+            const cd = String(r.v[0] || '');
+            const oh = OP_HIST_STOCKS[cd];
+            const minLv = parseInt(toneFilter.replace('qopd', ''), 10) || 1;
+            if (!oh || oh.lv > -minLv) return false;
+          }} else if (toneFilter.startsWith('qop')) {{
             const cd = String(r.v[0] || '');
             const oh = OP_HIST_STOCKS[cd];
             const minLv = parseInt(toneFilter.replace('qop', ''), 10) || 1;
@@ -4513,6 +4593,7 @@ def build_web_dashboard(here):
             const oh = OP_HIST_STOCKS[cd];
             if (oh) {{
               if (oh.lv >= 1) classes.push(`name-up${{oh.lv}}`);
+              else if (oh.lv <= -1) classes.push(`name-down${{Math.abs(oh.lv)}}`);
               if (oh.m) note = oh.m;
             }}
           }}
