@@ -1790,7 +1790,7 @@ def build_web_dashboard(here):
     body {{
       margin: 0;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
-      background: var(--bg);
+      background: #f8fafc;
       color: var(--text);
       font-size: 13px;
       display: flex;
@@ -1798,61 +1798,241 @@ def build_web_dashboard(here):
       height: 100vh;
       overflow: hidden;
     }}
+    /* 상단 슬림 화이트 헤더 (MONEYLAND 스타일) */
     .topbar {{
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-      color: #fff;
-      padding: 10px 18px;
+      background: #ffffff;
+      color: #0f172a;
+      height: 48px;
+      padding: 0 14px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border-bottom: 1px solid #e2e8f0;
+      z-index: 50;
     }}
-    .title-area h1 {{
-      margin: 0;
-      font-size: 16.5px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
+    .topbar-left {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
     }}
-    .title-area .subtitle {{
-      margin-top: 2px;
+    .menu-toggle-btn {{
+      width: 32px;
+      height: 32px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+      transition: background 0.15s;
+    }}
+    .menu-toggle-btn:hover {{
+      background: #e2e8f0;
+    }}
+    .brand-logo {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15.5px;
+      font-weight: 900;
+      letter-spacing: -0.4px;
+      color: #1e3a8a;
+      white-space: nowrap;
+      cursor: pointer;
+    }}
+    .brand-dot {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-size: 13px;
+    }}
+    .top-date-chip {{
       font-size: 11.5px;
-      color: #cbd5e1;
+      font-weight: 700;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 4px 9px;
+      border-radius: 7px;
+      white-space: nowrap;
+    }}
+    .topbar-center {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      max-width: 640px;
+      min-width: 0;
+    }}
+    .global-search {{
+      width: 250px;
+      max-width: 100%;
+      padding: 6px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 12px;
+      background: #f8fafc;
+      outline: none;
+    }}
+    .global-search:focus {{
+      background: #fff;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.14);
+    }}
+    .top-disclaimer {{
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }}
     .top-actions {{
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-shrink: 0;
     }}
     .dl-btn {{
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.14);
-      color: #fff;
+      gap: 4px;
+      background: #f1f5f9;
+      color: #1e293b;
       text-decoration: none;
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 12px;
-      border: 1px solid rgba(255,255,255,0.25);
+      padding: 5px 10px;
+      border-radius: 7px;
+      font-weight: 700;
+      font-size: 11.5px;
+      border: 1px solid #cbd5e1;
       transition: all 0.15s;
+      white-space: nowrap;
     }}
     .dl-btn:hover {{
-      background: rgba(255,255,255,0.26);
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }}
+    /* 좌측 사이드바 + 우측 메인 콘텐츠 셸 */
+    .app-shell {{
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }}
+    .sidebar {{
+      width: 186px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      padding: 10px 8px 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: width 0.18s ease, padding 0.18s ease;
+    }}
+    body.sidebar-collapsed .sidebar {{
+      width: 0;
+      padding-left: 0;
+      padding-right: 0;
+      border-right: none;
+      overflow: hidden;
+    }}
+    .nav-section {{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }}
+    .nav-section-title {{
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      padding: 4px 10px 3px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }}
+    .nav-item {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #334155;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.12s, color 0.12s;
+    }}
+    .nav-item:hover {{
+      background: #f1f5f9;
+      color: #0f172a;
+    }}
+    .nav-item.active {{
+      background: #1d4ed8;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(29,78,216,0.28);
+    }}
+    .nav-item-left {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .nav-badge {{
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+    }}
+    .nav-item.active .nav-badge {{
+      background: rgba(255,255,255,0.24);
+      color: #ffffff;
+    }}
+    .nav-badge.up {{ background: #ffe4e6; color: #be123c; }}
+    .nav-badge.down {{ background: #dbeafe; color: #1d4ed8; }}
+    .nav-badge.new {{ background: #ede9fe; color: #6d28d9; }}
+    .nav-divider {{
+      height: 1px;
+      background: #f1f5f9;
+      margin: 2px 6px;
+    }}
+    .sidebar-backdrop {{
+      display: none;
+      position: fixed;
+      inset: 48px 0 0 0;
+      background: rgba(15,23,42,0.35);
+      z-index: 39;
     }}
     .container {{
-      max-width: 100%;
       flex: 1;
+      min-width: 0;
       min-height: 0;
       display: flex;
       flex-direction: column;
       padding: 10px 14px 10px;
+      overflow: hidden;
     }}
-    .market-bar {{
+    .page-header {{
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -1861,35 +2041,23 @@ def build_web_dashboard(here):
       margin-bottom: 8px;
       flex-shrink: 0;
     }}
-    .market-tabs {{
+    .page-title-group {{
       display: flex;
+      align-items: baseline;
       gap: 8px;
+      flex-wrap: wrap;
     }}
-    .mkt-btn {{
-      border: 2px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 6px 15px;
-      border-radius: 9px;
-      font-size: 13.5px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .page-title {{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.4px;
     }}
-    .mkt-btn.active-KOSPI {{
-      background: var(--kospi);
-      color: #fff;
-      border-color: var(--kospi);
-      box-shadow: 0 2px 8px rgba(29,78,216,0.25);
-    }}
-    .mkt-btn.active-KOSDAQ {{
-      background: var(--kosdaq);
-      color: #fff;
-      border-color: var(--kosdaq);
-      box-shadow: 0 2px 8px rgba(5,150,105,0.25);
+    .page-subtitle {{
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
     }}
     .meta-badges {{
       display: flex;
@@ -1920,42 +2088,41 @@ def build_web_dashboard(here):
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 8px;
-      background: var(--card);
-      padding: 6px 8px;
-      border-radius: 9px;
-      border: 1px solid var(--border-light);
+      background: transparent;
+      padding: 0;
       flex-shrink: 0;
     }}
     .sheet-btn {{
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--text);
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
       padding: 5px 11px;
-      border-radius: 7px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.15s;
     }}
     .sheet-btn:hover {{
-      background: #e2e8f0;
+      background: #f1f5f9;
     }}
     .sheet-btn.active {{
-      background: #0f172a;
+      background: #2563eb;
       color: #fff;
-      border-color: #0f172a;
+      border-color: #2563eb;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.22);
     }}
     .sheet-count {{
-      background: rgba(100,116,139,0.18);
+      background: rgba(100,116,139,0.14);
       padding: 1px 6px;
       border-radius: 999px;
       font-size: 11px;
     }}
     .sheet-btn.active .sheet-count {{
-      background: #3b82f6;
+      background: rgba(255,255,255,0.24);
       color: #fff;
     }}
     .sheet-btn.tab-up {{
@@ -2459,7 +2626,29 @@ def build_web_dashboard(here):
     .rep-btn.scr:hover {{ background: #dbeafe; }}
     @media (max-width: 768px) {{
       body {{ height: auto; overflow: auto; }}
-      .container {{ flex: none; }}
+      .app-shell {{ overflow: visible; }}
+      .top-disclaimer, .top-date-chip {{ display: none; }}
+      .global-search {{ width: 150px; }}
+      .sidebar {{
+        position: fixed;
+        top: 48px;
+        bottom: 0;
+        left: 0;
+        z-index: 40;
+        width: 210px;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        box-shadow: 4px 0 18px rgba(0,0,0,0.16);
+      }}
+      body.mobile-nav-open .sidebar {{
+        transform: translateX(0);
+        width: 210px;
+        padding: 10px 8px 16px;
+      }}
+      body.mobile-nav-open .sidebar-backdrop {{
+        display: block;
+      }}
+      .container {{ flex: none; width: 100%; overflow: visible; }}
       .table-wrap {{ max-height: 68vh; min-height: 320px; }}
       .search-input {{ width: 150px; }}
       .reports-grid {{ grid-template-columns: 1fr; }}
@@ -2467,21 +2656,36 @@ def build_web_dashboard(here):
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="title-area">
-      <h1>📊 코스피 · 코스닥 시총 상위 200 영업이익 성장·수익성 스크리너</h1>
-      <div class="subtitle">실시간 주가 · 분기/연간 컨센서스 · 직전 파일 대비 예상이익 상향(▲빨강)/하향(▼파랑) 자동 비교</div>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="좌측 메뉴 접기/펼치기">☰</button>
+      <div class="brand-logo" onclick="selectMarket('KOSPI')">
+        <span class="brand-dot">📊</span>
+        <span>STOCK SCREENER</span>
+      </div>
+      <span class="top-date-chip" id="topDateChip"></span>
+    </div>
+    <div class="topbar-center">
+      <input type="text" id="globalSearchInput" class="global-search" placeholder="🔍 한국 종목 통합 검색 (Enter)" />
+      <span class="top-disclaimer">본 자료는 투자 참고용이며 수치상 오류가 있을 수 있습니다.</span>
     </div>
     <div class="top-actions" id="dlActions"></div>
-  </div>
+  </header>
 
-  <div class="container">
-    <div class="market-bar">
-      <div class="market-tabs" id="marketTabs"></div>
-      <div class="meta-badges" id="metaBadges"></div>
-    </div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebarNav"></aside>
+    <div class="sidebar-backdrop" onclick="closeMobileNav()"></div>
 
-    <div class="sheet-tabs" id="sheetTabs"></div>
+    <main class="container">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1 class="page-title" id="pageTitle">KOSPI 상위 200</h1>
+          <span class="page-subtitle" id="pageSubtitle">영업이익 성장·수익성 스크리너</span>
+        </div>
+        <div class="meta-badges" id="metaBadges"></div>
+      </div>
+
+      <div class="sheet-tabs" id="sheetTabs"></div>
 
     <div class="controls-panel" id="screenerControls">
       <div class="filter-left">
@@ -2574,6 +2778,7 @@ def build_web_dashboard(here):
         <div class="reports-grid" id="reportsGrid"></div>
       </div>
     </div>
+    </main>
   </div>
 
   <div class="tooltip-box" id="tooltipBox"></div>
@@ -2648,7 +2853,8 @@ def build_web_dashboard(here):
         btn.textContent = '📌 좌측 틀고정 OFF';
       }}
       renderDownloadButtons();
-      renderMarketTabs();
+      renderTopDateChip();
+      renderSidebar();
       selectMarket(currentMarket);
 
       document.getElementById('searchInput').addEventListener('input', () => {{ currentPage = 1; renderTableBody(); }});
@@ -2658,7 +2864,59 @@ def build_web_dashboard(here):
       initReportsFilters();
       document.getElementById('repSearchInput').addEventListener('input', renderReportsGrid);
       document.getElementById('repBrokerSelect').addEventListener('change', renderReportsGrid);
-      document.getElementById('repChangeSelect').addEventListener('change', renderReportsGrid);
+      document.getElementById('repChangeSelect').addEventListener('change', () => {{ renderSidebar(); renderReportsGrid(); }});
+
+      document.getElementById('globalSearchInput').addEventListener('keydown', (e) => {{
+        if (e.key === 'Enter') handleGlobalSearch(e.target.value);
+      }});
+    }}
+
+    function toggleSidebar() {{
+      if (window.innerWidth <= 768) {{
+        document.body.classList.toggle('mobile-nav-open');
+      }} else {{
+        document.body.classList.toggle('sidebar-collapsed');
+      }}
+    }}
+
+    function closeMobileNav() {{
+      document.body.classList.remove('mobile-nav-open');
+    }}
+
+    function renderTopDateChip() {{
+      const d = DB[currentMarket] || DB[marketKeys[0]];
+      const dtStr = (d && d.updatedAt) ? d.updatedAt : (REPORTS_DATA.date || '');
+      document.getElementById('topDateChip').textContent = `🕒 ${{dtStr}}`;
+    }}
+
+    function handleGlobalSearch(rawQuery) {{
+      const q = String(rawQuery || '').trim();
+      if (!q) return;
+      const ql = q.toLowerCase();
+      // 현재 시장에 매칭되면 현재 시장, 아니면 다른 시장에서 검색
+      const checkMkt = (mkt) => {{
+        const d = DB[mkt];
+        if (!d || !d.sheets[0]) return false;
+        return d.sheets[0].rows.some(r =>
+          String(r.v[0] || '').toLowerCase().includes(ql) ||
+          String(r.v[1] || '').toLowerCase().includes(ql)
+        );
+      }};
+      let targetMkt = checkMkt(currentMarket) ? currentMarket : marketKeys.find(m => checkMkt(m));
+      if (targetMkt) {{
+        selectMarket(targetMkt);
+        currentSheetIdx = 0;
+        renderSheetTabs();
+        document.getElementById('searchInput').value = q;
+        document.getElementById('sectorSelect').value = '';
+        document.getElementById('toneSelect').value = '';
+        currentPage = 1;
+        renderTable();
+      }} else {{
+        selectReportsView();
+        document.getElementById('repSearchInput').value = q;
+        renderReportsGrid();
+      }}
     }}
 
     function initReportsFilters() {{
@@ -2687,20 +2945,103 @@ def build_web_dashboard(here):
       const box = document.getElementById('dlActions');
       box.innerHTML = marketKeys.map(m => {{
         const d = DB[m];
-        return `<a class="dl-btn" href="${{d.downloadFile}}" download="${{d.filename}}">📥 ${{m}} 엑셀(.xlsx) 다운로드</a>`;
+        return `<a class="dl-btn" href="${{d.downloadFile}}" download="${{d.filename}}">📥 ${{m}} 엑셀</a>`;
       }}).join('');
     }}
 
-    function renderMarketTabs() {{
-      const box = document.getElementById('marketTabs');
-      const repCount = (REPORTS_DATA.reports || []).length;
-      const mktBtns = marketKeys.map(m => {{
-        const activeCls = (currentViewMode === 'SCREENER' && m === currentMarket) ? `active-${{m}}` : '';
-        return `<button class="mkt-btn ${{activeCls}}" onclick="selectMarket('${{m}}')">${{m}} 상위 200</button>`;
+    function renderSidebar() {{
+      const nav = document.getElementById('sidebarNav');
+      const reps = REPORTS_DATA.reports || [];
+      const repUp = reps.filter(r => r.target_change === '상향').length;
+      const repNew = reps.filter(r => r.target_change === '신규').length;
+      const repDown = reps.filter(r => r.target_change === '하향').length;
+      const curRepChg = document.getElementById('repChangeSelect') ? document.getElementById('repChangeSelect').value : '';
+
+      const curD = DB[currentMarket] || DB[marketKeys[0]];
+      const curSheetName = (curD && curD.sheets[currentSheetIdx]) ? curD.sheets[currentSheetIdx].name : '';
+      const sheetCountOf = (name) => {{
+        const s = curD ? curD.sheets.find(x => x.name === name) : null;
+        return s ? s.count : 0;
+      }};
+
+      const isScr = (currentViewMode === 'SCREENER');
+      const isRep = (currentViewMode === 'REPORTS');
+
+      const mktItems = marketKeys.map(m => {{
+        const icon = m === 'KOSPI' ? '📊' : '🚀';
+        const active = (isScr && currentMarket === m && curSheetName === '1_전체') ? 'active' : '';
+        return `<button class="nav-item ${{active}}" onclick="selectMarketAndSheet('${{m}}', '1_전체')">
+          <span class="nav-item-left"><span>${{icon}}</span><span>${{m}} 상위 200</span></span>
+          <span class="nav-badge">${{DB[m].sheets[0] ? DB[m].sheets[0].count : 0}}</span>
+        </button>`;
       }}).join('');
-      const repActiveCls = (currentViewMode === 'REPORTS') ? 'active-REPORTS' : '';
-      const repBtn = `<button class="mkt-btn ${{repActiveCls}}" onclick="selectReportsView()">📰 오늘의 기업 리포트 (${{repCount}})</button>`;
-      box.innerHTML = mktBtns + repBtn;
+
+      const quickSheets = [
+        {{ name: '2_통과', icon: '⭐', label: '메인 통과' }},
+        {{ name: '6_연속이익성장(E3및E2)', icon: '💎', label: '연속이익성장' }},
+        {{ name: '7_예상이익상향', icon: '🔺', label: '예상이익 상향', bCls: 'up' }},
+        {{ name: '8_예상이익하향', icon: '🔻', label: '예상이익 하향', bCls: 'down' }},
+        {{ name: '4_30퍼하락', icon: '📉', label: '고점대비 30%↓' }},
+      ].map(q => {{
+        const active = (isScr && curSheetName === q.name) ? 'active' : '';
+        return `<button class="nav-item ${{active}}" onclick="selectMarketAndSheet(currentMarket, '${{q.name}}')">
+          <span class="nav-item-left"><span>${{q.icon}}</span><span>${{q.label}}</span></span>
+          <span class="nav-badge ${{q.bCls || ''}}">${{sheetCountOf(q.name)}}</span>
+        </button>`;
+      }}).join('');
+
+      const dlLinks = marketKeys.map(m => {{
+        const d = DB[m];
+        return `<a class="nav-item" href="${{d.downloadFile}}" download="${{d.filename}}">
+          <span class="nav-item-left"><span>📥</span><span>${{m}} 엑셀(.xlsx)</span></span>
+        </a>`;
+      }}).join('');
+
+      nav.innerHTML = `
+        <div class="nav-section">
+          <div class="nav-section-title">한국 스크리너</div>
+          ${{mktItems}}
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">${{currentMarket}} 빠른 필터</div>
+          ${{quickSheets}}
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">기업 리포트</div>
+          <button class="nav-item ${{isRep && !curRepChg ? 'active' : ''}}" onclick="selectReportsView('', '')">
+            <span class="nav-item-left"><span>📰</span><span>오늘의 리포트</span></span>
+            <span class="nav-badge">${{reps.length}}</span>
+          </button>
+          <button class="nav-item ${{isRep && curRepChg === '상향' ? 'active' : ''}}" onclick="selectReportsView('', '상향')">
+            <span class="nav-item-left"><span>📈</span><span>목표가 상향</span></span>
+            <span class="nav-badge up">${{repUp}}</span>
+          </button>
+          <button class="nav-item ${{isRep && curRepChg === '신규' ? 'active' : ''}}" onclick="selectReportsView('', '신규')">
+            <span class="nav-item-left"><span>✨</span><span>신규 커버리지</span></span>
+            <span class="nav-badge new">${{repNew}}</span>
+          </button>
+          <button class="nav-item ${{isRep && curRepChg === '하향' ? 'active' : ''}}" onclick="selectReportsView('', '하향')">
+            <span class="nav-item-left"><span>📉</span><span>목표가 하향</span></span>
+            <span class="nav-badge down">${{repDown}}</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">다운로드 · 원문</div>
+          ${{dlLinks}}
+          <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
+            <span class="nav-item-left"><span>🌐</span><span>한경 컨센서스</span></span>
+          </a>
+        </div>
+      `;
+    }}
+
+    function selectMarketAndSheet(mkt, sheetName) {{
+      closeMobileNav();
+      selectMarket(mkt);
+      if (sheetName) selectSheetByName(sheetName);
     }}
 
     function setScreenerVisibility(showScreener) {{
@@ -2711,28 +3052,34 @@ def build_web_dashboard(here):
       document.getElementById('reportsView').classList.toggle('active', !showScreener);
     }}
 
-    function selectReportsView(focusCode = '') {{
+    function selectReportsView(focusCode = '', filterChange = null) {{
+      closeMobileNav();
       currentViewMode = 'REPORTS';
       highlightReportCode = focusCode || '';
-      renderMarketTabs();
       setScreenerVisibility(false);
+
+      document.getElementById('pageTitle').textContent = '오늘의 기업 리포트';
+      document.getElementById('pageSubtitle').textContent = `한경 컨센서스 · ${{REPORTS_DATA.date || '-'}} 기준`;
 
       const reps = REPORTS_DATA.reports || [];
       const upCnt = reps.filter(r => r.target_change === '상향').length;
       const newCnt = reps.filter(r => r.target_change === '신규').length;
       const downCnt = reps.filter(r => r.target_change === '하향').length;
       document.getElementById('metaBadges').innerHTML = `
-        <span class="meta-pill">📅 리포트 기준일: ${{REPORTS_DATA.date || '-'}}</span>
+        <span class="meta-pill">📅 기준일: ${{REPORTS_DATA.date || '-'}}</span>
         <span class="meta-pill">📄 총 ${{reps.length}}건</span>
-        <span class="meta-pill up">▲ 목표가 상향 ${{upCnt}}건</span>
-        <span class="meta-pill" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;">★ 신규 ${{newCnt}}건</span>
-        <span class="meta-pill down">▼ 목표가 하향 ${{downCnt}}건</span>
+        <span class="meta-pill up clickable" onclick="selectReportsView('', '상향')">▲ 목표가 상향 ${{upCnt}}건</span>
+        <span class="meta-pill clickable" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;" onclick="selectReportsView('', '신규')">★ 신규 ${{newCnt}}건</span>
+        <span class="meta-pill down clickable" onclick="selectReportsView('', '하향')">▼ 목표가 하향 ${{downCnt}}건</span>
       `;
       if (focusCode) {{
         document.getElementById('repSearchInput').value = '';
         document.getElementById('repBrokerSelect').value = '';
         document.getElementById('repChangeSelect').value = '';
+      }} else if (filterChange !== null) {{
+        document.getElementById('repChangeSelect').value = filterChange;
       }}
+      renderSidebar();
       renderReportsGrid();
       if (focusCode) {{
         const targetEl = document.getElementById('rep-card-' + focusCode);
@@ -2838,8 +3185,11 @@ def build_web_dashboard(here):
       sortColIdx = -1;
       currentPage = 1;
       setScreenerVisibility(true);
-      renderMarketTabs();
       const d = DB[currentMarket];
+
+      document.getElementById('pageTitle').textContent = `${{currentMarket}} 상위 200`;
+      document.getElementById('pageSubtitle').textContent = '영업이익 성장 · 수익성 · 예상이익 변동 스크리너';
+      renderTopDateChip();
 
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">🕒 업데이트: ${{d.updatedAt}}</span>
@@ -2849,6 +3199,7 @@ def build_web_dashboard(here):
       `;
 
       if (currentSheetIdx >= d.sheets.length) currentSheetIdx = 0;
+      renderSidebar();
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
@@ -2878,6 +3229,7 @@ def build_web_dashboard(here):
       currentSheetIdx = idx;
       sortColIdx = -1;
       currentPage = 1;
+      renderSidebar();
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
