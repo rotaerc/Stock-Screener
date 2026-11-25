@@ -2,6 +2,7 @@
 Backup/
 MD/
 엑셀백업/
+reports/
 __pycache__/
 *.docx
 ~$*

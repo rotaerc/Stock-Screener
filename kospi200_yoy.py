@@ -1504,9 +1504,237 @@ def _extract_market_excel_for_web(here, market):
     }
 
 
+def _summarize_pdf_text(text, title=""):
+    """PDF 추출 텍스트에서 투자포인트·핵심 문장 3~4개를 자동 정리합니다."""
+    if not text:
+        return [title] if title else ["PDF 원문 텍스트를 추출하지 못했습니다. 원문 PDF 보기를 이용해 주세요."]
+
+    lines = [re.sub(r"\s+", " ", ln).strip() for ln in text.splitlines()]
+    lines = [ln for ln in lines if ln]
+
+    bullets = []
+    # ■, , •, – 로 시작하는 불릿 문단 우선 수집
+    cur_buf = ""
+    for ln in lines:
+        if any(k in ln for k in ("Compliance notice", "당보고서공표일", "Stock Indicator", "STOCK DATA", "COMPANY DATA", "K-IFRS", "자료 :")):
+            if cur_buf:
+                bullets.append(cur_buf.strip())
+                cur_buf = ""
+            continue
+        if re.match(r"^[■•●◆▶\-–]\s*", ln):
+            if cur_buf:
+                bullets.append(cur_buf.strip())
+            cur_buf = re.sub(r"^[■•●◆▶\-–]\s*", "", ln)
+        elif cur_buf:
+            if len(cur_buf) < 220 and not re.match(r"^[\d\.,\-\+\s%]+$", ln):
+                cur_buf += " " + ln
+            else:
+                bullets.append(cur_buf.strip())
+                cur_buf = ""
+    if cur_buf:
+        bullets.append(cur_buf.strip())
+
+    clean_bullets = []
+    for b in bullets:
+        b = re.sub(r"\s+", " ", b).strip()
+        if len(b) >= 25 and not re.match(r"^[\d\s\.,%\-\+]+$", b):
+            if len(b) > 220:
+                b = b[:217].rstrip() + "..."
+            clean_bullets.append(b)
+        if len(clean_bullets) >= 4:
+            break
+
+    if clean_bullets:
+        return clean_bullets
+
+    # 불릿이 없는 일반 문단형 PDF (SK증권 등) 처리
+    joined = " ".join(ln for ln in lines[:45] if len(ln) >= 12 and not re.match(r"^[\d\s\.,%\-\+/]+$", ln))
+    sents = re.split(r"(?<=[다요함임음]\.)\s+", joined)
+    picked = []
+    for s in sents:
+        s = s.strip()
+        if len(s) >= 25 and not any(skip in s for skip in ("Compliance", "http", "sks.co.kr", "@")):
+            if len(s) > 220:
+                s = s[:217].rstrip() + "..."
+            picked.append(s)
+        if len(picked) >= 3:
+            break
+    return picked if picked else ([title] if title else ["핵심 요약 추출 불가 — 원문 PDF를 참고하세요."])
+
+
+def _detect_target_change(text, target_price):
+    if not target_price or str(target_price).strip() in ("0", "", "-"):
+        return "없음"
+    if not text:
+        return "유지"
+    head = text[:2000]
+    if re.search(r"목표주가[^\n]{0,30}(신규|개시|편입)", head) or "커버리지 개시" in head or "커버리지를 개시" in head:
+        return "신규"
+    if re.search(r"목표주가[^\n]{0,30}(상향|↑|▲)", head) or "목표주가를" in head and "상향" in head:
+        return "상향"
+    if re.search(r"목표주가[^\n]{0,30}(하향|↓|▼)", head) or ("목표주가" in head and "하향" in head[:1200]):
+        return "하향"
+    if re.search(r"목표주가[^\n]{0,30}유지", head):
+        return "유지"
+    return "유지"
+
+
+def fetch_hankyung_reports(here, target_date=None):
+    """
+    한경 컨센서스(https://consensus.hankyung.com/analysis/list?skinType=business)에서
+    오늘자(또는 가장 최근 영업일) 기업 리포트 목록 및 PDF를 다운로드·정리하여
+    hankyung_reports.json에 저장합니다.
+    """
+    json_path = os.path.join(here, "hankyung_reports.json")
+    existing_by_idx = {}
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+            for rep in old_data.get("reports", []):
+                if rep.get("report_idx"):
+                    existing_by_idx[str(rep["report_idx"])] = rep
+        except Exception:
+            pass
+
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        PdfReader = None
+
+    today_str = target_date or datetime.now().strftime("%Y-%m-%d")
+    hdr = {"User-Agent": UA}
+    base_list_url = "https://consensus.hankyung.com/analysis/list?skinType=business"
+
+    print(f"\n{'='*80}")
+    print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({today_str})...")
+
+    def parse_page(url_to_get):
+        r = requests.get(url_to_get, headers=hdr, timeout=20)
+        r.raise_for_status()
+        p_html = r.content.decode("utf-8", errors="replace")
+        trs = re.findall(r"<tr[^>]*>(.*?)</tr>", p_html, re.S)
+        items = []
+        for tr in trs[1:]:
+            tds = re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)
+            if len(tds) < 6:
+                continue
+
+            def cln(s):
+                return html_lib.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s))).strip()
+
+            dt = cln(tds[0])
+            if not re.match(r"^\d{4}-\d{2}-\d{2}$", dt):
+                continue
+            m_a = re.search(r'<a[^>]*href="([^"]*downpdf\?report_idx=(\d+))"[^>]*>(.*?)</a>', tds[1], re.S)
+            if m_a:
+                idx = m_a.group(2)
+                raw_title = cln(m_a.group(3))
+            else:
+                m_idx = re.search(r"downpdf\?report_idx=(\d+)", tr)
+                idx = m_idx.group(1) if m_idx else ""
+                raw_title = cln(tds[1])
+
+            m_st = re.match(r"^(.+?)\((\d{6})\)\s*(.*)$", raw_title)
+            if m_st:
+                st_name, st_code, title = m_st.group(1).strip(), m_st.group(2).strip(), m_st.group(3).strip()
+            else:
+                st_name, st_code, title = "", "", raw_title
+
+            items.append({
+                "date": dt,
+                "stock_name": st_name,
+                "stock_code": st_code,
+                "title": title,
+                "target_price": cln(tds[2]),
+                "opinion": cln(tds[3]),
+                "analyst": cln(tds[4]),
+                "broker": cln(tds[5]),
+                "report_idx": idx,
+                "pdf_url": f"https://consensus.hankyung.com/analysis/downpdf?report_idx={idx}" if idx else "",
+            })
+        return items
+
+    try:
+        collected = []
+        active_date = today_str
+        url_today = f"{base_list_url}&sdate={today_str}&edate={today_str}&pagenum=80&now_page=1"
+        collected = [it for it in parse_page(url_today) if it["date"] == today_str]
+
+        # 주말·장전 등으로 오늘 리포트가 아직 없으면 가장 최근 올라온 날짜 리포트 사용
+        if not collected:
+            latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
+            if latest_items:
+                active_date = latest_items[0]["date"]
+                collected = [it for it in latest_items if it["date"] == active_date]
+
+        if not collected:
+            print("  [알림] 한경 컨센서스에서 리포트를 찾지 못해 기존 캐시를 유지합니다.")
+            return _load_hankyung_reports(here)
+
+        rep_dir = os.path.join(here, "reports", active_date)
+        os.makedirs(rep_dir, exist_ok=True)
+
+        final_reports = []
+        for it in collected:
+            idx = str(it.get("report_idx") or "")
+            cached = existing_by_idx.get(idx)
+            if cached and cached.get("curated"):
+                final_reports.append(cached)
+                continue
+
+            pdf_text = ""
+            if idx and it.get("pdf_url") and PdfReader is not None:
+                safe_fn = re.sub(r'[\\/:*?"<>|]', "_", f"{it['stock_name']}_{it['stock_code']}_{idx}.pdf")
+                pdf_path = os.path.join(rep_dir, safe_fn)
+                try:
+                    if not os.path.isfile(pdf_path):
+                        rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
+                        if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
+                            with open(pdf_path, "wb") as f:
+                                f.write(rp.content)
+                    if os.path.isfile(pdf_path):
+                        reader = PdfReader(pdf_path)
+                        pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
+                except Exception:
+                    pdf_text = ""
+
+            it["target_change"] = _detect_target_change(pdf_text, it.get("target_price"))
+            it["summary"] = _summarize_pdf_text(pdf_text, it.get("title", ""))
+            it["curated"] = False
+            final_reports.append(it)
+            time.sleep(0.25)
+
+        payload = {
+            "date": active_date,
+            "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "sourceUrl": base_list_url,
+            "reports": final_reports,
+        }
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+        print(f" ★ 한경 기업 리포트 {len(final_reports)}건 정리 완료 (기준일: {active_date})")
+        print(f"{'='*80}")
+        return payload
+    except Exception as e:
+        print(f"  [경고] 한경 리포트 수집 중 오류 발생(기존 데이터 유지): {e}")
+        return _load_hankyung_reports(here)
+
+
+def _load_hankyung_reports(here):
+    json_path = os.path.join(here, "hankyung_reports.json")
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"date": "", "updatedAt": "", "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business", "reports": []}
+
+
 def build_web_dashboard(here):
     """
-    최신 KOSPI / KOSDAQ 통합 엑셀(.xlsx) 파일을 읽어
+    최신 KOSPI / KOSDAQ 통합 엑셀(.xlsx) 파일 및 한경 기업 리포트(hankyung_reports.json)를 읽어
     웹 브라우저 및 GitHub Pages에서 무료로 바로 열람 가능한 index.html 파일을 생성합니다.
     """
     print(f"\n{'='*80}")
@@ -1522,7 +1750,11 @@ def build_web_dashboard(here):
         print("  [경고] 변환할 엑셀(.xlsx) 파일을 찾지 못해 index.html 생성을 건너뜁니다.")
         return None
 
+    reports_data = _load_hankyung_reports(here)
+    print(f"  - [리포트] 한경 기업 리포트 로드 완료: {len(reports_data.get('reports', []))}건 (기준일: {reports_data.get('date', '-')})")
+
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
+    reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -2052,11 +2284,185 @@ def build_web_dashboard(here):
       pointer-events: none;
       display: none;
     }}
+    .mkt-btn.active-REPORTS {{
+      background: #7c3aed;
+      color: #fff;
+      border-color: #7c3aed;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.28);
+    }}
+    .rep-badge-link {{
+      display: inline-block;
+      margin-left: 3px;
+      padding: 1px 4px;
+      font-size: 10px;
+      border-radius: 4px;
+      background: #ede9fe;
+      color: #6d28d9;
+      text-decoration: none;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid #c4b5fd;
+    }}
+    .rep-badge-link:hover {{
+      background: #ddd6fe;
+    }}
+    .reports-view {{
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }}
+    .reports-view.active {{
+      display: flex;
+    }}
+    .reports-grid-wrap {{
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 2px 2px 14px;
+    }}
+    .reports-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+      gap: 12px;
+    }}
+    .rep-card {{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }}
+    .rep-card:hover {{
+      border-color: #93c5fd;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.09);
+    }}
+    .rep-card.highlight {{
+      border: 2px solid #7c3aed;
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.16);
+    }}
+    .rep-card-head {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 8px;
+    }}
+    .rep-stock-title {{
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }}
+    .rep-stock-name {{
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+    }}
+    .rep-code {{
+      font-size: 11.5px;
+      color: #64748b;
+      font-weight: 600;
+    }}
+    .rep-pill {{
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }}
+    .rep-pill.chg-상향 {{ background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }}
+    .rep-pill.chg-하향 {{ background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }}
+    .rep-pill.chg-신규 {{ background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }}
+    .rep-pill.chg-유지 {{ background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }}
+    .rep-pill.chg-없음 {{ background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }}
+    .rep-pill.scr-pass {{ background: #dcfce7; color: #166534; }}
+    .rep-pill.scr-seq {{ background: #fef3c7; color: #92400e; }}
+    .rep-pill.scr-up {{ background: #fee2e2; color: #b91c1c; }}
+    .rep-target-box {{
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.35;
+    }}
+    .rep-target-price {{
+      font-size: 14px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }}
+    .rep-headline {{
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1.4;
+    }}
+    .rep-meta-row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #475569;
+      background: #f8fafc;
+      padding: 5px 9px;
+      border-radius: 7px;
+    }}
+    .rep-summary-list {{
+      margin: 0;
+      padding-left: 17px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #334155;
+    }}
+    .rep-card-foot {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-light);
+    }}
+    .rep-btn {{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: #1e293b;
+    }}
+    .rep-btn:hover {{ background: #e2e8f0; }}
+    .rep-btn.pdf {{
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }}
+    .rep-btn.pdf:hover {{ background: #fee2e2; }}
+    .rep-btn.scr {{
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }}
+    .rep-btn.scr:hover {{ background: #dbeafe; }}
     @media (max-width: 768px) {{
       body {{ height: auto; overflow: auto; }}
       .container {{ flex: none; }}
       .table-wrap {{ max-height: 68vh; min-height: 320px; }}
       .search-input {{ width: 150px; }}
+      .reports-grid {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -2077,7 +2483,7 @@ def build_web_dashboard(here):
 
     <div class="sheet-tabs" id="sheetTabs"></div>
 
-    <div class="controls-panel">
+    <div class="controls-panel" id="screenerControls">
       <div class="filter-left">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 종목명 / 코드 / 섹터 검색..." />
         <select id="sectorSelect" class="select-box">
@@ -2143,13 +2549,40 @@ def build_web_dashboard(here):
         <button class="pg-btn" onclick="document.getElementById('tableWrap').scrollTop = 0">⬆ 맨 위로</button>
       </div>
     </div>
+
+    <div class="reports-view" id="reportsView">
+      <div class="controls-panel" style="margin-bottom:10px;">
+        <div class="filter-left">
+          <input type="text" id="repSearchInput" class="search-input" style="width:240px;" placeholder="🔍 종목명 / 증권사 / 리포트 내용 검색..." />
+          <select id="repBrokerSelect" class="select-box">
+            <option value="">전체 증권사</option>
+          </select>
+          <select id="repChangeSelect" class="select-box">
+            <option value="">목표가 변동 전체</option>
+            <option value="상향">▲ 목표가 상향</option>
+            <option value="신규">★ 신규편입</option>
+            <option value="유지">유지</option>
+            <option value="하향">▼ 목표가 하향</option>
+          </select>
+          <span id="repCountLabel" style="font-weight:700; color:#475569;"></span>
+        </div>
+        <div class="group-right">
+          <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 컨센서스 원문 목록 열기</a>
+        </div>
+      </div>
+      <div class="reports-grid-wrap" id="reportsGridWrap">
+        <div class="reports-grid" id="reportsGrid"></div>
+      </div>
+    </div>
   </div>
 
   <div class="tooltip-box" id="tooltipBox"></div>
 
   <script>
     const DB = {json_payload};
+    const REPORTS_DATA = {reports_payload};
     const marketKeys = Object.keys(DB);
+    let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
     let currentMarket = marketKeys.includes('KOSPI') ? 'KOSPI' : marketKeys[0];
     let currentSheetIdx = 0;
     let openGroups = {{ A: false, B: false, E: false, C: false, D: false }};
@@ -2159,6 +2592,40 @@ def build_web_dashboard(here):
     let pageSize = 0;
     let currentPage = 1;
     let totalPages = 1;
+    let highlightReportCode = '';
+
+    const REPORTS_BY_CODE = {{}};
+    (REPORTS_DATA.reports || []).forEach(rep => {{
+      if (rep.stock_code) {{
+        if (!REPORTS_BY_CODE[rep.stock_code]) REPORTS_BY_CODE[rep.stock_code] = [];
+        REPORTS_BY_CODE[rep.stock_code].push(rep);
+      }}
+    }});
+
+    const STOCK_LOOKUP = {{}};
+    marketKeys.forEach(mkt => {{
+      const d = DB[mkt];
+      const cols = d.columns.map(c => c.name);
+      const priceIdx = cols.indexOf('현재가');
+      const rateIdx = cols.indexOf('오늘등락율(%)');
+      const passIdx = cols.indexOf('통과');
+      const seqIdx = cols.indexOf('연속이익성장(연간+분기)');
+      const allSheet = d.sheets[0];
+      if (!allSheet) return;
+      allSheet.rows.forEach(r => {{
+        const cd = String(r.v[0] || '');
+        if (!cd) return;
+        const hasUp = r.t ? Object.values(r.t).some(v => String(v).startsWith('up')) : false;
+        STOCK_LOOKUP[cd] = {{
+          market: mkt,
+          price: priceIdx >= 0 ? r.v[priceIdx] : null,
+          rate: rateIdx >= 0 ? r.v[rateIdx] : null,
+          passed: passIdx >= 0 ? !!r.v[passIdx] : false,
+          seqGrowth: seqIdx >= 0 ? !!r.v[seqIdx] : false,
+          hasEstUp: hasUp
+        }};
+      }});
+    }});
 
     const SHEET_LABELS = {{
       "1_전체": "1_전체 (시총순)",
@@ -2187,6 +2654,19 @@ def build_web_dashboard(here):
       document.getElementById('searchInput').addEventListener('input', () => {{ currentPage = 1; renderTableBody(); }});
       document.getElementById('sectorSelect').addEventListener('change', () => {{ currentPage = 1; renderTableBody(); }});
       document.getElementById('toneSelect').addEventListener('change', () => {{ currentPage = 1; renderTableBody(); }});
+
+      initReportsFilters();
+      document.getElementById('repSearchInput').addEventListener('input', renderReportsGrid);
+      document.getElementById('repBrokerSelect').addEventListener('change', renderReportsGrid);
+      document.getElementById('repChangeSelect').addEventListener('change', renderReportsGrid);
+    }}
+
+    function initReportsFilters() {{
+      const reps = REPORTS_DATA.reports || [];
+      const brokers = Array.from(new Set(reps.map(r => r.broker).filter(Boolean))).sort();
+      const sel = document.getElementById('repBrokerSelect');
+      sel.innerHTML = `<option value="">전체 증권사 (${{brokers.length}})</option>` +
+        brokers.map(b => `<option value="${{escapeHtml(b)}}">${{escapeHtml(b)}}</option>`).join('');
     }}
 
     function onPageSizeChange() {{
@@ -2213,16 +2693,151 @@ def build_web_dashboard(here):
 
     function renderMarketTabs() {{
       const box = document.getElementById('marketTabs');
-      box.innerHTML = marketKeys.map(m => {{
-        const activeCls = (m === currentMarket) ? `active-${{m}}` : '';
+      const repCount = (REPORTS_DATA.reports || []).length;
+      const mktBtns = marketKeys.map(m => {{
+        const activeCls = (currentViewMode === 'SCREENER' && m === currentMarket) ? `active-${{m}}` : '';
         return `<button class="mkt-btn ${{activeCls}}" onclick="selectMarket('${{m}}')">${{m}} 상위 200</button>`;
+      }}).join('');
+      const repActiveCls = (currentViewMode === 'REPORTS') ? 'active-REPORTS' : '';
+      const repBtn = `<button class="mkt-btn ${{repActiveCls}}" onclick="selectReportsView()">📰 오늘의 기업 리포트 (${{repCount}})</button>`;
+      box.innerHTML = mktBtns + repBtn;
+    }}
+
+    function setScreenerVisibility(showScreener) {{
+      document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
+      document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
+      document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
+      document.getElementById('paginationBar').style.display = showScreener ? 'flex' : 'none';
+      document.getElementById('reportsView').classList.toggle('active', !showScreener);
+    }}
+
+    function selectReportsView(focusCode = '') {{
+      currentViewMode = 'REPORTS';
+      highlightReportCode = focusCode || '';
+      renderMarketTabs();
+      setScreenerVisibility(false);
+
+      const reps = REPORTS_DATA.reports || [];
+      const upCnt = reps.filter(r => r.target_change === '상향').length;
+      const newCnt = reps.filter(r => r.target_change === '신규').length;
+      const downCnt = reps.filter(r => r.target_change === '하향').length;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">📅 리포트 기준일: ${{REPORTS_DATA.date || '-'}}</span>
+        <span class="meta-pill">📄 총 ${{reps.length}}건</span>
+        <span class="meta-pill up">▲ 목표가 상향 ${{upCnt}}건</span>
+        <span class="meta-pill" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;">★ 신규 ${{newCnt}}건</span>
+        <span class="meta-pill down">▼ 목표가 하향 ${{downCnt}}건</span>
+      `;
+      if (focusCode) {{
+        document.getElementById('repSearchInput').value = '';
+        document.getElementById('repBrokerSelect').value = '';
+        document.getElementById('repChangeSelect').value = '';
+      }}
+      renderReportsGrid();
+      if (focusCode) {{
+        const targetEl = document.getElementById('rep-card-' + focusCode);
+        if (targetEl) targetEl.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+      }}
+    }}
+
+    function jumpToStockInScreener(code, market) {{
+      selectMarket(market);
+      currentSheetIdx = 0;
+      renderSheetTabs();
+      document.getElementById('searchInput').value = code;
+      document.getElementById('sectorSelect').value = '';
+      document.getElementById('toneSelect').value = '';
+      currentPage = 1;
+      renderTable();
+    }}
+
+    function renderReportsGrid() {{
+      const reps = REPORTS_DATA.reports || [];
+      const q = document.getElementById('repSearchInput').value.trim().toLowerCase();
+      const brokerF = document.getElementById('repBrokerSelect').value;
+      const chgF = document.getElementById('repChangeSelect').value;
+
+      const filtered = reps.filter(r => {{
+        if (brokerF && r.broker !== brokerF) return false;
+        if (chgF && r.target_change !== chgF) return false;
+        if (q) {{
+          const hay = [r.stock_name, r.stock_code, r.broker, r.analyst, r.title, ...(r.summary || [])].join(' ').toLowerCase();
+          if (!hay.includes(q)) return false;
+        }}
+        return true;
+      }});
+
+      document.getElementById('repCountLabel').textContent = `표시 리포트: ${{filtered.length}} / ${{reps.length}}건`;
+      const grid = document.getElementById('reportsGrid');
+      if (!filtered.length) {{
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:10px; border:1px solid #e2e8f0;">조건에 맞는 기업 리포트가 없습니다.</div>`;
+        return;
+      }}
+
+      grid.innerHTML = filtered.map(r => {{
+        const info = STOCK_LOOKUP[r.stock_code] || null;
+        const tpNum = parseFloat(String(r.target_price || '').replace(/,/g, ''));
+        const hasTp = !isNaN(tpNum) && tpNum > 0;
+        let upsideHtml = '';
+        if (hasTp && info && info.price) {{
+          const gap = ((tpNum - info.price) / info.price * 100);
+          const gapCls = gap >= 0 ? 'pos' : 'neg';
+          upsideHtml = `<div style="font-size:11px; color:#475569;">현재가 ${{Math.round(info.price).toLocaleString('ko-KR')}}원 · 괴리율 <span class="${{gapCls}}">${{gap >= 0 ? '+' : ''}}${{gap.toFixed(1)}}%</span></div>`;
+        }}
+
+        const scrBadges = [];
+        if (info) {{
+          scrBadges.push(`<span class="rep-pill" style="background:#f1f5f9; color:#334155;">${{info.market}}</span>`);
+          if (info.passed) scrBadges.push(`<span class="rep-pill scr-pass">★통과</span>`);
+          if (info.seqGrowth) scrBadges.push(`<span class="rep-pill scr-seq">◆연속성장</span>`);
+          if (info.hasEstUp) scrBadges.push(`<span class="rep-pill scr-up">▲예상이익상향</span>`);
+        }}
+
+        const chg = r.target_change || '유지';
+        const chgText = chg === '상향' ? '▲ 상향' : (chg === '하향' ? '▼ 하향' : (chg === '신규' ? '★ 신규' : chg));
+        const hlCls = (highlightReportCode && highlightReportCode === r.stock_code) ? 'highlight' : '';
+        const summaryLis = (r.summary || []).map(s => `<li>${{escapeHtml(s)}}</li>`).join('');
+        const naverUrl = `https://finance.naver.com/item/main.naver?code=${{r.stock_code}}`;
+        const fnUrl = `https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A${{r.stock_code}}`;
+
+        return `<div class="rep-card ${{hlCls}}" id="rep-card-${{r.stock_code}}">
+          <div class="rep-card-head">
+            <div class="rep-stock-title">
+              <span class="rep-stock-name">${{escapeHtml(r.stock_name || '기업명')}}</span>
+              <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
+              <span class="rep-pill chg-${{chg}}">${{chgText}}</span>
+              ${{scrBadges.join('')}}
+            </div>
+            <div class="rep-target-box">
+              <div class="rep-target-price">${{hasTp ? '목표가 ' + Math.round(tpNum).toLocaleString('ko-KR') + '원' : '목표가 미제시'}} <span style="font-size:11.5px; color:#475569;">(${{escapeHtml(r.opinion || '-')}})</span></div>
+              ${{upsideHtml}}
+            </div>
+          </div>
+          <div class="rep-headline">${{escapeHtml(r.title || '')}}</div>
+          <div class="rep-meta-row">
+            <span>🏢 <strong>${{escapeHtml(r.broker || '-')}}</strong></span>
+            <span>✍️ ${{escapeHtml(r.analyst || '-')}}</span>
+            <span>📅 ${{escapeHtml(r.date || '-')}}</span>
+          </div>
+          <ul class="rep-summary-list">${{summaryLis}}</ul>
+          <div class="rep-card-foot">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${{r.pdf_url ? `<a class="rep-btn pdf" href="${{r.pdf_url}}" target="_blank">📄 원문 PDF 보기</a>` : ''}}
+              <a class="rep-btn" href="${{naverUrl}}" target="_blank">네이버 금융</a>
+              <a class="rep-btn" href="${{fnUrl}}" target="_blank">에프앤가이드</a>
+            </div>
+            ${{info ? `<button class="rep-btn scr" onclick="jumpToStockInScreener('${{r.stock_code}}', '${{info.market}}')">📊 ${{info.market}} 표에서 보기</button>` : ''}}
+          </div>
+        </div>`;
       }}).join('');
     }}
 
     function selectMarket(mkt) {{
+      currentViewMode = 'SCREENER';
       currentMarket = mkt;
       sortColIdx = -1;
       currentPage = 1;
+      setScreenerVisibility(true);
       renderMarketTabs();
       const d = DB[currentMarket];
 
@@ -2391,9 +3006,16 @@ def build_web_dashboard(here):
         const code = rowVals[0] || '';
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{code}}`;
         const fnUrl = `https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A${{code}}`;
+        const reps = REPORTS_BY_CODE[code] || [];
+        let repBtn = '';
+        if (reps.length > 0) {{
+          const r0 = reps[0];
+          const repTip = `[오늘의 기업 리포트 · ${{r0.broker}}]\\n${{r0.title}}\\n• 목표가: ${{r0.target_price}}원 (${{r0.target_change || r0.opinion}})\\n(클릭 시 리포트 요약 보기)`;
+          repBtn = `<span class="rep-badge-link" onclick="selectReportsView('${{code}}')" data-tip="${{escapeHtml(repTip)}}">📄</span>`;
+        }}
         return `<strong title="${{escapeHtml(String(val))}}">${{escapeHtml(String(val))}}</strong>
           <a class="ext-link" href="${{naverUrl}}" target="_blank" title="네이버 금융 열기">N</a>
-          <a class="ext-link" href="${{fnUrl}}" target="_blank" title="에프앤가이드 열기">Fn</a>`;
+          <a class="ext-link" href="${{fnUrl}}" target="_blank" title="에프앤가이드 열기">Fn</a>${{repBtn}}`;
       }}
       if (colName === '섹터1' || colName === '섹터2') {{
         const s = escapeHtml(String(val));
@@ -2651,6 +3273,7 @@ def auto_push_to_github(here, commit_msg=None):
         upload_targets = [
             "kospi200_yoy.py",
             "index.html",
+            "hankyung_reports.json",
             "requirements.txt",
             "kospi_top200_latest.xlsx",
             "kosdaq_top200_latest.xlsx",
@@ -2714,6 +3337,14 @@ def main():
         auto_push_to_github(here)
         return
 
+    # 오늘자 한경 기업 리포트만 수집·정리 후 웹페이지 최신화 + GitHub 업로드 (예: python kospi200_yoy.py --reports)
+    if args and args[0].lower() in ("--reports", "reports", "--report"):
+        fetch_hankyung_reports(here)
+        build_web_dashboard(here)
+        if not skip_push:
+            auto_push_to_github(here)
+        return
+
     # 기존 최신 엑셀(.xlsx) 파일만으로 웹페이지(index.html) 즉시 생성 + GitHub 자동 업로드
     if args and args[0].lower() in ("--html", "html", "--web", "web"):
         build_web_dashboard(here)
@@ -2758,7 +3389,8 @@ def main():
         print(f"  - [{mkt}] {os.path.basename(path)}")
     print(f"{'='*80}")
 
-    # 크롤링 및 엑셀 생성 완료 후 자동으로 웹페이지(index.html) 최신화 + GitHub 자동 업로드
+    # 크롤링 및 엑셀 생성 완료 후 오늘자 한경 기업 리포트 수집 + 웹페이지(index.html) 최신화 + GitHub 자동 업로드
+    fetch_hankyung_reports(here)
     build_web_dashboard(here)
     if not skip_push:
         auto_push_to_github(here)

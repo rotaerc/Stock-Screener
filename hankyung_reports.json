@@ -1,0 +1,239 @@
+{
+  "date": "2026-11-25",
+  "updatedAt": "2026-11-25 13:49",
+  "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business",
+  "reports": [
+    {
+      "date": "2026-11-25",
+      "stock_name": "현대모비스",
+      "stock_code": "012330",
+      "title": "A/S 안정성에 모듈 개선을 더하다",
+      "target_price": "430,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "권순우",
+      "broker": "SK증권",
+      "report_idx": "654545",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654545",
+      "curated": true,
+      "summary": [
+        "2027년 매출 68.3조원(+6.3% YoY), 영업이익 3.87조원(+7.4%, OPM 5.7%), 지배순이익 4.08조원(+17.3%) 전망.",
+        "고수익성 A/S 부문(OPM ~25%)이 이익 기반을 지지하는 가운데, 고객사 생산 정상화·신차 투입 가동률 개선으로 모듈 부문 영업이익이 2026년 398억원 → 2027년 3,848억원으로 대폭 회복 전망.",
+        "램프사업 매각(11/24 물적분할 주총 가결, 2027년 하반기 완료 목표)으로 핵심부품 집중 추진. 로봇 분야 Atlas용 액추에이터 공급 협력 구체화가 신규 모멘텀.",
+        "12개월 선행 EPS에 최근 1년 평균 PER 9.4배 적용, 투자의견 매수·목표주가 43만원으로 커버리지 개시(상승여력 +19.8%)."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "기아",
+      "stock_code": "000270",
+      "title": "라인업 확대의 성과와 주주환원에 주목",
+      "target_price": "120,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "권순우",
+      "broker": "SK증권",
+      "report_idx": "654544",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654544",
+      "curated": true,
+      "summary": [
+        "2027년 매출 124.3조원(+1.0% YoY), 영업이익 7.96조원(-5.3%, OPM 6.4%) 전망. 환율 효과 약화·유럽 경쟁 심화로 연간 감익 부담은 있으나 하반기 전년동기비 증익 전환 예상.",
+        "미국은 텔루라이드 등 주력 SUV·하이브리드 현지 생산으로 관세 부담 완화, 유럽은 EV2·EV4·신형 셀토스 확대, PBV는 PV5에 이어 PV7 투입으로 물류·운송 고객 확장.",
+        "12개월 선행 PER 4.8배·PBR 0.5배의 낮은 밸류에이션과 총주주환원율 35% 이상(배당성향 ~38%) 정책이 핵심 투자 매력.",
+        "투자의견 매수·목표주가 12만원으로 커버리지 개시(상승여력 +25.5%)."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "현대차",
+      "stock_code": "005380",
+      "title": "공급 회복에 신차 사이클이 더해진다",
+      "target_price": "370,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "권순우",
+      "broker": "SK증권",
+      "report_idx": "654543",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654543",
+      "curated": true,
+      "summary": [
+        "SK증권 모빌리티 커버리지 신규 개시 종목으로 투자의견 매수, 목표주가 370,000원 제시.",
+        "완성차 공급 정상화와 글로벌 신차 사이클 진입에 따른 출하량 회복 및 믹스 개선 모멘텀에 주목.",
+        "※ 참고: 한경 컨센서스 서버의 해당 PDF 링크(654543)에 동일 작성자의 기아 리포트 파일이 중복 첨부되어 있어, 현대차 상세 재무 수치는 증권사 원문 확인이 필요합니다."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "호전실업",
+      "stock_code": "111110",
+      "title": "팬데믹 이후 가장 비어 있는 의류 창고",
+      "target_price": "9,500",
+      "target_change": "유지",
+      "opinion": "매수",
+      "analyst": "나승두",
+      "broker": "SK증권",
+      "report_idx": "654542",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654542",
+      "curated": true,
+      "summary": [
+        "3Q26 해외 생산법인 증설 라인 안정화, 신규 고객사 확대, 고부가 의류 비중 상승으로 수익성 개선. 2027E 매출 5,789억원, 영업이익 334억원(+31% YoY, OPM 5.8%) 전망.",
+        "미국 의류 매장 판매는 전년비 +5.3% 증가했으나 재고/매출 비율은 팬데믹 이후 최저치 — 2009년 금융위기 직후와 유사한 대규모 재고 보충(Restocking) 호황 기대.",
+        "내년 예상 PER 2.0배, PBR 0.2배의 지나친 저평가 구간. 주당 400원 배당 시 배당수익률 6.5% 및 연내 기업가치 제고 계획 공시 기대감(목표주가 9,500원 유지, 상승여력 +51.0%)."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "하이브",
+      "stock_code": "352820",
+      "title": "저연차의 서구권 수익화가 이익 지속성의 핵심",
+      "target_price": "290,000",
+      "target_change": "유지",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654537",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654537",
+      "curated": true,
+      "summary": [
+        "BTS 아시아 투어·앙코르 공연이 2027년 상반기까지 이어지며 실적 하방 지지. 3Q 북미 투어 MD 판매 호조로 OPM 12.4%(+0.6%p QoQ) 기록, 2027E 영업이익 4,950억원(+74.8% YoY) 전망.",
+        "KATSEYE(47회 아레나 투어 70만~100만명 모객 기대)와 CORTIS(2027년 아레나 투어 진입 기대)의 서구권 수익화가 BTS 의존도 완화의 핵심.",
+        "2027년 상반기 데뷔 목표 미국 신인 보이·걸그룹 흥행 시 중장기 이익 성장 가시성 확대(단기 4Q는 서구권 공연 축소·남미 투어로 QoQ 둔화 예상, 목표주가 29만원 유지)."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "에스엠",
+      "stock_code": "041510",
+      "title": "2027년 저연차 투어 확대와 MD 성장으로 높은 이익 회복 가시성",
+      "target_price": "130,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654536",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654536",
+      "curated": true,
+      "summary": [
+        "2027년 매출 1조 3,470억원(+11.1% YoY), 영업이익 2,180억원(+31.5%, OPM 16.2%)으로 높은 이익 회복 가시성 확보.",
+        "NCT WISH 상반기 22회 아레나 투어(회당 모객 +70%), RIIZE 1Q 정규앨범 후 월드투어 재개, aespa 아시아 투어 및 내년 1월 신인 보이그룹 데뷔로 전사 실적 견인.",
+        "3Q MD/라이선싱 매출 621억원(+24% YoY) 서프라이즈로 수익화 역량 입증. 할인율 축소를 반영해 목표주가를 130,000원으로 +18% 상향(중국 본토 공연 재개 시 최대 수혜)."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "리가켐바이오",
+      "stock_code": "141080",
+      "title": "터프해지는 환경 속 돋보일 경쟁력",
+      "target_price": "180,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654535",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654535",
+      "curated": true,
+      "summary": [
+        "중국 바이오텍 기술이전 급증으로 경쟁 환경이 치열해졌으나, 기존 TOP1 저해제 ADC 교차 내성 한계 속에서 자체 링커-페이로드 플랫폼 '콘쥬올(ConjuALL)' 경쟁력 유효.",
+        "3분기말 보유자금 8,321억원(국민성장펀드 상장사 최초 직접투자 선정) 확보로 후기 임상 자체 완주 및 고가치 딜 전략이 가능한 재무 안정성이 핵심 강점.",
+        "HER2 ADC 'IKS014'(엔허투 이후 환자 10명 중 5명 반응, 고등급 ILD 미관찰) 추가 데이터가 12월 SABCS 학회에서 공개 예정.",
+        "환율·플랫폼 영구성장률 조정으로 목표주가는 22만원→18만원 하향했으나 주가 낙폭 과대 및 12월 학회 이벤트 기대로 업종 Top Pick 유지."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "SK바이오팜",
+      "stock_code": "326030",
+      "title": "성장 가속화, 판매 제품 다변화의 투 트랙 성장",
+      "target_price": "150,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654534",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654534",
+      "curated": true,
+      "summary": [
+        "3Q26 매출 2,584억원(+35% YoY), 영업이익 1,163억원(+66%, OPM 45%)으로 일회성 제외 첫 분기 영업이익 1,000억원 돌파. 미국 엑스코프리 3Q TRx 15만건(월평균 첫 5만건) 돌파.",
+        "8월 라이선스인한 Kv7 계열 '오파칼림'은 엑스코프리와 병용 가능한 기전으로, 이미 구축된 미국 직판망을 통해 높은 한계이익률 기대.",
+        "2027년 2~3건 신규 IND(RPT 후보 SKL35501 등) 제출 계획. 엑스코프리 현금흐름만으로 자체 R&D 및 후속 제품 도입 선순환 구축.",
+        "현재 판매 중인 엑스코프리 가치만 반영해 목표주가 15만원으로 상향, 향후 오파칼림·RISE3 데이터 확인 시 추가 리레이팅 기대."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "녹십자",
+      "stock_code": "006280",
+      "title": "무시할 수 없는 알리글로의 잠재력",
+      "target_price": "210,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654533",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654533",
+      "curated": true,
+      "summary": [
+        "면역글로불린 '알리글로' 미국 40여개주 공급·누적 환자 1,000명 돌파·3대 PBM 등재(사보험 75% 커버)로 3Q 누적 약 9,700만달러 달성, 2026년 가이던스 1.5억달러 달성 무난.",
+        "20조원 이상 미국 IVIG 시장은 혈장 채취가 공급 제약 요인인데, 현지 ABO 플라즈마 혈장 조달 비중이 2028년 ~80%까지 확대되며 원가 개선과 매출 성장이 동시 가시화.",
+        "고농도 SCIG 제형 변화의 장기 업사이드 및 2027년 별도 EBITDA 기준 SOTP 기업가치 2.4조원을 반영해 목표주가 18만원 → 21만원으로 상향."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "HK이노엔",
+      "stock_code": "195940",
+      "title": "시점이 임박한 글로벌 이벤트 주목",
+      "target_price": "70,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "리서치센터",
+      "broker": "iM증권",
+      "report_idx": "654532",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654532",
+      "curated": true,
+      "summary": [
+        "2027년초 케이캡(K-CAB) 미국 FDA 허가 획득 및 연내 출시 기대. 미국 GERD 치료 환자 약 40%의 PPI 불충분 반응 시장을 겨냥해 유지요법 포함 다수 적응증 동시 진입 전략.",
+        "중남미 최대 시장 브라질 품목허가 최초 획득. 경쟁약 보케즈나(3Q 매출 8,470만달러, +71% YoY)가 P-CAB 시장 성장을 입증했으며 초기 보험 등재 속도가 핵심 포인트.",
+        "주1회 GLP-1 비만치료제 '에크노글루타이드' 국내 3상 연내 투약 종료·내년 출시 예정. 2027E 영업이익 1,810억원(+41.4% YoY) 전망 및 목표주가 6만원 → 7만원 상향."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "와이바이오로직스",
+      "stock_code": "338840",
+      "title": "전임상에서 딜 테이블로, 승부는 2027년",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "투자의견없음",
+      "analyst": "김승준,이금민",
+      "broker": "한국IR협의회",
+      "report_idx": "654527",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654527",
+      "curated": true,
+      "summary": [
+        "완전인간항체 발굴 플랫폼(Ymax-ABL)·항체-사이토카인 융합 플랫폼(Multi-AbKine) 기반 차세대 면역항암제 개발 바이오텍.",
+        "주력 삼중 기능성 면역항암제 'AR170'이 전임상에서 완전관해(CR) 50%(3/6)·면역기억 형성·영장류 초기 안전성을 확보, 2027년 미국 IND 제출 및 조기 글로벌 L/O 추진.",
+        "공동개발 OXTIMA(글로벌 임상 2a상) 마일스톤 및 인투셀 'ITC-6146RO' 2027년 조기 L/O 모멘텀 보유. 다만 2026년 매출 25억원(-14.2%)·영업손실 178억원 적자 지속 전망."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "영원무역",
+      "stock_code": "111770",
+      "title": "3Q26 Review: 환율이 너무해",
+      "target_price": "100,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "이해니",
+      "broker": "유진투자증권",
+      "report_idx": "654517",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654517",
+      "curated": true,
+      "summary": [
+        "3Q26 매출 1조 2,163억원(+1.0% YoY), 영업이익 1,990억원(+9.8% YoY, OPM 16.4%)으로 컨센서스 부합. 다만 원/달러 환율 급락에 따른 외화환산손실로 지배순이익 670억원(-59.5%) 급감.",
+        "OEM은 3Q 매출 +7.2% YoY로 견조했으나 9월 일부 상위·애슬레저 고객 주문 둔화 및 4Q 높은 기저 부담. 자회사 SCOTT는 재고 정상화로 3Q 영업손실 -20억원으로 적자폭 축소.",
+        "실적 추정치 조정으로 목표주가 12만원 → 10만원 하향했으나, 배당성향 25%→30% 상향 및 자사주 500억원 추가 매입으로 예상 배당수익률 5.8% 주주환원 매력 부각."
+      ]
+    }
+  ]
+}
