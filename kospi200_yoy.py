@@ -1060,11 +1060,114 @@ def sync_op_history_from_excels(here):
     return hist_data
 
 
+OP_BASELINE_DATE = "2026-11-18"
+
+
+def _extract_est_map_from_excel(xlsx_path):
+    """엑셀 통합시트(1번째 시트)에서 {종목코드: {OP_*(E)/연간OP_*(E): 수치}} 딕셔너리 추출"""
+    est_by_code = {}
+    prev_df = pd.read_excel(xlsx_path, sheet_name=0, dtype={"종목코드": str})
+    if "종목코드" not in prev_df.columns:
+        return est_by_code
+    est_cols = [
+        c for c in prev_df.columns
+        if (str(c).startswith("OP_") or str(c).startswith("연간OP_")) and str(c).endswith("(E)")
+    ]
+    for _, row in prev_df.iterrows():
+        raw_cd = str(row.get("종목코드", "")).strip()
+        if not raw_cd or raw_cd.lower() == "nan":
+            continue
+        cd = raw_cd.split(".")[0].zfill(6)
+        row_est = {}
+        for col in est_cols:
+            v = _num(row.get(col))
+            if v is not None:
+                row_est[str(col)] = round(float(v), 2)
+        if row_est:
+            est_by_code[cd] = row_est
+    return est_by_code
+
+
+def _build_or_load_op_baseline(here, target_date=OP_BASELINE_DATE):
+    """
+    고정 기준일(기본 2026-11-18)의 KOSPI/KOSDAQ 예상이익 기준 스냅샷(op_baseline.json)을 로드하거나
+    해당 날짜 엑셀 파일에서 자동 생성·저장합니다. (GitHub Actions에서도 동일 기준 유지)
+    """
+    b_path = os.path.join(here, "op_baseline.json")
+    data = {}
+    if os.path.isfile(b_path):
+        try:
+            with open(b_path, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+            if isinstance(loaded, dict) and loaded.get("baselineDate") == target_date:
+                data = loaded
+        except Exception:
+            data = {}
+
+    if not data:
+        data = {"baselineDate": target_date, "markets": {}}
+    markets_map = data.setdefault("markets", {})
+
+    compact_dt = target_date.replace("-", "")
+    search_dirs = [here, os.path.join(here, "엑셀백업")]
+    changed = False
+    for mkt in MARKETS:
+        prefix = f"{mkt.lower()}_top{TOP_N}"
+        if markets_map.get(prefix, {}).get("estimates"):
+            continue
+        matches = []
+        for d in search_dirs:
+            if not os.path.isdir(d):
+                continue
+            for fn in os.listdir(d):
+                if fn.startswith("~$") or not fn.lower().endswith(".xlsx"):
+                    continue
+                if (fn.startswith(f"{prefix}_통합시트_{compact_dt}") or fn.startswith(f"{prefix}_전체_{compact_dt}")):
+                    full_p = os.path.join(d, fn)
+                    if os.path.isfile(full_p):
+                        matches.append(full_p)
+        if matches:
+            matches.sort(key=lambda p: (os.path.basename(p), os.path.getmtime(p)), reverse=True)
+            chosen = matches[0]
+            try:
+                est_by_code = _extract_est_map_from_excel(chosen)
+                if est_by_code:
+                    markets_map[prefix] = {
+                        "filename": os.path.basename(chosen),
+                        "estimates": est_by_code,
+                    }
+                    changed = True
+            except Exception as e:
+                print(f"  [알림] 기준일({target_date}) 엑셀({os.path.basename(chosen)}) 로드 실패: {e}")
+
+    if changed:
+        try:
+            with open(b_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        except Exception as e:
+            print(f"  [알림] op_baseline.json 저장 실패: {e}")
+    return data
+
+
 def _load_latest_prev_estimates(here, prefix):
     """
-    폴더(here) 내 해당 시장(prefix)의 가장 최근 생성된 엑셀 파일을 찾아
-    종목별 예상이익(OP_*(E), 연간OP_*(E)) 데이터를 {(종목코드, 컬럼명): 수치} 형태로 반환
+    고정 기준일(OP_BASELINE_DATE, 기본 2026-11-18)의 예상이익(OP_*(E), 연간OP_*(E)) 데이터를
+    {(종목코드, 컬럼명): 수치} 형태로 반환합니다.
+    기준일 데이터가 없으면 폴더 내 가장 최근 이전 엑셀 파일로 대체합니다.
     """
+    baseline = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
+    mkt_entry = (baseline.get("markets") or {}).get(prefix)
+    if mkt_entry and mkt_entry.get("estimates"):
+        b_date = baseline.get("baselineDate") or OP_BASELINE_DATE
+        b_fn = mkt_entry.get("filename") or f"{prefix}_{b_date}"
+        prev_map = {}
+        for cd, cols_dict in mkt_entry["estimates"].items():
+            for col, v in cols_dict.items():
+                if v is not None:
+                    prev_map[(cd, col)] = float(v)
+        if prev_map:
+            return f"{b_date} 기준 ({b_fn})", prev_map
+
     candidates = []
     latest_fallback = None
     search_dirs = [here, os.path.join(here, "엑셀백업")]
@@ -1097,22 +1200,10 @@ def _load_latest_prev_estimates(here, prefix):
 
     prev_map = {}
     try:
-        prev_df = pd.read_excel(latest_path, sheet_name=0, dtype={"종목코드": str})
-        if "종목코드" not in prev_df.columns:
-            return os.path.basename(latest_path), {}
-        est_cols = [
-            c for c in prev_df.columns
-            if (c.startswith("OP_") or c.startswith("연간OP_")) and c.endswith("(E)")
-        ]
-        for _, row in prev_df.iterrows():
-            raw_cd = str(row.get("종목코드", "")).strip()
-            if not raw_cd or raw_cd.lower() == "nan":
-                continue
-            cd = raw_cd.split(".")[0].zfill(6)
-            for col in est_cols:
-                v = _num(row.get(col))
-                if v is not None:
-                    prev_map[(cd, col)] = v
+        est_by_code = _extract_est_map_from_excel(latest_path)
+        for cd, cols_dict in est_by_code.items():
+            for col, v in cols_dict.items():
+                prev_map[(cd, col)] = float(v)
     except Exception as e:
         print(f"  [알림] 이전 엑셀 파일({os.path.basename(latest_path)}) 비교 데이터 로드 실패: {e}")
         return None, {}
@@ -1316,8 +1407,8 @@ def run_market(market, sess, here):
                 if (col_name.startswith("OP_") or col_name.startswith("연간OP_")) and col_name.endswith("(E)"):
                     desc = (
                         f"[{col_name}]\n컨센서스 예상 영업이익(억원)\n"
-                        "• 직전 대비 상향(▲): <5% 연빨강 / 5~10% 진빨강 / 10%↑ 매우진빨강\n"
-                        "• 직전 대비 하향(▼): <5% 연파랑 / 5~10% 진파랑 / 10%↓ 매우진파랑"
+                        f"• 기준일({OP_BASELINE_DATE}) 대비 상향(▲): <5% 연빨강 / 5~10% 진빨강 / 10%↑ 매우진빨강\n"
+                        f"• 기준일({OP_BASELINE_DATE}) 대비 하향(▼): <5% 연파랑 / 5~10% 진파랑 / 10%↓ 매우진파랑"
                     )
             if desc:
                 line_cnt = desc.count("\n") + 1
@@ -1389,7 +1480,7 @@ def run_market(market, sess, here):
                             head = f"[예상이익 하향 ▼]{ref_label}"
                         memo_txt = (
                             f"{head}\n"
-                            f"• 직전: {old_r:,.2f}\n"
+                            f"• 기준({OP_BASELINE_DATE}): {old_r:,.2f}\n"
                             f"• 현재: {new_r:,.2f}\n"
                             f"• 증감: {diff:+,.2f}{pct_str}\n"
                         )
@@ -1731,10 +1822,20 @@ def _extract_market_excel_for_web(here, market):
         })
 
     code_col_idx = raw_cols.index("종목코드") if "종목코드" in raw_cols else -1
+    est_col_idxs = {
+        idx for idx, c in enumerate(raw_cols)
+        if (c.startswith("OP_") or c.startswith("연간OP_")) and c.endswith("(E)")
+    }
+    base_label, base_est_map = _load_latest_prev_estimates(here, prefix)
+    use_fixed_baseline = bool(base_est_map and OP_BASELINE_DATE in str(base_label or ""))
+    baseline_date_str = OP_BASELINE_DATE if use_fixed_baseline else ""
     sheets_data = []
     total_up, total_down = 0, 0
 
     for s_name in wb.sheetnames:
+        if use_fixed_baseline and s_name in ("7_예상이익상향", "8_예상이익하향"):
+            # 기준일(2026-11-18) 비교 결과로 아래에서 최신 재구성
+            continue
         ws = wb[s_name]
         rows_list = []
         s_up, s_down = 0, 0
@@ -1746,6 +1847,12 @@ def _extract_market_excel_for_web(here, market):
             vals = []
             tones = {}
             notes = {}
+            row_code = ""
+            if code_col_idx >= 0:
+                raw_cd = ws.cell(r_idx, code_col_idx + 1).value
+                if raw_cd is not None and str(raw_cd).strip():
+                    row_code = str(raw_cd).strip().split(".")[0].zfill(6)
+
             for c_idx in range(1, len(raw_cols) + 1):
                 cell = ws.cell(r_idx, c_idx)
                 v = _clean_json_val(cell.value)
@@ -1753,9 +1860,37 @@ def _extract_market_excel_for_web(here, market):
                     v = str(v).split(".")[0].zfill(6)
                 vals.append(v)
 
+                col_i = c_idx - 1
+                if use_fixed_baseline and col_i in est_col_idxs:
+                    old_v = base_est_map.get((row_code, raw_cols[col_i])) if row_code else None
+                    new_v = _num(v)
+                    if old_v is not None and new_v is not None:
+                        old_r, new_r = round(float(old_v), 2), round(float(new_v), 2)
+                        if new_r != old_r:
+                            diff = new_r - old_r
+                            pct_val = (diff / abs(old_r) * 100.0) if old_r != 0 else None
+                            abs_p = abs(pct_val) if pct_val is not None else 0.0
+                            tier = 3 if abs_p >= 10.0 else (2 if abs_p >= 5.0 else 1)
+                            direction = "up" if new_r > old_r else "down"
+                            tones[str(col_i)] = f"{direction}{tier}"
+                            pct_str = f" ({pct_val:+.2f}%)" if pct_val is not None else ""
+                            head = "[예상이익 상향 ▲]" if direction == "up" else "[예상이익 하향 ▼]"
+                            notes[str(col_i)] = (
+                                f"{head}\n"
+                                f"  (비교: {base_label})\n"
+                                f"• 기준({OP_BASELINE_DATE}): {old_r:,.2f}\n"
+                                f"• 현재: {new_r:,.2f}\n"
+                                f"• 증감: {diff:+,.2f}{pct_str}"
+                            )
+                            if direction == "up":
+                                s_up += 1
+                            else:
+                                s_down += 1
+                    continue
+
                 note_txt = cell.comment.text.strip() if (cell.comment and cell.comment.text) else ""
                 if note_txt:
-                    notes[str(c_idx - 1)] = note_txt
+                    notes[str(col_i)] = note_txt
 
                 rgb = ""
                 try:
@@ -1791,7 +1926,7 @@ def _extract_market_excel_for_web(here, market):
                                 tier = 2
                             else:
                                 tier = 1
-                    tones[str(c_idx - 1)] = f"{direction}{tier}"
+                    tones[str(col_i)] = f"{direction}{tier}"
                     if direction == "up":
                         s_up += 1
                     else:
@@ -1812,7 +1947,7 @@ def _extract_market_excel_for_web(here, market):
             "rows": rows_list,
         })
 
-    # 기존 6시트 엑셀 파일이어도 웹페이지에서 '7_예상이익상향', '8_예상이익하향' 탭을 자동 생성
+    # 기존 6시트 엑셀 또는 기준일(2026-11-18) 재계산 시 '7_예상이익상향', '8_예상이익하향' 탭을 자동 생성
     existing_names = {s["name"] for s in sheets_data}
     all_sheet = next((s for s in sheets_data if s["name"] == "1_전체"), sheets_data[0] if sheets_data else None)
     if all_sheet:
@@ -1844,6 +1979,7 @@ def _extract_market_excel_for_web(here, market):
         "filename": base_fn,
         "downloadFile": f"{prefix}_latest.xlsx",
         "updatedAt": updated_at,
+        "baselineDate": baseline_date_str,
         "upCount": total_up,
         "downCount": total_down,
         "columns": columns_meta,
@@ -3525,12 +3661,12 @@ def build_web_dashboard(here):
           <option value="qopd2">❄️ 현재분기 OP 누적 -10% 이하 (하향 2단계↓)</option>
           <option value="qopd3">❄️❄️ 현재분기 OP 누적 -15% 이하 (하향 3단계↓)</option>
           <option value="qopd4">❄️❄️ 현재분기 OP 누적 -20% 이하 (하향 4단계)</option>
-          <option value="up">▲ 예상이익 상향 전체 (직전 대비)</option>
-          <option value="up5">▲ 예상이익 +5% 이상 상향</option>
-          <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향</option>
-          <option value="down">▼ 예상이익 하향 전체 (직전 대비)</option>
-          <option value="down5">▼ 예상이익 -5% 이하 하향</option>
-          <option value="down10">▼▼ 예상이익 -10% 이하 대폭 하향</option>
+          <option value="up">▲ 예상이익 상향 전체 (11/18 기준)</option>
+          <option value="up5">▲ 예상이익 +5% 이상 상향 (11/18 기준)</option>
+          <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향 (11/18 기준)</option>
+          <option value="down">▼ 예상이익 하향 전체 (11/18 기준)</option>
+          <option value="down5">▼ 예상이익 -5% 이하 하향 (11/18 기준)</option>
+          <option value="down10">▼▼ 예상이익 -10% 이하 대폭 하향 (11/18 기준)</option>
         </select>
         <span id="rowCountLabel" style="font-weight:700; color:#475569;"></span>
       </div>
@@ -3574,7 +3710,7 @@ def build_web_dashboard(here):
         <span class="lg-chip" style="background:#60a5fa; color:#0f172a; border-left:3px solid #1d4ed8;">▼15%</span>
         <span class="lg-chip" style="background:#1d4ed8; color:#fff; border-left:3px solid #1e3a8a;">▼20%↓</span>
         <span style="color:#cbd5e1; margin:0 2px;">|</span>
-        <span style="color:#475569;">셀 변동:</span>
+        <span style="color:#475569;">셀 변동({OP_BASELINE_DATE[5:].replace('-', '/')} 기준):</span>
         <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
         <span class="lg-chip" style="background:#fca5a5; color:#7f1d1d;">▲5~10%</span>
         <span class="lg-chip" style="background:#dc2626; color:#fff;">▲10%↑</span>
@@ -4223,11 +4359,12 @@ def build_web_dashboard(here):
       document.getElementById('pageSubtitle').textContent = '영업이익 성장 · 수익성 · 예상이익 변동 스크리너';
       renderTopDateChip();
 
+      const basePill = d.baselineDate ? `<span class="meta-pill" style="background:#f1f5f9; color:#334155;">📌 비교기준: ${{d.baselineDate}}</span>` : '';
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">🕒 업데이트: ${{d.updatedAt}}</span>
-        <span class="meta-pill">📄 ${{d.filename}}</span>
-        <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
-        <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
+        ${{basePill}}
+        <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="${{d.baselineDate || '직전'}} 대비 예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
+        <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="${{d.baselineDate || '직전'}} 대비 예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
       `;
 
       if (currentSheetIdx >= d.sheets.length) currentSheetIdx = 0;
@@ -4682,6 +4819,7 @@ def auto_push_to_github(here, commit_msg=None):
             "index.html",
             "hankyung_reports.json",
             "op_estimate_history.json",
+            "op_baseline.json",
             "requirements.txt",
             "kospi_top200_latest.xlsx",
             "kosdaq_top200_latest.xlsx",
