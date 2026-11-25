@@ -805,9 +805,19 @@ def _recompute_op_history_entry(entry, quarter_label):
     if first_v is not None and last_v is not None and first_v != 0:
         total_pct = round((last_v - first_v) / abs(first_v) * 100.0, 2)
 
-    net_up = bool(up_cnt > 0 and first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
-    level = min(4, up_cnt) if net_up else 0
+    net_up = bool(first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
+    level = 0
+    if net_up and total_pct is not None:
+        if total_pct >= 20.0:
+            level = 4
+        elif total_pct >= 15.0:
+            level = 3
+        elif total_pct >= 10.0:
+            level = 2
+        elif total_pct >= 5.0:
+            level = 1
 
+    lvl_labels = {1: "1단계(+5%↑)", 2: "2단계(+10%↑)", 3: "3단계(+15%↑)", 4: "4단계(+20%↑)"}
     name = entry.get("name") or ""
     lines = [f"[{name} · {quarter_label}(E) 분기 예상 영업이익 추적]"]
     if len(hist) <= 1:
@@ -816,8 +826,9 @@ def _recompute_op_history_entry(entry, quarter_label):
         else:
             lines.append("• 추적 데이터 없음")
     else:
-        pct_txt = f" (최초 대비 {total_pct:+.2f}%)" if total_pct is not None else ""
-        lines.append(f"• 누적 상향: {up_cnt}회 ▲ / 하향: {down_cnt}회 ▼{pct_txt}")
+        pct_txt = f"{total_pct:+.2f}%" if total_pct is not None else "-"
+        lvl_txt = f" · {lvl_labels[level]}" if level in lvl_labels else ""
+        lines.append(f"• 누적 변동률: {pct_txt}{lvl_txt} (상향 {up_cnt}회 ▲ / 하향 {down_cnt}회 ▼)")
         lines.append("────────────────────────")
         for idx_h, pt in enumerate(hist[-10:]):
             dt_s, v_s = pt.get("d", ""), pt.get("v")
@@ -3416,8 +3427,10 @@ def build_web_dashboard(here):
         </select>
         <select id="toneSelect" class="select-box">
           <option value="">전체 (예상이익 변동 무관)</option>
-          <option value="qop1">🔥 현재분기 OP 누적상향 (1회↑)</option>
-          <option value="qop2">🔥🔥 현재분기 OP 2회 이상 상향</option>
+          <option value="qop1">🔥 현재분기 OP 누적 +5% 이상 (1단계↑)</option>
+          <option value="qop2">🔥 현재분기 OP 누적 +10% 이상 (2단계↑)</option>
+          <option value="qop3">🔥🔥 현재분기 OP 누적 +15% 이상 (3단계↑)</option>
+          <option value="qop4">🔥🔥 현재분기 OP 누적 +20% 이상 (4단계)</option>
           <option value="up">▲ 예상이익 상향 전체 (직전 대비)</option>
           <option value="up5">▲ 예상이익 +5% 이상 상향</option>
           <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향</option>
@@ -3458,10 +3471,10 @@ def build_web_dashboard(here):
       </div>
       <div class="legend-bar">
         <span style="color:#475569;">종목명(분기OP 누적상향):</span>
-        <span class="lg-chip" style="background:#fff1f2; color:#9f1239; border-left:3px solid #fda4af;">▲1회</span>
-        <span class="lg-chip" style="background:#fecdd3; color:#881337; border-left:3px solid #f43f5e;">▲2회</span>
-        <span class="lg-chip" style="background:#fb7185; color:#4c0519; border-left:3px solid #be123c;">▲3회</span>
-        <span class="lg-chip" style="background:#dc2626; color:#fff; border-left:3px solid #7f1d1d;">🔥4회↑</span>
+        <span class="lg-chip" style="background:#fff1f2; color:#9f1239; border-left:3px solid #fda4af;">▲5%↑</span>
+        <span class="lg-chip" style="background:#fecdd3; color:#881337; border-left:3px solid #f43f5e;">▲10%↑</span>
+        <span class="lg-chip" style="background:#fb7185; color:#4c0519; border-left:3px solid #be123c;">▲15%↑</span>
+        <span class="lg-chip" style="background:#dc2626; color:#fff; border-left:3px solid #7f1d1d;">🔥20%↑</span>
         <span style="color:#cbd5e1; margin:0 2px;">|</span>
         <span style="color:#475569;">셀 변동:</span>
         <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
@@ -4290,7 +4303,8 @@ def build_web_dashboard(here):
         let cntBadge = '';
         if (oh && oh.lv >= 1) {{
           const bIcon = oh.lv >= 4 ? '🔥' : '▲';
-          cntBadge = `<span class="op-cnt-badge op-cnt-${{oh.lv}}">${{bIcon}}${{oh.u}}</span>`;
+          const pctLabel = (oh.p !== null && oh.p !== undefined) ? `+${{Math.round(oh.p)}}%` : `${{oh.lv}}`;
+          cntBadge = `<span class="op-cnt-badge op-cnt-${{oh.lv}}">${{bIcon}}${{pctLabel}}</span>`;
         }}
         const titleAttr = (oh && oh.m) ? '' : `title="${{escapeHtml(String(val))}}"`;
         return `<strong ${{titleAttr}}>${{escapeHtml(String(val))}}</strong>${{cntBadge}}
@@ -4395,10 +4409,10 @@ def build_web_dashboard(here):
           if (secType === '섹터2' && String(r.v[s2Idx] || '') !== secVal) return false;
         }}
         if (toneFilter) {{
-          if (toneFilter === 'qop1' || toneFilter === 'qop2') {{
+          if (toneFilter.startsWith('qop')) {{
             const cd = String(r.v[0] || '');
             const oh = OP_HIST_STOCKS[cd];
-            const minLv = toneFilter === 'qop2' ? 2 : 1;
+            const minLv = parseInt(toneFilter.replace('qop', ''), 10) || 1;
             if (!oh || oh.lv < minLv) return false;
           }} else {{
             if (!r.t) return false;
