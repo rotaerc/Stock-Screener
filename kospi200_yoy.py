@@ -15,6 +15,7 @@
 """
 
 import html as html_lib
+import io
 import json
 import os
 import re
@@ -1721,8 +1722,6 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             grouped_new.setdefault(it["date"], []).append(it)
 
         for dt_key, dt_items in sorted(grouped_new.items(), reverse=True):
-            rep_dir = os.path.join(here, "reports", dt_key)
-            os.makedirs(rep_dir, exist_ok=True)
             dt_final = []
             for it in dt_items:
                 idx = str(it.get("report_idx") or "")
@@ -1731,18 +1730,13 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                     dt_final.append(cached)
                     continue
 
+                # 디스크에 PDF 파일을 남기지 않고 메모리(BytesIO)에서 바로 요약 후 자동 폐기
                 pdf_text = ""
                 if idx and it.get("pdf_url") and PdfReader is not None:
-                    safe_fn = re.sub(r'[\\/:*?"<>|]', "_", f"{it['stock_name']}_{it['stock_code']}_{idx}.pdf")
-                    pdf_path = os.path.join(rep_dir, safe_fn)
                     try:
-                        if not os.path.isfile(pdf_path):
-                            rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
-                            if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
-                                with open(pdf_path, "wb") as f:
-                                    f.write(rp.content)
-                        if os.path.isfile(pdf_path):
-                            reader = PdfReader(pdf_path)
+                        rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
+                        if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
+                            reader = PdfReader(io.BytesIO(rp.content))
                             pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
                     except Exception:
                         pdf_text = ""
