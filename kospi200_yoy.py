@@ -22,7 +22,7 @@ import shutil
 import sys
 import subprocess
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
@@ -1579,21 +1579,44 @@ def _detect_target_change(text, target_price):
     return "유지"
 
 
-def fetch_hankyung_reports(here, target_date=None):
+def _extract_pdf_price_info(text):
+    """PDF 본문에서 현재주가와 상승여력(%)을 보조 추출합니다."""
+    cur_price, upside_pct = None, None
+    if not text:
+        return cur_price, upside_pct
+    head = text[:2500]
+    m_p = re.search(r"(?:현재주가|현재가|종가)\s*(?:\([^)]*\))?\s*[:：]?\s*([\d,]+)\s*원", head)
+    if m_p:
+        cur_price = _num(m_p.group(1))
+    m_u = re.search(r"상승여력\s*[:：]?\s*([+-]?\d+(?:\.\d+)?)\s*%", head)
+    if m_u:
+        upside_pct = _num(m_u.group(1))
+    return cur_price, upside_pct
+
+
+def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
     """
     한경 컨센서스(https://consensus.hankyung.com/analysis/list?skinType=business)에서
-    오늘자(또는 가장 최근 영업일) 기업 리포트 목록 및 PDF를 다운로드·정리하여
-    hankyung_reports.json에 저장합니다.
+    오늘자(또는 최근 영업일/지정 기간) 기업 리포트 목록 및 PDF를 다운로드·정리하여
+    hankyung_reports.json에 최대 60일 치 일자별 이력(byDate)으로 누적 저장합니다.
     """
     json_path = os.path.join(here, "hankyung_reports.json")
+    by_date = {}
     existing_by_idx = {}
     if os.path.isfile(json_path):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 old_data = json.load(f)
-            for rep in old_data.get("reports", []):
-                if rep.get("report_idx"):
-                    existing_by_idx[str(rep["report_idx"])] = rep
+            if isinstance(old_data.get("byDate"), dict):
+                for dt_k, rep_list in old_data["byDate"].items():
+                    if isinstance(rep_list, list):
+                        by_date[dt_k] = rep_list
+            elif old_data.get("date") and isinstance(old_data.get("reports"), list):
+                by_date[old_data["date"]] = old_data["reports"]
+            for rep_list in by_date.values():
+                for rep in rep_list:
+                    if rep.get("report_idx"):
+                        existing_by_idx[str(rep["report_idx"])] = rep
         except Exception:
             pass
 
@@ -1602,12 +1625,18 @@ def fetch_hankyung_reports(here, target_date=None):
     except ImportError:
         PdfReader = None
 
-    today_str = target_date or datetime.now().strftime("%Y-%m-%d")
+    end_dt = datetime.strptime(target_date, "%Y-%m-%d") if target_date else datetime.now()
+    today_str = end_dt.strftime("%Y-%m-%d")
     hdr = {"User-Agent": UA}
     base_list_url = "https://consensus.hankyung.com/analysis/list?skinType=business"
 
     print(f"\n{'='*80}")
-    print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({today_str})...")
+    if lookback_days > 0:
+        start_str = (end_dt - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+        print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({start_str} ~ {today_str})...")
+    else:
+        start_str = today_str
+        print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({today_str})...")
 
     def parse_page(url_to_get):
         r = requests.get(url_to_get, headers=hdr, timeout=20)
@@ -1657,63 +1686,104 @@ def fetch_hankyung_reports(here, target_date=None):
 
     try:
         collected = []
-        active_date = today_str
-        url_today = f"{base_list_url}&sdate={today_str}&edate={today_str}&pagenum=80&now_page=1"
-        collected = [it for it in parse_page(url_today) if it["date"] == today_str]
+        if lookback_days > 0:
+            seen_idx = set()
+            for pg in range(1, 6):
+                url_pg = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page={pg}"
+                pg_items = parse_page(url_pg)
+                if not pg_items:
+                    break
+                added = 0
+                for it in pg_items:
+                    key = it.get("report_idx") or f"{it['date']}_{it['stock_code']}_{it['title']}"
+                    if key not in seen_idx and start_str <= it["date"] <= today_str:
+                        seen_idx.add(key)
+                        collected.append(it)
+                        added += 1
+                if len(pg_items) < 80 or added == 0:
+                    break
+        else:
+            url_today = f"{base_list_url}&sdate={today_str}&edate={today_str}&pagenum=80&now_page=1"
+            collected = [it for it in parse_page(url_today) if it["date"] == today_str]
+            # 주말·장전 등으로 오늘 리포트가 아직 없으면 가장 최근 올라온 날짜 리포트 사용
+            if not collected:
+                latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
+                if latest_items:
+                    latest_dt = latest_items[0]["date"]
+                    collected = [it for it in latest_items if it["date"] == latest_dt]
 
-        # 주말·장전 등으로 오늘 리포트가 아직 없으면 가장 최근 올라온 날짜 리포트 사용
-        if not collected:
-            latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
-            if latest_items:
-                active_date = latest_items[0]["date"]
-                collected = [it for it in latest_items if it["date"] == active_date]
-
-        if not collected:
+        if not collected and not by_date:
             print("  [알림] 한경 컨센서스에서 리포트를 찾지 못해 기존 캐시를 유지합니다.")
             return _load_hankyung_reports(here)
 
-        rep_dir = os.path.join(here, "reports", active_date)
-        os.makedirs(rep_dir, exist_ok=True)
-
-        final_reports = []
+        grouped_new = {}
         for it in collected:
-            idx = str(it.get("report_idx") or "")
-            cached = existing_by_idx.get(idx)
-            if cached and cached.get("curated"):
-                final_reports.append(cached)
-                continue
+            grouped_new.setdefault(it["date"], []).append(it)
 
-            pdf_text = ""
-            if idx and it.get("pdf_url") and PdfReader is not None:
-                safe_fn = re.sub(r'[\\/:*?"<>|]', "_", f"{it['stock_name']}_{it['stock_code']}_{idx}.pdf")
-                pdf_path = os.path.join(rep_dir, safe_fn)
-                try:
-                    if not os.path.isfile(pdf_path):
-                        rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
-                        if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
-                            with open(pdf_path, "wb") as f:
-                                f.write(rp.content)
-                    if os.path.isfile(pdf_path):
-                        reader = PdfReader(pdf_path)
-                        pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
-                except Exception:
-                    pdf_text = ""
+        for dt_key, dt_items in sorted(grouped_new.items(), reverse=True):
+            rep_dir = os.path.join(here, "reports", dt_key)
+            os.makedirs(rep_dir, exist_ok=True)
+            dt_final = []
+            for it in dt_items:
+                idx = str(it.get("report_idx") or "")
+                cached = existing_by_idx.get(idx)
+                if cached and (cached.get("curated") or cached.get("summary")):
+                    dt_final.append(cached)
+                    continue
 
-            it["target_change"] = _detect_target_change(pdf_text, it.get("target_price"))
-            it["summary"] = _summarize_pdf_text(pdf_text, it.get("title", ""))
-            it["curated"] = False
-            final_reports.append(it)
-            time.sleep(0.25)
+                pdf_text = ""
+                if idx and it.get("pdf_url") and PdfReader is not None:
+                    safe_fn = re.sub(r'[\\/:*?"<>|]', "_", f"{it['stock_name']}_{it['stock_code']}_{idx}.pdf")
+                    pdf_path = os.path.join(rep_dir, safe_fn)
+                    try:
+                        if not os.path.isfile(pdf_path):
+                            rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
+                            if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
+                                with open(pdf_path, "wb") as f:
+                                    f.write(rp.content)
+                        if os.path.isfile(pdf_path):
+                            reader = PdfReader(pdf_path)
+                            pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
+                    except Exception:
+                        pdf_text = ""
+
+                cur_p, up_p = _extract_pdf_price_info(pdf_text)
+                if cur_p is not None:
+                    it["current_price"] = cur_p
+                if up_p is not None:
+                    it["upside_pct"] = up_p
+                it["target_change"] = _detect_target_change(pdf_text, it.get("target_price"))
+                it["summary"] = _summarize_pdf_text(pdf_text, it.get("title", ""))
+                it["curated"] = False
+                dt_final.append(it)
+                existing_by_idx[idx] = it
+                time.sleep(0.15)
+            by_date[dt_key] = dt_final
+            print(f"  - [{dt_key}] 리포트 {len(dt_final)}건 정리 완료")
+
+        # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리)
+        cutoff_str = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
+        pruned_by_date = {
+            d: lst for d, lst in sorted(by_date.items(), reverse=True)
+            if d >= cutoff_str and isinstance(lst, list) and len(lst) > 0
+        }
+        sorted_dates = sorted(pruned_by_date.keys(), reverse=True)
+        latest_date = sorted_dates[0] if sorted_dates else today_str
+        latest_reports = pruned_by_date.get(latest_date, [])
 
         payload = {
-            "date": active_date,
+            "date": latest_date,
             "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "retentionDays": 60,
             "sourceUrl": base_list_url,
-            "reports": final_reports,
+            "dates": sorted_dates,
+            "byDate": pruned_by_date,
+            "reports": latest_reports,
         }
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
-        print(f" ★ 한경 기업 리포트 {len(final_reports)}건 정리 완료 (기준일: {active_date})")
+        total_saved = sum(len(v) for v in pruned_by_date.values())
+        print(f" ★ 한경 기업 리포트 누적 저장 완료: 최신일 {latest_date}({len(latest_reports)}건) / 총 {len(sorted_dates)}일 · {total_saved}건 (최대 60일 보관)")
         print(f"{'='*80}")
         return payload
     except Exception as e:
@@ -1726,10 +1796,16 @@ def _load_hankyung_reports(here):
     if os.path.isfile(json_path):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+            if not isinstance(data.get("byDate"), dict):
+                dt = data.get("date") or ""
+                reps = data.get("reports") or []
+                data["byDate"] = {dt: reps} if (dt and reps) else {}
+            data["dates"] = sorted(data["byDate"].keys(), reverse=True)
+            return data
         except Exception:
             pass
-    return {"date": "", "updatedAt": "", "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business", "reports": []}
+    return {"date": "", "updatedAt": "", "retentionDays": 60, "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business", "dates": [], "byDate": {}, "reports": []}
 
 
 def build_web_dashboard(here):
@@ -2757,7 +2833,12 @@ def build_web_dashboard(here):
     <div class="reports-view" id="reportsView">
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
-          <input type="text" id="repSearchInput" class="search-input" style="width:240px;" placeholder="🔍 종목명 / 증권사 / 리포트 내용 검색..." />
+          <div style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:3px 6px; border-radius:8px; border:1px solid #bfdbfe;">
+            <button class="pg-btn" id="btnPrevRepDate" onclick="stepReportDate(1)" title="이전 날짜 리포트">◀</button>
+            <select id="repDateSelect" class="select-box" style="font-weight:800; color:#1e3a8a; border-color:#93c5fd;" onchange="onReportDateChange()"></select>
+            <button class="pg-btn" id="btnNextRepDate" onclick="stepReportDate(-1)" title="다음 날짜 리포트">▶</button>
+          </div>
+          <input type="text" id="repSearchInput" class="search-input" style="width:200px;" placeholder="🔍 종목명 / 증권사 / 내용 검색..." />
           <select id="repBrokerSelect" class="select-box">
             <option value="">전체 증권사</option>
           </select>
@@ -2768,10 +2849,17 @@ def build_web_dashboard(here):
             <option value="유지">유지</option>
             <option value="하향">▼ 목표가 하향</option>
           </select>
+          <select id="repSortSelect" class="select-box" style="font-weight:700; color:#1e293b;" onchange="renderReportsGrid()">
+            <option value="priority" selected>정렬: 목표가상향 → 예상이익상향 → 괴리율순</option>
+            <option value="gap">정렬: 괴리율 높은순</option>
+            <option value="estUp">정렬: 예상이익 상향 우선</option>
+            <option value="latest">정렬: 원문 등록순</option>
+          </select>
           <span id="repCountLabel" style="font-weight:700; color:#475569;"></span>
         </div>
         <div class="group-right">
-          <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 컨센서스 원문 목록 열기</a>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">🗓️ 최대 60일 보관</span>
+          <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 원문</a>
         </div>
       </div>
       <div class="reports-grid-wrap" id="reportsGridWrap">
@@ -2799,12 +2887,20 @@ def build_web_dashboard(here):
     let totalPages = 1;
     let highlightReportCode = '';
 
+    const REPORTS_BY_DATE = (REPORTS_DATA.byDate && Object.keys(REPORTS_DATA.byDate).length > 0)
+      ? REPORTS_DATA.byDate
+      : (REPORTS_DATA.date ? {{ [REPORTS_DATA.date]: (REPORTS_DATA.reports || []) }} : {{}});
+    const REPORT_DATES = Object.keys(REPORTS_BY_DATE).sort().reverse();
+    let currentReportDate = REPORT_DATES[0] || REPORTS_DATA.date || '';
+
     const REPORTS_BY_CODE = {{}};
-    (REPORTS_DATA.reports || []).forEach(rep => {{
-      if (rep.stock_code) {{
-        if (!REPORTS_BY_CODE[rep.stock_code]) REPORTS_BY_CODE[rep.stock_code] = [];
-        REPORTS_BY_CODE[rep.stock_code].push(rep);
-      }}
+    REPORT_DATES.forEach(dt => {{
+      (REPORTS_BY_DATE[dt] || []).forEach(rep => {{
+        if (rep.stock_code) {{
+          if (!REPORTS_BY_CODE[rep.stock_code]) REPORTS_BY_CODE[rep.stock_code] = [];
+          REPORTS_BY_CODE[rep.stock_code].push(rep);
+        }}
+      }});
     }});
 
     const STOCK_LOOKUP = {{}};
@@ -2919,12 +3015,79 @@ def build_web_dashboard(here):
       }}
     }}
 
+    function getActiveReportsList() {{
+      if (currentReportDate === 'ALL') {{
+        const merged = [];
+        REPORT_DATES.forEach(dt => {{
+          (REPORTS_BY_DATE[dt] || []).forEach(r => merged.push(r));
+        }});
+        return merged;
+      }}
+      return REPORTS_BY_DATE[currentReportDate] || REPORTS_DATA.reports || [];
+    }}
+
     function initReportsFilters() {{
-      const reps = REPORTS_DATA.reports || [];
+      const dateSel = document.getElementById('repDateSelect');
+      const totalAll = REPORT_DATES.reduce((acc, dt) => acc + (REPORTS_BY_DATE[dt] || []).length, 0);
+      const dateOpts = REPORT_DATES.map((dt, i) => {{
+        const cnt = (REPORTS_BY_DATE[dt] || []).length;
+        const tag = i === 0 ? ' · 최신' : '';
+        return `<option value="${{dt}}">📅 ${{dt}} (${{cnt}}건)${{tag}}</option>`;
+      }}).join('');
+      const allOpt = REPORT_DATES.length > 1
+        ? `<option value="ALL">🗂️ 전체 보관기간 (최근 ${{REPORT_DATES.length}}일 · ${{totalAll}}건)</option>`
+        : '';
+      dateSel.innerHTML = dateOpts + allOpt;
+      if (currentReportDate) dateSel.value = currentReportDate;
+      refreshReportBrokers();
+      updateReportDateNavButtons();
+    }}
+
+    function refreshReportBrokers() {{
+      const reps = getActiveReportsList();
       const brokers = Array.from(new Set(reps.map(r => r.broker).filter(Boolean))).sort();
       const sel = document.getElementById('repBrokerSelect');
+      const prev = sel.value;
       sel.innerHTML = `<option value="">전체 증권사 (${{brokers.length}})</option>` +
         brokers.map(b => `<option value="${{escapeHtml(b)}}">${{escapeHtml(b)}}</option>`).join('');
+      if (brokers.includes(prev)) sel.value = prev;
+    }}
+
+    function updateReportDateNavButtons() {{
+      const btnPrev = document.getElementById('btnPrevRepDate');
+      const btnNext = document.getElementById('btnNextRepDate');
+      if (!btnPrev || !btnNext) return;
+      if (currentReportDate === 'ALL' || REPORT_DATES.length <= 1) {{
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+        return;
+      }}
+      const idx = REPORT_DATES.indexOf(currentReportDate);
+      btnPrev.disabled = (idx < 0 || idx >= REPORT_DATES.length - 1);
+      btnNext.disabled = (idx <= 0);
+    }}
+
+    function stepReportDate(delta) {{
+      if (currentReportDate === 'ALL') return;
+      const idx = REPORT_DATES.indexOf(currentReportDate);
+      const nextIdx = idx + delta;
+      if (nextIdx >= 0 && nextIdx < REPORT_DATES.length) {{
+        currentReportDate = REPORT_DATES[nextIdx];
+        document.getElementById('repDateSelect').value = currentReportDate;
+        onReportDateChange();
+      }}
+    }}
+
+    function onReportDateChange() {{
+      currentReportDate = document.getElementById('repDateSelect').value || REPORT_DATES[0] || '';
+      highlightReportCode = '';
+      refreshReportBrokers();
+      updateReportDateNavButtons();
+      if (currentViewMode === 'REPORTS') {{
+        updateReportsHeaderAndBadges();
+        renderSidebar();
+        renderReportsGrid();
+      }}
     }}
 
     function onPageSizeChange() {{
@@ -2951,7 +3114,7 @@ def build_web_dashboard(here):
 
     function renderSidebar() {{
       const nav = document.getElementById('sidebarNav');
-      const reps = REPORTS_DATA.reports || [];
+      const reps = getActiveReportsList();
       const repUp = reps.filter(r => r.target_change === '상향').length;
       const repNew = reps.filter(r => r.target_change === '신규').length;
       const repDown = reps.filter(r => r.target_change === '하향').length;
@@ -3052,33 +3215,48 @@ def build_web_dashboard(here):
       document.getElementById('reportsView').classList.toggle('active', !showScreener);
     }}
 
+    function updateReportsHeaderAndBadges() {{
+      const reps = getActiveReportsList();
+      const dateLabel = currentReportDate === 'ALL'
+        ? `전체 보관기간 (최근 ${{REPORT_DATES.length}}일)`
+        : `${{currentReportDate || REPORTS_DATA.date || '-'}} 기준`;
+      document.getElementById('pageTitle').textContent = '기업 리포트 요약';
+      document.getElementById('pageSubtitle').textContent = `한경 컨센서스 · ${{dateLabel}} · 목표가상향 → 예상이익상향 → 괴리율순`;
+
+      const upCnt = reps.filter(r => r.target_change === '상향').length;
+      const newCnt = reps.filter(r => r.target_change === '신규').length;
+      const downCnt = reps.filter(r => r.target_change === '하향').length;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">📅 ${{dateLabel}}</span>
+        <span class="meta-pill">📄 총 ${{reps.length}}건</span>
+        <span class="meta-pill up clickable" onclick="selectReportsView('', '상향')">▲ 목표가 상향 ${{upCnt}}건</span>
+        <span class="meta-pill clickable" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;" onclick="selectReportsView('', '신규')">★ 신규 ${{newCnt}}건</span>
+        <span class="meta-pill down clickable" onclick="selectReportsView('', '하향')">▼ 목표가 하향 ${{downCnt}}건</span>
+      `;
+    }}
+
     function selectReportsView(focusCode = '', filterChange = null) {{
       closeMobileNav();
       currentViewMode = 'REPORTS';
       highlightReportCode = focusCode || '';
       setScreenerVisibility(false);
 
-      document.getElementById('pageTitle').textContent = '오늘의 기업 리포트';
-      document.getElementById('pageSubtitle').textContent = `한경 컨센서스 · ${{REPORTS_DATA.date || '-'}} 기준`;
-
-      const reps = REPORTS_DATA.reports || [];
-      const upCnt = reps.filter(r => r.target_change === '상향').length;
-      const newCnt = reps.filter(r => r.target_change === '신규').length;
-      const downCnt = reps.filter(r => r.target_change === '하향').length;
-      document.getElementById('metaBadges').innerHTML = `
-        <span class="meta-pill">📅 기준일: ${{REPORTS_DATA.date || '-'}}</span>
-        <span class="meta-pill">📄 총 ${{reps.length}}건</span>
-        <span class="meta-pill up clickable" onclick="selectReportsView('', '상향')">▲ 목표가 상향 ${{upCnt}}건</span>
-        <span class="meta-pill clickable" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;" onclick="selectReportsView('', '신규')">★ 신규 ${{newCnt}}건</span>
-        <span class="meta-pill down clickable" onclick="selectReportsView('', '하향')">▼ 목표가 하향 ${{downCnt}}건</span>
-      `;
       if (focusCode) {{
+        const matched = REPORTS_BY_CODE[focusCode];
+        if (matched && matched.length > 0 && matched[0].date) {{
+          currentReportDate = matched[0].date;
+          const dateSel = document.getElementById('repDateSelect');
+          if (dateSel) dateSel.value = currentReportDate;
+          refreshReportBrokers();
+          updateReportDateNavButtons();
+        }}
         document.getElementById('repSearchInput').value = '';
         document.getElementById('repBrokerSelect').value = '';
         document.getElementById('repChangeSelect').value = '';
       }} else if (filterChange !== null) {{
         document.getElementById('repChangeSelect').value = filterChange;
       }}
+      updateReportsHeaderAndBadges();
       renderSidebar();
       renderReportsGrid();
       if (focusCode) {{
@@ -3098,50 +3276,96 @@ def build_web_dashboard(here):
       renderTable();
     }}
 
+    function computeReportRankMeta(r) {{
+      const info = STOCK_LOOKUP[r.stock_code] || null;
+      const tpNum = parseFloat(String(r.target_price || '').replace(/,/g, ''));
+      const hasTp = !isNaN(tpNum) && tpNum > 0;
+      const curPrice = (info && info.price) ? info.price : (r.current_price || null);
+      let gap = null;
+      if (hasTp && curPrice && curPrice > 0) {{
+        gap = ((tpNum - curPrice) / curPrice * 100);
+      }} else if (r.upside_pct !== null && r.upside_pct !== undefined && !isNaN(Number(r.upside_pct))) {{
+        gap = Number(r.upside_pct);
+      }}
+      return {{
+        info,
+        tpNum,
+        hasTp,
+        curPrice,
+        gap,
+        isTargetUp: r.target_change === '상향' ? 1 : 0,
+        isEstUp: (info && info.hasEstUp) ? 1 : 0,
+      }};
+    }}
+
     function renderReportsGrid() {{
-      const reps = REPORTS_DATA.reports || [];
+      const reps = getActiveReportsList();
       const q = document.getElementById('repSearchInput').value.trim().toLowerCase();
       const brokerF = document.getElementById('repBrokerSelect').value;
       const chgF = document.getElementById('repChangeSelect').value;
+      const sortMode = document.getElementById('repSortSelect') ? document.getElementById('repSortSelect').value : 'priority';
 
-      const filtered = reps.filter(r => {{
+      let items = reps.map((r, origIdx) => ({{ r, origIdx, meta: computeReportRankMeta(r) }})).filter(({{ r }}) => {{
         if (brokerF && r.broker !== brokerF) return false;
         if (chgF && r.target_change !== chgF) return false;
         if (q) {{
-          const hay = [r.stock_name, r.stock_code, r.broker, r.analyst, r.title, ...(r.summary || [])].join(' ').toLowerCase();
+          const hay = [r.stock_name, r.stock_code, r.broker, r.analyst, r.title, r.date, ...(r.summary || [])].join(' ').toLowerCase();
           if (!hay.includes(q)) return false;
         }}
         return true;
       }});
 
-      document.getElementById('repCountLabel').textContent = `표시 리포트: ${{filtered.length}} / ${{reps.length}}건`;
+      const gapVal = (m) => (m.gap !== null && !isNaN(m.gap)) ? m.gap : -999999;
+      if (sortMode === 'priority') {{
+        // 1순위: 목표가 상향, 2순위: 예상이익 상향, 3순위: 괴리율 큰 순서
+        items.sort((a, b) => {{
+          if (b.meta.isTargetUp !== a.meta.isTargetUp) return b.meta.isTargetUp - a.meta.isTargetUp;
+          if (b.meta.isEstUp !== a.meta.isEstUp) return b.meta.isEstUp - a.meta.isEstUp;
+          const dg = gapVal(b.meta) - gapVal(a.meta);
+          if (dg !== 0) return dg;
+          return a.origIdx - b.origIdx;
+        }});
+      }} else if (sortMode === 'gap') {{
+        items.sort((a, b) => {{
+          const dg = gapVal(b.meta) - gapVal(a.meta);
+          return dg !== 0 ? dg : (a.origIdx - b.origIdx);
+        }});
+      }} else if (sortMode === 'estUp') {{
+        items.sort((a, b) => {{
+          if (b.meta.isEstUp !== a.meta.isEstUp) return b.meta.isEstUp - a.meta.isEstUp;
+          const dg = gapVal(b.meta) - gapVal(a.meta);
+          return dg !== 0 ? dg : (a.origIdx - b.origIdx);
+        }});
+      }}
+
+      document.getElementById('repCountLabel').textContent = `표시: ${{items.length}} / ${{reps.length}}건`;
       const grid = document.getElementById('reportsGrid');
-      if (!filtered.length) {{
+      if (!items.length) {{
         grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:10px; border:1px solid #e2e8f0;">조건에 맞는 기업 리포트가 없습니다.</div>`;
         return;
       }}
 
-      grid.innerHTML = filtered.map(r => {{
-        const info = STOCK_LOOKUP[r.stock_code] || null;
-        const tpNum = parseFloat(String(r.target_price || '').replace(/,/g, ''));
-        const hasTp = !isNaN(tpNum) && tpNum > 0;
+      grid.innerHTML = items.map(({{ r, meta }}) => {{
+        const {{ info, tpNum, hasTp, curPrice, gap }} = meta;
         let upsideHtml = '';
-        if (hasTp && info && info.price) {{
-          const gap = ((tpNum - info.price) / info.price * 100);
+        if (gap !== null && !isNaN(gap)) {{
           const gapCls = gap >= 0 ? 'pos' : 'neg';
-          upsideHtml = `<div style="font-size:11px; color:#475569;">현재가 ${{Math.round(info.price).toLocaleString('ko-KR')}}원 · 괴리율 <span class="${{gapCls}}">${{gap >= 0 ? '+' : ''}}${{gap.toFixed(1)}}%</span></div>`;
+          const priceTxt = curPrice ? `현재가 ${{Math.round(curPrice).toLocaleString('ko-KR')}}원 · ` : '';
+          upsideHtml = `<div style="font-size:11.5px; color:#475569;">${{priceTxt}}괴리율 <span class="${{gapCls}}" style="font-size:12.5px;">${{gap >= 0 ? '+' : ''}}${{gap.toFixed(1)}}%</span></div>`;
+        }} else if (curPrice) {{
+          upsideHtml = `<div style="font-size:11px; color:#64748b;">현재가 ${{Math.round(curPrice).toLocaleString('ko-KR')}}원</div>`;
         }}
 
         const scrBadges = [];
         if (info) {{
           scrBadges.push(`<span class="rep-pill" style="background:#f1f5f9; color:#334155;">${{info.market}}</span>`);
+          if (info.hasEstUp) scrBadges.push(`<span class="rep-pill scr-up">▲예상이익상향</span>`);
           if (info.passed) scrBadges.push(`<span class="rep-pill scr-pass">★통과</span>`);
           if (info.seqGrowth) scrBadges.push(`<span class="rep-pill scr-seq">◆연속성장</span>`);
-          if (info.hasEstUp) scrBadges.push(`<span class="rep-pill scr-up">▲예상이익상향</span>`);
         }}
 
         const chg = r.target_change || '유지';
-        const chgText = chg === '상향' ? '▲ 상향' : (chg === '하향' ? '▼ 하향' : (chg === '신규' ? '★ 신규' : chg));
+        const chgText = chg === '상향' ? '▲ 목표가상향' : (chg === '하향' ? '▼ 목표가하향' : (chg === '신규' ? '★ 신규' : chg));
         const hlCls = (highlightReportCode && highlightReportCode === r.stock_code) ? 'highlight' : '';
         const summaryLis = (r.summary || []).map(s => `<li>${{escapeHtml(s)}}</li>`).join('');
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{r.stock_code}}`;
@@ -3689,9 +3913,11 @@ def main():
         auto_push_to_github(here)
         return
 
-    # 오늘자 한경 기업 리포트만 수집·정리 후 웹페이지 최신화 + GitHub 업로드 (예: python kospi200_yoy.py --reports)
-    if args and args[0].lower() in ("--reports", "reports", "--report"):
-        fetch_hankyung_reports(here)
+    # 오늘자(또는 최근 N일) 한경 기업 리포트 수집·정리 후 웹페이지 최신화 + GitHub 업로드
+    # 예: python kospi200_yoy.py --reports  또는  python kospi200_yoy.py --reports 7
+    if args and args[0].lower() in ("--reports", "reports", "--report", "--reports-backfill"):
+        lb_days = int(args[1]) if (len(args) > 1 and args[1].isdigit()) else 0
+        fetch_hankyung_reports(here, lookback_days=lb_days)
         build_web_dashboard(here)
         if not skip_push:
             auto_push_to_github(here)
