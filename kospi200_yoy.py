@@ -2832,7 +2832,7 @@ def build_web_dashboard(here):
             <select id="repDateSelect" class="select-box" style="font-weight:800; color:#1e3a8a; border-color:#93c5fd;" onchange="onReportDateChange()"></select>
             <button class="pg-btn" id="btnNextRepDate" onclick="stepReportDate(-1)" title="다음 날짜 리포트">▶</button>
           </div>
-          <input type="text" id="repSearchInput" class="search-input" style="width:200px;" placeholder="🔍 종목명 / 증권사 / 내용 검색..." />
+          <input type="text" id="repSearchInput" class="search-input" style="width:225px;" placeholder="🔍 종목명 / 증권사 / 내용 (전체기간 검색)" />
           <select id="repBrokerSelect" class="select-box">
             <option value="">전체 증권사</option>
           </select>
@@ -3009,13 +3009,17 @@ def build_web_dashboard(here):
       }}
     }}
 
+    function getAllStoredReportsList() {{
+      const merged = [];
+      REPORT_DATES.forEach(dt => {{
+        (REPORTS_BY_DATE[dt] || []).forEach(r => merged.push(r));
+      }});
+      return merged;
+    }}
+
     function getActiveReportsList() {{
       if (currentReportDate === 'ALL') {{
-        const merged = [];
-        REPORT_DATES.forEach(dt => {{
-          (REPORTS_BY_DATE[dt] || []).forEach(r => merged.push(r));
-        }});
-        return merged;
+        return getAllStoredReportsList();
       }}
       return REPORTS_BY_DATE[currentReportDate] || REPORTS_DATA.reports || [];
     }}
@@ -3293,11 +3297,12 @@ def build_web_dashboard(here):
     }}
 
     function renderReportsGrid() {{
-      const reps = getActiveReportsList();
       const q = document.getElementById('repSearchInput').value.trim().toLowerCase();
       const brokerF = document.getElementById('repBrokerSelect').value;
       const chgF = document.getElementById('repChangeSelect').value;
       const sortMode = document.getElementById('repSortSelect') ? document.getElementById('repSortSelect').value : 'priority';
+      const isGlobalSearch = q.length > 0 && currentReportDate !== 'ALL';
+      const reps = isGlobalSearch ? getAllStoredReportsList() : getActiveReportsList();
 
       let items = reps.map((r, origIdx) => ({{ r, origIdx, meta: computeReportRankMeta(r) }})).filter(({{ r }}) => {{
         if (brokerF && r.broker !== brokerF) return false;
@@ -3311,12 +3316,14 @@ def build_web_dashboard(here):
 
       const gapVal = (m) => (m.gap !== null && !isNaN(m.gap)) ? m.gap : -999999;
       if (sortMode === 'priority') {{
-        // 1순위: 목표가 상향, 2순위: 예상이익 상향, 3순위: 괴리율 큰 순서
+        // 1순위: 목표가 상향, 2순위: 예상이익 상향, 3순위: 괴리율 큰 순서 (동률 시 최신 날짜 우선)
         items.sort((a, b) => {{
           if (b.meta.isTargetUp !== a.meta.isTargetUp) return b.meta.isTargetUp - a.meta.isTargetUp;
           if (b.meta.isEstUp !== a.meta.isEstUp) return b.meta.isEstUp - a.meta.isEstUp;
           const dg = gapVal(b.meta) - gapVal(a.meta);
           if (dg !== 0) return dg;
+          const dd = String(b.r.date || '').localeCompare(String(a.r.date || ''));
+          if (dd !== 0) return dd;
           return a.origIdx - b.origIdx;
         }});
       }} else if (sortMode === 'gap') {{
@@ -3332,7 +3339,12 @@ def build_web_dashboard(here):
         }});
       }}
 
-      document.getElementById('repCountLabel').textContent = `표시: ${{items.length}} / ${{reps.length}}건`;
+      const countEl = document.getElementById('repCountLabel');
+      if (isGlobalSearch) {{
+        countEl.innerHTML = `<span style="color:#1d4ed8;">전체 보관기간(${{REPORT_DATES.length}}일) 검색: ${{items.length}}건</span>`;
+      }} else {{
+        countEl.textContent = `표시: ${{items.length}} / ${{reps.length}}건`;
+      }}
       const grid = document.getElementById('reportsGrid');
       if (!items.length) {{
         grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:10px; border:1px solid #e2e8f0;">조건에 맞는 기업 리포트가 없습니다.</div>`;
@@ -3351,6 +3363,9 @@ def build_web_dashboard(here):
         }}
 
         const scrBadges = [];
+        if (isGlobalSearch || currentReportDate === 'ALL') {{
+          scrBadges.push(`<span class="rep-pill" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;">📅 ${{escapeHtml(r.date || '')}}</span>`);
+        }}
         if (info) {{
           scrBadges.push(`<span class="rep-pill" style="background:#f1f5f9; color:#334155;">${{info.market}}</span>`);
           if (info.hasEstUp) scrBadges.push(`<span class="rep-pill scr-up">▲예상이익상향</span>`);
