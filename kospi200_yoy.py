@@ -1017,7 +1017,11 @@ def run_market(market, sess, here):
             desc = header_comments.get(col_name)
             if not desc:
                 if (col_name.startswith("OP_") or col_name.startswith("연간OP_")) and col_name.endswith("(E)"):
-                    desc = f"[{col_name}]\n컨센서스 예상 영업이익(억원)\n• 직전 엑셀 대비 상향 시: 빨간색 셀 + 변동 메모\n• 직전 엑셀 대비 하향 시: 파란색 셀 + 변동 메모"
+                    desc = (
+                        f"[{col_name}]\n컨센서스 예상 영업이익(억원)\n"
+                        "• 직전 대비 상향(▲): <5% 연빨강 / 5~10% 진빨강 / 10%↑ 매우진빨강\n"
+                        "• 직전 대비 하향(▼): <5% 연파랑 / 5~10% 진파랑 / 10%↓ 매우진파랑"
+                    )
             if desc:
                 line_cnt = desc.count("\n") + 1
                 cm = Comment(desc, "Screener")
@@ -1025,11 +1029,19 @@ def run_market(market, sess, here):
                 cm.height = max(120, (line_cnt + 2) * 26)
                 ws.cell(row=1, column=c_idx).comment = cm
 
-        # 5) 직전 엑셀 파일과 예상이익(OP_*(E), 연간OP_*(E)) 비교하여 셀 색상 채우기 + 변동 내역 메모 삽입
+        # 5) 직전 엑셀 파일과 예상이익(OP_*(E), 연간OP_*(E)) 비교하여 3단계 강도별 셀 색상 채우기 + 변동 내역 메모 삽입
         up_cnt, down_cnt = 0, 0
         if prev_map and "종목코드" in cols and ws.max_row >= 2:
-            fill_up = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")    # 상승: 빨간색(연홍)
-            fill_down = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")  # 하락: 파란색(연청)
+            from openpyxl.styles import Font
+            fill_up_1 = PatternFill(start_color="FFE0E4", end_color="FFE0E4", fill_type="solid")    # 상향 <5%: 연빨강
+            fill_up_2 = PatternFill(start_color="FF9AA8", end_color="FF9AA8", fill_type="solid")    # 상향 5~10%: 중간 진빨강
+            fill_up_3 = PatternFill(start_color="E11D48", end_color="E11D48", fill_type="solid")    # 상향 10%↑: 아주 진빨강
+            fill_down_1 = PatternFill(start_color="D6E9FA", end_color="D6E9FA", fill_type="solid")  # 하향 <5%: 연파랑
+            fill_down_2 = PatternFill(start_color="7EB8F0", end_color="7EB8F0", fill_type="solid")  # 하향 5~10%: 중간 진파랑
+            fill_down_3 = PatternFill(start_color="1D4ED8", end_color="1D4ED8", fill_type="solid")  # 하향 10%↓: 아주 진파랑
+            font_up_2 = Font(color="7F1D1D", bold=True)
+            font_down_2 = Font(color="172554", bold=True)
+            font_strong = Font(color="FFFFFF", bold=True)
 
             code_col_idx = cols.index("종목코드") + 1
             est_col_pairs = [
@@ -1053,13 +1065,29 @@ def run_market(market, sess, here):
                     old_r, new_r = round(old_val, 2), round(new_val, 2)
                     if new_r != old_r:
                         diff = new_r - old_r
-                        pct_str = f" ({diff / abs(old_r) * 100:+.2f}%)" if old_r != 0 else ""
+                        pct_val = (diff / abs(old_r) * 100.0) if old_r != 0 else None
+                        abs_pct = abs(pct_val) if pct_val is not None else 0.0
+                        pct_str = f" ({pct_val:+.2f}%)" if pct_val is not None else ""
                         if new_r > old_r:
-                            cell_obj.fill = fill_up
+                            if abs_pct >= 10.0:
+                                cell_obj.fill = fill_up_3
+                                cell_obj.font = font_strong
+                            elif abs_pct >= 5.0:
+                                cell_obj.fill = fill_up_2
+                                cell_obj.font = font_up_2
+                            else:
+                                cell_obj.fill = fill_up_1
                             up_cnt += 1
                             head = f"[예상이익 상향 ▲]{ref_label}"
                         else:
-                            cell_obj.fill = fill_down
+                            if abs_pct >= 10.0:
+                                cell_obj.fill = fill_down_3
+                                cell_obj.font = font_strong
+                            elif abs_pct >= 5.0:
+                                cell_obj.fill = fill_down_2
+                                cell_obj.font = font_down_2
+                            else:
+                                cell_obj.fill = fill_down_1
                             down_cnt += 1
                             head = f"[예상이익 하향 ▼]{ref_label}"
                         memo_txt = (
@@ -1378,21 +1406,49 @@ def _extract_market_excel_for_web(here, market):
                     v = str(v).split(".")[0].zfill(6)
                 vals.append(v)
 
+                note_txt = cell.comment.text.strip() if (cell.comment and cell.comment.text) else ""
+                if note_txt:
+                    notes[str(c_idx - 1)] = note_txt
+
                 rgb = ""
                 try:
                     if cell.fill and cell.fill.fill_type == "solid" and cell.fill.start_color:
                         rgb = str(cell.fill.start_color.rgb or "").upper()
                 except Exception:
                     rgb = ""
-                if rgb.endswith("FFC7CE"):
-                    tones[str(c_idx - 1)] = "up"
-                    s_up += 1
-                elif rgb.endswith("BDD7EE"):
-                    tones[str(c_idx - 1)] = "down"
-                    s_down += 1
 
-                if cell.comment and cell.comment.text:
-                    notes[str(c_idx - 1)] = cell.comment.text.strip()
+                direction = ""
+                tier_from_rgb = 1
+                if rgb.endswith("E11D48"):
+                    direction, tier_from_rgb = "up", 3
+                elif rgb.endswith("FF9AA8"):
+                    direction, tier_from_rgb = "up", 2
+                elif rgb.endswith("FFE0E4") or rgb.endswith("FFC7CE"):
+                    direction, tier_from_rgb = "up", 1
+                elif rgb.endswith("1D4ED8"):
+                    direction, tier_from_rgb = "down", 3
+                elif rgb.endswith("7EB8F0"):
+                    direction, tier_from_rgb = "down", 2
+                elif rgb.endswith("D6E9FA") or rgb.endswith("BDD7EE"):
+                    direction, tier_from_rgb = "down", 1
+
+                if direction:
+                    tier = tier_from_rgb
+                    if note_txt:
+                        m_pct = re.search(r"\(([+-]?\d+(?:\.\d+)?)%\)", note_txt)
+                        if m_pct:
+                            abs_p = abs(float(m_pct.group(1)))
+                            if abs_p >= 10.0:
+                                tier = 3
+                            elif abs_p >= 5.0:
+                                tier = 2
+                            else:
+                                tier = 1
+                    tones[str(c_idx - 1)] = f"{direction}{tier}"
+                    if direction == "up":
+                        s_up += 1
+                    else:
+                        s_down += 1
 
             rows_list.append({
                 "v": vals,
@@ -1416,9 +1472,9 @@ def _extract_market_excel_for_web(here, market):
         if "7_예상이익상향" not in existing_names:
             up_rows = [
                 r for r in all_sheet["rows"]
-                if r.get("t") and "up" in r["t"].values()
+                if r.get("t") and any(v.startswith("up") for v in r["t"].values())
             ]
-            up_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v == "up"))
+            up_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v.startswith("up")))
             sheets_data.append({
                 "name": "7_예상이익상향",
                 "count": len(up_rows),
@@ -1427,9 +1483,9 @@ def _extract_market_excel_for_web(here, market):
         if "8_예상이익하향" not in existing_names:
             down_rows = [
                 r for r in all_sheet["rows"]
-                if r.get("t") and "down" in r["t"].values()
+                if r.get("t") and any(v.startswith("down") for v in r["t"].values())
             ]
-            down_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v == "down"))
+            down_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v.startswith("down")))
             sheets_data.append({
                 "name": "8_예상이익하향",
                 "count": len(down_rows),
@@ -1854,7 +1910,7 @@ def build_web_dashboard(here):
     tbody tr:nth-child(even) td {{
       background: #f8fafc;
     }}
-    tbody tr:hover td {{
+    tbody tr:hover td:not(.tone-up1):not(.tone-up2):not(.tone-up3):not(.tone-down1):not(.tone-down2):not(.tone-down3) {{
       background: #eef2ff !important;
     }}
     /* 틀 고정 (종목코드~섹터2) */
@@ -1887,18 +1943,55 @@ def build_web_dashboard(here):
     th.b-right, td.b-right {{
       border-right: 2px solid #1e293b !important;
     }}
-    /* 예상이익 상향/하향 셀 */
-    td.tone-up {{
-      background: var(--up-bg) !important;
-      color: var(--up-text);
+    /* 예상이익 상향/하향 3단계 농도 셀 (<5% / 5~10% / 10%↑↓) */
+    td.tone-up1 {{
+      background: #ffe4e6 !important;
+      color: #9f1239;
       font-weight: 700;
       cursor: help;
     }}
-    td.tone-down {{
-      background: var(--down-bg) !important;
-      color: var(--down-text);
+    td.tone-up2 {{
+      background: #fca5a5 !important;
+      color: #7f1d1d;
+      font-weight: 800;
+      cursor: help;
+    }}
+    td.tone-up3 {{
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      cursor: help;
+    }}
+    td.tone-down1 {{
+      background: #dbeafe !important;
+      color: #1e40af;
       font-weight: 700;
       cursor: help;
+    }}
+    td.tone-down2 {{
+      background: #93c5fd !important;
+      color: #172554;
+      font-weight: 800;
+      cursor: help;
+    }}
+    td.tone-down3 {{
+      background: #1d4ed8 !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      cursor: help;
+    }}
+    .legend-bar {{
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }}
+    .lg-chip {{
+      padding: 2px 6px;
+      border-radius: 5px;
+      border: 1px solid rgba(0,0,0,0.08);
     }}
     .num {{ text-align: right; font-variant-numeric: tabular-nums; }}
     .center {{ text-align: center; }}
@@ -1992,8 +2085,12 @@ def build_web_dashboard(here):
         </select>
         <select id="toneSelect" class="select-box">
           <option value="">전체 (예상이익 변동 무관)</option>
-          <option value="up">▲ 예상이익 상향 포함 종목만</option>
-          <option value="down">▼ 예상이익 하향 포함 종목만</option>
+          <option value="up">▲ 예상이익 상향 전체</option>
+          <option value="up5">▲ 예상이익 +5% 이상 상향</option>
+          <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향</option>
+          <option value="down">▼ 예상이익 하향 전체</option>
+          <option value="down5">▼ 예상이익 -5% 이하 하향</option>
+          <option value="down10">▼▼ 예상이익 -10% 이하 대폭 하향</option>
         </select>
         <span id="rowCountLabel" style="font-weight:700; color:#475569;"></span>
       </div>
@@ -2025,6 +2122,15 @@ def build_web_dashboard(here):
           <option value="50">50줄씩 페이지 나누기</option>
         </select>
         <span id="pageRangeInfo" style="color:#64748b; font-weight:600;"></span>
+      </div>
+      <div class="legend-bar">
+        <span style="color:#475569;">색상 농도:</span>
+        <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
+        <span class="lg-chip" style="background:#fca5a5; color:#7f1d1d;">▲5~10%</span>
+        <span class="lg-chip" style="background:#dc2626; color:#fff;">▲10%↑</span>
+        <span class="lg-chip" style="background:#dbeafe; color:#1e40af;">▼&lt;5%</span>
+        <span class="lg-chip" style="background:#93c5fd; color:#172554;">▼5~10%</span>
+        <span class="lg-chip" style="background:#1d4ed8; color:#fff;">▼10%↓</span>
       </div>
       <div class="page-controls" id="pageNavGroup">
         <button class="pg-btn" id="btnFirstPage" onclick="goToPage(1)">⏮ 처음</button>
@@ -2319,11 +2425,11 @@ def build_web_dashboard(here):
     function getAutoRevealColSet(sheet) {{
       const s = new Set();
       if (sheet && (sheet.name === '7_예상이익상향' || sheet.name === '8_예상이익하향')) {{
-        const wantTone = sheet.name === '7_예상이익상향' ? 'up' : 'down';
+        const wantPrefix = sheet.name === '7_예상이익상향' ? 'up' : 'down';
         sheet.rows.forEach(r => {{
           if (!r.t) return;
           Object.entries(r.t).forEach(([colIdxStr, toneVal]) => {{
-            if (toneVal === wantTone) s.add(parseInt(colIdxStr, 10));
+            if (String(toneVal).startsWith(wantPrefix)) s.add(parseInt(colIdxStr, 10));
           }});
         }});
       }}
@@ -2389,7 +2495,12 @@ def build_web_dashboard(here):
         if (toneFilter) {{
           if (!r.t) return false;
           const tones = Object.values(r.t);
-          if (!tones.includes(toneFilter)) return false;
+          if (toneFilter === 'up' && !tones.some(t => t.startsWith('up'))) return false;
+          if (toneFilter === 'up5' && !tones.some(t => t === 'up2' || t === 'up3')) return false;
+          if (toneFilter === 'up10' && !tones.some(t => t === 'up3')) return false;
+          if (toneFilter === 'down' && !tones.some(t => t.startsWith('down'))) return false;
+          if (toneFilter === 'down5' && !tones.some(t => t === 'down2' || t === 'down3')) return false;
+          if (toneFilter === 'down10' && !tones.some(t => t === 'down3')) return false;
         }}
         return true;
       }});
@@ -2454,12 +2565,11 @@ def build_web_dashboard(here):
           else if (typeof val === 'boolean' || idx === 0) classes.push('center');
 
           const tone = r.t ? r.t[String(idx)] : null;
-          if (tone === 'up') classes.push('tone-up');
-          else if (tone === 'down') classes.push('tone-down');
+          if (tone) classes.push(`tone-${{tone}}`);
 
           const note = r.n ? r.n[String(idx)] : null;
           const tipAttr = note ? `data-tip="${{escapeHtml(note)}}"` : '';
-          const arrow = tone === 'up' ? ' ▲' : (tone === 'down' ? ' ▼' : '');
+          const arrow = tone ? (tone.startsWith('up') ? ' ▲' : ' ▼') : '';
 
           cells += `<td class="${{classes.join(' ')}}" ${{tipAttr}}>${{formatCell(c.name, val, r.v, idx)}}${{arrow}}</td>`;
         }});
