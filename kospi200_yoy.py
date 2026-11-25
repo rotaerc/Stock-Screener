@@ -1563,21 +1563,125 @@ def _summarize_pdf_text(text, title=""):
     return picked if picked else ([title] if title else ["핵심 요약 추출 불가 — 원문 PDF를 참고하세요."])
 
 
+def _parse_krw_amount(num_str, unit_str=""):
+    v = _num(num_str)
+    if v is None:
+        return None
+    if "만" in str(unit_str):
+        return v * 10000.0
+    return v
+
+
+def _extract_target_change_info(first_text, last_text, target_price):
+    """
+    리포트 1~2페이지 본문 및 마지막 페이지 '2년간 목표주가 변동추이' 표에서
+    (target_change, prev_target_price, target_change_pct)를 정밀 추출합니다.
+    """
+    curr_tp = _num(target_price)
+    if curr_tp is None or curr_tp <= 0:
+        return "없음", None, None
+
+    head = (first_text or "")[:3000]
+    head_flat = re.sub(r"\s+", " ", head)
+
+    # 1. 신규 커버리지 개시 여부
+    if (
+        re.search(r"(?:목표주가|목표가|TP)[^\.]{0,35}(?:신규|개시|편입)", head_flat)
+        or "커버리지 개시" in head_flat
+        or "커버리지를 개시" in head_flat
+        or "신규편입" in head_flat[:1200]
+    ):
+        return "신규", None, None
+
+    prev_tp = None
+    chg_pct = None
+
+    # 2A. 본문에서 '기존 A(만)원에서 B(만)원으로 상향/하향' 패턴 추출
+    m_from_to = re.search(
+        r"(?:목표주가|목표가|TP)[^\.]{0,35}?(?:기존|직전|이전)?\s*([\d,\.]+)\s*(만?원)\s*(?:에서|→|->|~)\s*([\d,\.]+)\s*(만?원)",
+        head_flat,
+    )
+    if m_from_to:
+        p_old = _parse_krw_amount(m_from_to.group(1), m_from_to.group(2))
+        p_new = _parse_krw_amount(m_from_to.group(3), m_from_to.group(4))
+        if p_old and p_new and p_old > 0:
+            prev_tp = round(p_old)
+            chg_pct = round((p_new - p_old) / p_old * 100.0, 1)
+
+    # 2B. 요약표 '목표주가 100,000 120,000 ▼/▲' (유진/SK 등) 패턴 추출
+    if chg_pct is None:
+        m_tbl = re.search(r"목표주가\s+([\d,]{3,})\s+([\d,]{3,})\s*([▲▼↑↓])", head_flat)
+        if m_tbl:
+            v1, v2 = _num(m_tbl.group(1)), _num(m_tbl.group(2))
+            if v1 and v2 and v2 > 0 and abs(v1 - curr_tp) <= max(100, curr_tp * 0.02):
+                prev_tp = round(v2)
+                chg_pct = round((v1 - v2) / v2 * 100.0, 1)
+
+    # 2C. 본문에서 '목표주가 ... 18% 상향/하향' 명시 퍼센트 추출
+    if chg_pct is None:
+        m_pct = re.search(
+            r"(?:목표주가|목표가|TP)[^\.]{0,55}?([+-]?\d+(?:\.\d+)?)\s*%\s*(?<!우)(상향|하향)",
+            head_flat,
+        )
+        if m_pct:
+            pct_v = abs(float(m_pct.group(1)))
+            if 0.1 <= pct_v <= 500.0:
+                dir_word = m_pct.group(2)
+                chg_pct = round(pct_v if dir_word == "상향" else -pct_v, 1)
+                denom = 1.0 + chg_pct / 100.0
+                if denom > 0:
+                    prev_tp = round(curr_tp / denom)
+
+    # 3. 마지막 페이지 '투자의견 및 목표주가 변동추이' 법정 공시 표에서 직전 목표가 추출
+    if prev_tp is None and last_text:
+        hist_rows = []
+        for ln in last_text.splitlines():
+            m_h = re.search(r"(20\d{2}[-./]\d{2}[-./]\d{2})[^\d]{1,35}?([\d,]{3,})(?:\s|$)", ln)
+            if not m_h:
+                continue
+            dt_s = m_h.group(1).replace(".", "-").replace("/", "-")
+            tp_v = _num(m_h.group(2))
+            if tp_v is not None and 500 <= tp_v <= 50000000:
+                hist_rows.append((dt_s, tp_v))
+        if len(hist_rows) >= 2:
+            # 날짜 오름차순 정렬 (중복 날짜 제거 후 마지막 2건 비교)
+            dedup = []
+            for dt_s, tp_v in hist_rows:
+                if dedup and dedup[-1][0] == dt_s and dedup[-1][1] == tp_v:
+                    continue
+                dedup.append((dt_s, tp_v))
+            if len(dedup) >= 2:
+                dedup.sort(key=lambda x: x[0])
+                last_tp = dedup[-1][1]
+                prev_cand = dedup[-2][1]
+                if abs(last_tp - curr_tp) <= max(100, curr_tp * 0.02) and prev_cand > 0:
+                    prev_tp = round(prev_cand)
+                    chg_pct = round((curr_tp - prev_cand) / prev_cand * 100.0, 1)
+
+    # 4. 최종 변동 구분 결정
+    if chg_pct is not None:
+        if chg_pct > 0.1:
+            return "상향", prev_tp, chg_pct
+        if chg_pct < -0.1:
+            return "하향", prev_tp, chg_pct
+        return "유지", prev_tp, 0.0
+
+    # 퍼센트·직전가가 안 잡힌 경우에만 목표주가 인접 텍스트로 방향 판별 ('우상향' 제외)
+    m_dir = re.search(r"(?:목표주가|목표가|TP)[^\.]{0,40}?(?<!우)(상향|하향|유지|↑|▲|↓|▼)", head_flat)
+    if m_dir:
+        tok = m_dir.group(1)
+        if tok in ("상향", "↑", "▲"):
+            return "상향", prev_tp, None
+        if tok in ("하향", "↓", "▼"):
+            return "하향", prev_tp, None
+        return "유지", prev_tp, 0.0
+
+    return "유지", prev_tp, None
+
+
 def _detect_target_change(text, target_price):
-    if not target_price or str(target_price).strip() in ("0", "", "-"):
-        return "없음"
-    if not text:
-        return "유지"
-    head = text[:2000]
-    if re.search(r"목표주가[^\n]{0,30}(신규|개시|편입)", head) or "커버리지 개시" in head or "커버리지를 개시" in head:
-        return "신규"
-    if re.search(r"목표주가[^\n]{0,30}(상향|↑|▲)", head) or "목표주가를" in head and "상향" in head:
-        return "상향"
-    if re.search(r"목표주가[^\n]{0,30}(하향|↓|▼)", head) or ("목표주가" in head and "하향" in head[:1200]):
-        return "하향"
-    if re.search(r"목표주가[^\n]{0,30}유지", head):
-        return "유지"
-    return "유지"
+    chg, _, _ = _extract_target_change_info(text, "", target_price)
+    return chg
 
 
 def _extract_pdf_price_info(text):
@@ -1731,22 +1835,29 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                     continue
 
                 # 디스크에 PDF 파일을 남기지 않고 메모리(BytesIO)에서 바로 요약 후 자동 폐기
-                pdf_text = ""
+                pdf_text, last_text = "", ""
                 if idx and it.get("pdf_url") and PdfReader is not None:
                     try:
                         rp = requests.get(it["pdf_url"], headers={**hdr, "Referer": base_list_url}, timeout=20)
                         if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
                             reader = PdfReader(io.BytesIO(rp.content))
                             pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
+                            if len(reader.pages) >= 1:
+                                last_text = reader.pages[-1].extract_text() or ""
                     except Exception:
-                        pdf_text = ""
+                        pdf_text, last_text = "", ""
 
                 cur_p, up_p = _extract_pdf_price_info(pdf_text)
                 if cur_p is not None:
                     it["current_price"] = cur_p
                 if up_p is not None:
                     it["upside_pct"] = up_p
-                it["target_change"] = _detect_target_change(pdf_text, it.get("target_price"))
+                chg, prev_tp, chg_pct = _extract_target_change_info(pdf_text, last_text, it.get("target_price"))
+                it["target_change"] = chg
+                if prev_tp is not None:
+                    it["prev_target_price"] = prev_tp
+                if chg_pct is not None:
+                    it["target_change_pct"] = chg_pct
                 it["summary"] = _summarize_pdf_text(pdf_text, it.get("title", ""))
                 it["source"] = "한경"
                 it["curated"] = False
@@ -1900,21 +2011,31 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
 
                         summary_lines = _summarize_naver_html(raw_content, title)
                         plain_content = html_lib.unescape(re.sub(r"<[^>]+>", " ", raw_content))
-                        chg = _detect_target_change_strict(plain_content, tp_str)
+                        chg, prev_tp, chg_pct = _extract_target_change_info(plain_content, "", tp_str)
 
-                        # 본문에 목표가 변동(상향/하향/신규/유지)이나 요약이 부족하면 PDF 1페이지를 메모리에서 확인
-                        pdf_text = ""
-                        if (not chg or len(summary_lines) < 2) and attach_url.lower().endswith(".pdf") and PdfReader is not None:
+                        # 본문에 직전 목표가·상향율이 없거나 요약이 부족하면 PDF 1페이지·마지막 페이지를 메모리에서 확인
+                        pdf_text, last_text = "", ""
+                        need_pdf = (tp_str != "0" and chg_pct is None and chg != "신규") or len(summary_lines) < 2
+                        if need_pdf and attach_url.lower().endswith(".pdf") and PdfReader is not None:
                             try:
                                 rp = requests.get(attach_url, headers=hdr, timeout=15)
                                 if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
                                     reader = PdfReader(io.BytesIO(rp.content))
-                                    pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:1])
+                                    pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:2])
+                                    if len(reader.pages) >= 1:
+                                        last_text = reader.pages[-1].extract_text() or ""
                             except Exception:
-                                pdf_text = ""
+                                pdf_text, last_text = "", ""
 
-                        if not chg:
-                            chg = _detect_target_change_strict(pdf_text, tp_str) or ("없음" if tp_str == "0" else "유지")
+                        if pdf_text or last_text:
+                            chg2, prev_tp2, chg_pct2 = _extract_target_change_info(
+                                plain_content + "\n" + pdf_text, last_text, tp_str
+                            )
+                            chg = chg2
+                            if prev_tp2 is not None:
+                                prev_tp = prev_tp2
+                            if chg_pct2 is not None:
+                                chg_pct = chg_pct2
                         if len(summary_lines) < 2 and pdf_text:
                             summary_lines = _summarize_pdf_text(pdf_text, title)
                         if not summary_lines:
@@ -1937,6 +2058,10 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                             "curated": False,
                             "summary": summary_lines,
                         }
+                        if prev_tp is not None:
+                            rep_obj["prev_target_price"] = prev_tp
+                        if chg_pct is not None:
+                            rep_obj["target_change_pct"] = chg_pct
                         if cur_p is not None and cur_p > 0:
                             rep_obj["current_price"] = cur_p
                         nv_added.append(rep_obj)
@@ -3039,7 +3164,7 @@ def build_web_dashboard(here):
             <option value="하향">▼ 목표가 하향</option>
           </select>
           <select id="repSortSelect" class="select-box" style="font-weight:700; color:#1e293b;" onchange="renderReportsGrid()">
-            <option value="priority" selected>정렬: 목표가상향 → 예상이익상향 → 괴리율순</option>
+            <option value="priority" selected>정렬: 목표가상향율순 → 예상이익상향 → 괴리율순</option>
             <option value="gap">정렬: 괴리율 높은순</option>
             <option value="estUp">정렬: 예상이익 상향 우선</option>
             <option value="latest">정렬: 원문 등록순</option>
@@ -3484,12 +3609,16 @@ def build_web_dashboard(here):
       }} else if (r.upside_pct !== null && r.upside_pct !== undefined && !isNaN(Number(r.upside_pct))) {{
         gap = Number(r.upside_pct);
       }}
+      const tpChgPct = (r.target_change_pct !== null && r.target_change_pct !== undefined && !isNaN(Number(r.target_change_pct)))
+        ? Number(r.target_change_pct)
+        : null;
       return {{
         info,
         tpNum,
         hasTp,
         curPrice,
         gap,
+        tpChgPct,
         isTargetUp: r.target_change === '상향' ? 1 : 0,
         isEstUp: (info && info.hasEstUp) ? 1 : 0,
       }};
@@ -3514,10 +3643,17 @@ def build_web_dashboard(here):
       }});
 
       const gapVal = (m) => (m.gap !== null && !isNaN(m.gap)) ? m.gap : -999999;
+      const raiseVal = (m) => (m.tpChgPct !== null && !isNaN(m.tpChgPct)) ? m.tpChgPct : -999999;
       if (sortMode === 'priority') {{
-        // 1순위: 목표가 상향, 2순위: 예상이익 상향, 3순위: 괴리율 큰 순서 (동률 시 최신 날짜 우선)
+        // 1순위: 목표가 상향 (그 중에서도 상향율이 높은 기업 우선!)
+        // 2순위: 예상이익 상향
+        // 3순위: 괴리율 큰 순서 (동률 시 최신 날짜 우선)
         items.sort((a, b) => {{
           if (b.meta.isTargetUp !== a.meta.isTargetUp) return b.meta.isTargetUp - a.meta.isTargetUp;
+          if (a.meta.isTargetUp === 1 && b.meta.isTargetUp === 1) {{
+            const dr = raiseVal(b.meta) - raiseVal(a.meta);
+            if (dr !== 0) return dr;
+          }}
           if (b.meta.isEstUp !== a.meta.isEstUp) return b.meta.isEstUp - a.meta.isEstUp;
           const dg = gapVal(b.meta) - gapVal(a.meta);
           if (dg !== 0) return dg;
@@ -3573,7 +3709,16 @@ def build_web_dashboard(here):
         }}
 
         const chg = r.target_change || '유지';
-        const chgText = chg === '상향' ? '▲ 목표가상향' : (chg === '하향' ? '▼ 목표가하향' : (chg === '신규' ? '★ 신규' : chg));
+        const tpPct = meta.tpChgPct;
+        let chgText = chg === '상향' ? '▲ 목표가상향' : (chg === '하향' ? '▼ 목표가하향' : (chg === '신규' ? '★ 신규' : chg));
+        if (chg === '상향' && tpPct !== null) {{
+          chgText = `▲ 목표가 +${{Math.abs(tpPct).toFixed(1)}}%`;
+        }} else if (chg === '하향' && tpPct !== null) {{
+          chgText = `▼ 목표가 -${{Math.abs(tpPct).toFixed(1)}}%`;
+        }}
+        const prevTpTip = (r.prev_target_price && hasTp)
+          ? `data-tip="직전 목표가 ${{Math.round(r.prev_target_price).toLocaleString('ko-KR')}}원 → ${{Math.round(tpNum).toLocaleString('ko-KR')}}원${{tpPct !== null ? ' (' + (tpPct >= 0 ? '+' : '') + tpPct.toFixed(1) + '%)' : ''}}"`
+          : '';
         const hlCls = (highlightReportCode && highlightReportCode === r.stock_code) ? 'highlight' : '';
         const summaryLis = (r.summary || []).map(s => `<li>${{escapeHtml(s)}}</li>`).join('');
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{r.stock_code}}`;
@@ -3584,7 +3729,7 @@ def build_web_dashboard(here):
             <div class="rep-stock-title">
               <span class="rep-stock-name">${{escapeHtml(r.stock_name || '기업명')}}</span>
               <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
-              <span class="rep-pill chg-${{chg}}">${{chgText}}</span>
+              <span class="rep-pill chg-${{chg}}" ${{prevTpTip}}>${{chgText}}</span>
               ${{scrBadges.join('')}}
             </div>
             <div class="rep-target-box">
@@ -3611,6 +3756,7 @@ def build_web_dashboard(here):
           </div>
         </div>`;
       }}).join('');
+      bindTooltips();
     }}
 
     function selectMarket(mkt) {{
