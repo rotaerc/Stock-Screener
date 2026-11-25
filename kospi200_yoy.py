@@ -1150,11 +1150,52 @@ def run_market(market, sess, here):
         df_seq_growth = df_seq_growth.drop(columns="_is_e3").reset_index(drop=True)
 
     # =========================================================================
-    # ★ 6개 시트가 하나로 묶인 통합 엑셀(.xlsx) 파일 1개만 저장
+    # ★ 8개 시트가 하나로 묶인 통합 엑셀(.xlsx) 파일 1개만 저장
+    #   (7_예상이익상향, 8_예상이익하향 시트 포함)
     # =========================================================================
     prefix = f"{market.lower()}_top{TOP_N}"
     prev_filename, prev_est_map = _load_latest_prev_estimates(here, prefix)
     p_xlsx_multi = os.path.join(here, f"{prefix}_통합시트_{stamp}.xlsx")
+
+    # 7·8. 직전 파일 대비 예상이익(OP_*(E), 연간OP_*(E)) 상향 / 하향 기업 추출
+    est_compare_cols = [
+        c for c in full.columns
+        if (c.startswith("OP_") or c.startswith("연간OP_")) and c.endswith("(E)")
+    ]
+    up_cnt_by_idx, down_cnt_by_idx = {}, {}
+    if prev_est_map and "종목코드" in full.columns and est_compare_cols:
+        for row_idx, row in full.iterrows():
+            raw_cd = str(row.get("종목코드", "") or "").strip()
+            if not raw_cd:
+                continue
+            cd = raw_cd.split(".")[0].zfill(6)
+            u_c, d_c = 0, 0
+            for col in est_compare_cols:
+                old_v = prev_est_map.get((cd, col))
+                new_v = _num(row.get(col))
+                if old_v is None or new_v is None:
+                    continue
+                old_r, new_r = round(old_v, 2), round(new_v, 2)
+                if new_r > old_r:
+                    u_c += 1
+                elif new_r < old_r:
+                    d_c += 1
+            if u_c > 0:
+                up_cnt_by_idx[row_idx] = u_c
+            if d_c > 0:
+                down_cnt_by_idx[row_idx] = d_c
+
+    if up_cnt_by_idx:
+        up_order = sorted(up_cnt_by_idx.keys(), key=lambda i: (-up_cnt_by_idx[i], i))
+        df_est_up = full.loc[up_order].copy().reset_index(drop=True)
+    else:
+        df_est_up = full.iloc[0:0].copy()
+
+    if down_cnt_by_idx:
+        down_order = sorted(down_cnt_by_idx.keys(), key=lambda i: (-down_cnt_by_idx[i], i))
+        df_est_down = full.loc[down_order].copy().reset_index(drop=True)
+    else:
+        df_est_down = full.iloc[0:0].copy()
 
     all_up_cnt, all_down_cnt = 0, 0
     with pd.ExcelWriter(p_xlsx_multi, engine="openpyxl") as writer:
@@ -1165,6 +1206,8 @@ def run_market(market, sess, here):
             ("4_30퍼하락", target_down30),
             ("5_통과후E3반등", df_pass_and_reb),
             ("6_연속이익성장(E3및E2)", df_seq_growth),
+            ("7_예상이익상향", df_est_up),
+            ("8_예상이익하향", df_est_down),
         ]
         for s_name, s_df in sheets_to_write:
             s_df.to_excel(writer, sheet_name=s_name, index=False)
@@ -1197,6 +1240,8 @@ def run_market(market, sess, here):
             print(f"     ◆ [E0~E3 4분기 연속성장 ({len(e3_list)}개)]: {', '.join(e3_list)}")
         if e2_list:
             print(f"     ◇ [E0~E2 3분기 연속성장·E3미집계 ({len(e2_list)}개)]: {', '.join(e2_list)}")
+    print(f"  - 시트 7 [7_예상이익상향] 예상이익 상향(▲) 기업: {len(df_est_up)}개")
+    print(f"  - 시트 8 [8_예상이익하향] 예상이익 하향(▼) 기업: {len(df_est_down)}개")
     
     if errors:
         print(f"\n      [{market} 조회 실패 {len(errors)}종목]:")
@@ -1363,6 +1408,33 @@ def _extract_market_excel_for_web(here, market):
             "count": len(rows_list),
             "rows": rows_list,
         })
+
+    # 기존 6시트 엑셀 파일이어도 웹페이지에서 '7_예상이익상향', '8_예상이익하향' 탭을 자동 생성
+    existing_names = {s["name"] for s in sheets_data}
+    all_sheet = next((s for s in sheets_data if s["name"] == "1_전체"), sheets_data[0] if sheets_data else None)
+    if all_sheet:
+        if "7_예상이익상향" not in existing_names:
+            up_rows = [
+                r for r in all_sheet["rows"]
+                if r.get("t") and "up" in r["t"].values()
+            ]
+            up_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v == "up"))
+            sheets_data.append({
+                "name": "7_예상이익상향",
+                "count": len(up_rows),
+                "rows": up_rows,
+            })
+        if "8_예상이익하향" not in existing_names:
+            down_rows = [
+                r for r in all_sheet["rows"]
+                if r.get("t") and "down" in r["t"].values()
+            ]
+            down_rows.sort(key=lambda r: -sum(1 for v in (r.get("t") or {}).values() if v == "down"))
+            sheets_data.append({
+                "name": "8_예상이익하향",
+                "count": len(down_rows),
+                "rows": down_rows,
+            })
 
     return {
         "market": market,
@@ -1597,6 +1669,48 @@ def build_web_dashboard(here):
     .sheet-btn.active .sheet-count {{
       background: #3b82f6;
       color: #fff;
+    }}
+    .sheet-btn.tab-up {{
+      background: #fff1f2;
+      color: #9f1239;
+      border-color: #fda4af;
+    }}
+    .sheet-btn.tab-up:hover {{
+      background: #ffe4e6;
+    }}
+    .sheet-btn.tab-up.active {{
+      background: #be123c;
+      color: #fff;
+      border-color: #be123c;
+    }}
+    .sheet-btn.tab-up.active .sheet-count {{
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+    }}
+    .sheet-btn.tab-down {{
+      background: #eff6ff;
+      color: #1e40af;
+      border-color: #93c5fd;
+    }}
+    .sheet-btn.tab-down:hover {{
+      background: #dbeafe;
+    }}
+    .sheet-btn.tab-down.active {{
+      background: #1d4ed8;
+      color: #fff;
+      border-color: #1d4ed8;
+    }}
+    .sheet-btn.tab-down.active .sheet-count {{
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+    }}
+    .meta-pill.clickable {{
+      cursor: pointer;
+      transition: transform 0.12s;
+    }}
+    .meta-pill.clickable:hover {{
+      transform: translateY(-1px);
+      filter: brightness(0.96);
     }}
     .controls-panel {{
       background: var(--card);
@@ -1946,7 +2060,9 @@ def build_web_dashboard(here):
       "3_E3반등": "3_E3반등",
       "4_30퍼하락": "4_30%이상하락",
       "5_통과후E3반등": "5_통과+E3반등 ★★",
-      "6_연속이익성장(E3및E2)": "6_연속이익성장 ◆"
+      "6_연속이익성장(E3및E2)": "6_연속이익성장 ◆",
+      "7_예상이익상향": "7_예상이익상향 ▲",
+      "8_예상이익하향": "8_예상이익하향 ▼"
     }};
 
     function initApp() {{
@@ -2007,8 +2123,8 @@ def build_web_dashboard(here):
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">🕒 업데이트: ${{d.updatedAt}}</span>
         <span class="meta-pill">📄 ${{d.filename}}</span>
-        <span class="meta-pill up">▲ 예상이익 상향 ${{d.upCount}}셀</span>
-        <span class="meta-pill down">▼ 예상이익 하향 ${{d.downCount}}셀</span>
+        <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
+        <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
       `;
 
       if (currentSheetIdx >= d.sheets.length) currentSheetIdx = 0;
@@ -2017,13 +2133,20 @@ def build_web_dashboard(here):
       renderTable();
     }}
 
+    function selectSheetByName(targetName) {{
+      const d = DB[currentMarket];
+      const idx = d.sheets.findIndex(s => s.name === targetName);
+      if (idx >= 0) selectSheet(idx);
+    }}
+
     function renderSheetTabs() {{
       const d = DB[currentMarket];
       const box = document.getElementById('sheetTabs');
       box.innerHTML = d.sheets.map((s, idx) => {{
         const active = idx === currentSheetIdx ? 'active' : '';
+        const extraCls = s.name === '7_예상이익상향' ? 'tab-up' : (s.name === '8_예상이익하향' ? 'tab-down' : '');
         const label = SHEET_LABELS[s.name] || s.name;
-        return `<button class="sheet-btn ${{active}}" onclick="selectSheet(${{idx}})">
+        return `<button class="sheet-btn ${{extraCls}} ${{active}}" onclick="selectSheet(${{idx}})">
           <span>${{label}}</span>
           <span class="sheet-count">${{s.count}}</span>
         </button>`;
@@ -2193,14 +2316,30 @@ def build_web_dashboard(here):
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }}
 
+    function getAutoRevealColSet(sheet) {{
+      const s = new Set();
+      if (sheet && (sheet.name === '7_예상이익상향' || sheet.name === '8_예상이익하향')) {{
+        const wantTone = sheet.name === '7_예상이익상향' ? 'up' : 'down';
+        sheet.rows.forEach(r => {{
+          if (!r.t) return;
+          Object.entries(r.t).forEach(([colIdxStr, toneVal]) => {{
+            if (toneVal === wantTone) s.add(parseInt(colIdxStr, 10));
+          }});
+        }});
+      }}
+      return s;
+    }}
+
     function renderTable() {{
       const d = DB[currentMarket];
       const cols = d.columns;
+      const sheet = d.sheets[currentSheetIdx];
+      const autoRevealCols = getAutoRevealColSet(sheet);
       const thead = document.getElementById('tableHead');
 
       let trHtml = '<tr>';
       cols.forEach((c, idx) => {{
-        if (c.group && !openGroups[c.group]) return;
+        if (c.group && !openGroups[c.group] && !autoRevealCols.has(idx)) return;
         const classes = [];
         if (idx <= 3) classes.push(`sticky-col-${{idx}}`);
         if (c.borderL) classes.push('b-left');
@@ -2300,10 +2439,11 @@ def build_web_dashboard(here):
       document.getElementById('btnNextPage').disabled = (currentPage >= totalPages);
       document.getElementById('btnLastPage').disabled = (currentPage >= totalPages);
 
+      const autoRevealCols = getAutoRevealColSet(sheet);
       const rowsHtml = pageRows.map(r => {{
         let cells = '<tr>';
         cols.forEach((c, idx) => {{
-          if (c.group && !openGroups[c.group]) return;
+          if (c.group && !openGroups[c.group] && !autoRevealCols.has(idx)) return;
           const val = r.v[idx];
           const classes = [];
           if (idx <= 3) classes.push(`sticky-col-${{idx}}`);
