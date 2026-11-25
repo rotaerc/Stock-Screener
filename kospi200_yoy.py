@@ -764,6 +764,236 @@ def fill_missing_base_from_estimate(df):
     return df
 
 
+def _current_quarter_ym(dt=None):
+    d = dt or datetime.now()
+    q_month = ((d.month - 1) // 3 + 1) * 3
+    return f"{d.year}/{q_month:02d}"
+
+
+def _find_current_q_op_col(cols, dt=None):
+    cur_q = _current_quarter_ym(dt)
+    exact = f"OP_{cur_q}(E)"
+    if exact in cols:
+        return cur_q, exact
+    op_e_cols = sorted([c for c in cols if str(c).startswith("OP_") and str(c).endswith("(E)")])
+    for c in op_e_cols:
+        ym = str(c).replace("OP_", "").replace("(E)", "")
+        if ym >= cur_q:
+            return ym, c
+    if op_e_cols:
+        c0 = op_e_cols[0]
+        return str(c0).replace("OP_", "").replace("(E)", ""), c0
+    return cur_q, None
+
+
+def _recompute_op_history_entry(entry, quarter_label):
+    hist = entry.get("history") or []
+    up_cnt, down_cnt = 0, 0
+    for i in range(1, len(hist)):
+        prev_v = hist[i - 1].get("v")
+        cur_v = hist[i].get("v")
+        if prev_v is None or cur_v is None:
+            continue
+        if round(cur_v, 2) > round(prev_v, 2):
+            up_cnt += 1
+        elif round(cur_v, 2) < round(prev_v, 2):
+            down_cnt += 1
+
+    first_v = hist[0].get("v") if hist else None
+    last_v = hist[-1].get("v") if hist else None
+    total_pct = None
+    if first_v is not None and last_v is not None and first_v != 0:
+        total_pct = round((last_v - first_v) / abs(first_v) * 100.0, 2)
+
+    net_up = bool(up_cnt > 0 and first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
+    level = min(4, up_cnt) if net_up else 0
+
+    name = entry.get("name") or ""
+    lines = [f"[{name} · {quarter_label}(E) 분기 예상 영업이익 추적]"]
+    if len(hist) <= 1:
+        if first_v is not None:
+            lines.append(f"• {hist[0]['d']}: {first_v:,.2f}억 (변동 없음)")
+        else:
+            lines.append("• 추적 데이터 없음")
+    else:
+        pct_txt = f" (최초 대비 {total_pct:+.2f}%)" if total_pct is not None else ""
+        lines.append(f"• 누적 상향: {up_cnt}회 ▲ / 하향: {down_cnt}회 ▼{pct_txt}")
+        lines.append("────────────────────────")
+        for idx_h, pt in enumerate(hist[-10:]):
+            dt_s, v_s = pt.get("d", ""), pt.get("v")
+            if v_s is None:
+                continue
+            if idx_h == 0 and len(hist) <= 10:
+                lines.append(f"• {dt_s}: {v_s:,.2f}억 (기준)")
+            else:
+                orig_i = len(hist) - min(10, len(hist)) + idx_h
+                pv = hist[orig_i - 1].get("v") if orig_i > 0 else None
+                if pv is not None:
+                    df = round(v_s - pv, 2)
+                    arrow = "▲" if df > 0 else ("▼" if df < 0 else "=")
+                    p_str = f" / {df / abs(pv) * 100:+.2f}%" if pv != 0 else ""
+                    lines.append(f"• {dt_s}: {v_s:,.2f}억 ({arrow} {df:+,.2f}{p_str})")
+                else:
+                    lines.append(f"• {dt_s}: {v_s:,.2f}억")
+
+    entry["upCount"] = up_cnt
+    entry["downCount"] = down_cnt
+    entry["firstVal"] = first_v
+    entry["lastVal"] = last_v
+    entry["totalPct"] = total_pct
+    entry["netUp"] = net_up
+    entry["level"] = level
+    entry["memo"] = "\n".join(lines)
+    return entry
+
+
+def _load_op_estimate_history(here):
+    p = os.path.join(here, "op_estimate_history.json")
+    if os.path.isfile(p):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict) and isinstance(data.get("stocks"), dict):
+                return data
+        except Exception:
+            pass
+    cur_q = _current_quarter_ym()
+    return {"quarter": cur_q, "col": f"OP_{cur_q}(E)", "updatedAt": "", "stocks": {}}
+
+
+def _save_op_estimate_history(here, data):
+    p = os.path.join(here, "op_estimate_history.json")
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, quarter_ym, op_col):
+    """(code, name, val) 목록을 현재 분기 예상 영업이익 추적 이력에 반영합니다."""
+    if hist_data.get("quarter") != quarter_ym:
+        hist_data["quarter"] = quarter_ym
+        hist_data["col"] = op_col
+        hist_data["stocks"] = {}
+
+    stocks = hist_data["stocks"]
+    for cd, nm, val in rows_iter:
+        if not cd or val is None:
+            continue
+        v_r = round(float(val), 2)
+        ent = stocks.get(cd)
+        if not ent:
+            ent = {"name": nm, "history": [{"d": snap_label, "v": v_r}]}
+            stocks[cd] = ent
+        else:
+            if nm:
+                ent["name"] = nm
+            h = ent.get("history") or []
+            if not h:
+                h.append({"d": snap_label, "v": v_r})
+            else:
+                last_pt = h[-1]
+                if round(float(last_pt.get("v", 0)), 2) != v_r:
+                    if last_pt.get("d") == snap_label:
+                        last_pt["v"] = v_r
+                    else:
+                        h.append({"d": snap_label, "v": v_r})
+            ent["history"] = h
+        _recompute_op_history_entry(ent, quarter_ym)
+    hist_data["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    return hist_data
+
+
+def update_op_estimate_history_from_df(here, df_all, snap_dt=None):
+    """스크리너 실행 직후 DataFrame에서 현재 분기 예상 영업이익 변화를 추적·저장합니다."""
+    if df_all is None or df_all.empty or "종목코드" not in df_all.columns:
+        return _load_op_estimate_history(here)
+    cols = df_all.columns.tolist()
+    q_ym, op_col = _find_current_q_op_col(cols, snap_dt)
+    if not op_col:
+        return _load_op_estimate_history(here)
+
+    hist_data = _load_op_estimate_history(here)
+    snap_label = (snap_dt or datetime.now()).strftime("%Y-%m-%d %H:%M")
+    rows_iter = []
+    for _, row in df_all.iterrows():
+        raw_cd = str(row.get("종목코드", "") or "").strip()
+        if not raw_cd:
+            continue
+        cd = raw_cd.split(".")[0].zfill(6)
+        nm = str(row.get("종목명", "") or "").strip()
+        v = _num(row.get(op_col))
+        if v is not None:
+            rows_iter.append((cd, nm, v))
+
+    _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, q_ym, op_col)
+    _save_op_estimate_history(here, hist_data)
+    return hist_data
+
+
+def sync_op_history_from_excels(here):
+    """
+    폴더 및 엑셀백업 내 모든 과거 통합시트 엑셀(.xlsx)을 시간순으로 스캔하여
+    현재 분기 예상 영업이익 추적 이력(op_estimate_history.json)을 보강/최신화합니다.
+    """
+    cur_q = _current_quarter_ym()
+    op_col = f"OP_{cur_q}(E)"
+    hist_data = _load_op_estimate_history(here)
+    if hist_data.get("quarter") != cur_q:
+        hist_data = {"quarter": cur_q, "col": op_col, "updatedAt": "", "stocks": {}}
+
+    excel_files = []
+    seen_names = set()
+    for d in [here, os.path.join(here, "엑셀백업")]:
+        if not os.path.isdir(d):
+            continue
+        for fn in os.listdir(d):
+            if fn.startswith("~$") or not fn.lower().endswith(".xlsx"):
+                continue
+            if "_통합시트_" in fn and fn not in seen_names:
+                m_ts = re.search(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})", fn)
+                if m_ts:
+                    ts_key = f"{m_ts.group(1)}-{m_ts.group(2)}-{m_ts.group(3)} {m_ts.group(4)}:{m_ts.group(5)}"
+                    excel_files.append((ts_key, os.path.join(d, fn)))
+                    seen_names.add(fn)
+
+    if not excel_files:
+        return hist_data
+
+    # 이미 추적 기록이 충분하고 더 새 파일이 없는 경우 중복 스캔 방지 (항상 날짜 오름차순으로 병합)
+    excel_files.sort(key=lambda x: x[0])
+    # 과거 전체 파일에서 재구축할 때 기존 history의 더 오래된 기록은 보존
+    for ts_label, fpath in excel_files:
+        try:
+            wb = openpyxl.load_workbook(fpath, read_only=True, data_only=True)
+            ws = wb[wb.sheetnames[0]]
+            it_rows = ws.iter_rows(values_only=True)
+            header = [str(c or "").strip() for c in next(it_rows, [])]
+            if "종목코드" not in header or op_col not in header:
+                wb.close()
+                continue
+            c_idx = header.index("종목코드")
+            n_idx = header.index("종목명") if "종목명" in header else -1
+            o_idx = header.index(op_col)
+            rows_iter = []
+            for row in it_rows:
+                if len(row) <= max(c_idx, o_idx):
+                    continue
+                raw_cd = str(row[c_idx] or "").strip()
+                if not raw_cd:
+                    continue
+                cd = raw_cd.split(".")[0].zfill(6)
+                nm = str(row[n_idx] or "").strip() if (n_idx >= 0 and len(row) > n_idx) else ""
+                v = _num(row[o_idx])
+                if v is not None:
+                    rows_iter.append((cd, nm, v))
+            wb.close()
+            _ingest_snapshot_to_op_history(hist_data, rows_iter, ts_label, cur_q, op_col)
+        except Exception:
+            continue
+
+    _save_op_estimate_history(here, hist_data)
+    return hist_data
+
+
 def _load_latest_prev_estimates(here, prefix):
     """
     폴더(here) 내 해당 시장(prefix)의 가장 최근 생성된 엑셀 파일을 찾아
@@ -924,7 +1154,7 @@ def run_market(market, sess, here):
         remaining = sorted([c for c in cols if c not in ordered])
         return ordered + remaining
 
-    def apply_excel_ux(ws, cols, prev_map=None, prev_filename=None):
+    def apply_excel_ux(ws, cols, prev_map=None, prev_filename=None, op_hist_stocks=None):
         """
         각 시트에:
         1) 자동 필터
@@ -1102,6 +1332,43 @@ def run_market(market, sess, here):
                         cm.height = 160
                         cell_obj.comment = cm
 
+        # 5-2) 현재 분기 예상 영업이익 누적 상향 이력 -> 종목명 셀 단계별 진한 색상 + 변동 이력 메모
+        if op_hist_stocks and "종목코드" in cols and "종목명" in cols and ws.max_row >= 2:
+            from openpyxl.styles import Font as _Font
+            name_fills = {
+                1: PatternFill(start_color="FFF1F2", end_color="FFF1F2", fill_type="solid"),
+                2: PatternFill(start_color="FECDD3", end_color="FECDD3", fill_type="solid"),
+                3: PatternFill(start_color="FB7185", end_color="FB7185", fill_type="solid"),
+                4: PatternFill(start_color="DC2626", end_color="DC2626", fill_type="solid"),
+            }
+            name_fonts = {
+                1: _Font(color="9F1239", bold=True),
+                2: _Font(color="881337", bold=True),
+                3: _Font(color="4C0519", bold=True),
+                4: _Font(color="FFFFFF", bold=True),
+            }
+            cd_idx_e = cols.index("종목코드") + 1
+            nm_idx_e = cols.index("종목명") + 1
+            for r_idx in range(2, ws.max_row + 1):
+                raw_cd = str(ws.cell(row=r_idx, column=cd_idx_e).value or "").strip()
+                if not raw_cd:
+                    continue
+                cd = raw_cd.split(".")[0].zfill(6)
+                ent = op_hist_stocks.get(cd)
+                if not ent:
+                    continue
+                nm_cell = ws.cell(row=r_idx, column=nm_idx_e)
+                lvl = int(ent.get("level") or 0)
+                if lvl >= 1:
+                    nm_cell.fill = name_fills[min(4, lvl)]
+                    nm_cell.font = name_fonts[min(4, lvl)]
+                memo_h = ent.get("memo") or ""
+                if memo_h and len(ent.get("history") or []) >= 2:
+                    cm_h = Comment(memo_h, "OP Tracker")
+                    cm_h.width = 400
+                    cm_h.height = max(140, (memo_h.count("\n") + 2) * 22)
+                    nm_cell.comment = cm_h
+
         # 6) 분기·연간 이익(OP), YoY, 영업이익률 등 연도(YYYY)가 바뀌는 경계마다 진한 세로선(medium) 테두리 적용
         def _metric_year_key(col_name):
             m = re.match(r"^(OP_|YoY_|분기영업이익률_|연간OP_|연간영업이익률_)(\d{4})/", str(col_name))
@@ -1226,6 +1493,10 @@ def run_market(market, sess, here):
     else:
         df_est_down = full.iloc[0:0].copy()
 
+    # 현재 분기 예상 영업이익 누적 추적 이력 업데이트
+    op_hist_data = update_op_estimate_history_from_df(here, df_all)
+    op_hist_stocks = op_hist_data.get("stocks", {})
+
     all_up_cnt, all_down_cnt = 0, 0
     with pd.ExcelWriter(p_xlsx_multi, engine="openpyxl") as writer:
         sheets_to_write = [
@@ -1244,7 +1515,8 @@ def run_market(market, sess, here):
                 writer.sheets[s_name],
                 s_df.columns.tolist(),
                 prev_map=prev_est_map,
-                prev_filename=prev_filename
+                prev_filename=prev_filename,
+                op_hist_stocks=op_hist_stocks
             )
             if s_name == "1_전체":
                 all_up_cnt, all_down_cnt = u_cnt, d_cnt
@@ -2143,8 +2415,27 @@ def build_web_dashboard(here):
     reports_data = _load_hankyung_reports(here)
     print(f"  - [리포트] 한경 기업 리포트 로드 완료: {len(reports_data.get('reports', []))}건 (기준일: {reports_data.get('date', '-')})")
 
+    op_hist_raw = _load_op_estimate_history(here)
+    op_hist_compact = {
+        "quarter": op_hist_raw.get("quarter", _current_quarter_ym()),
+        "col": op_hist_raw.get("col", ""),
+        "stocks": {
+            cd: {
+                "lv": int(ent.get("level") or 0),
+                "u": int(ent.get("upCount") or 0),
+                "d": int(ent.get("downCount") or 0),
+                "p": ent.get("totalPct"),
+                "m": ent.get("memo") or "",
+            }
+            for cd, ent in (op_hist_raw.get("stocks") or {}).items()
+        },
+    }
+    up_tracked_cnt = sum(1 for v in op_hist_compact["stocks"].values() if v["lv"] >= 1)
+    print(f"  - [분기OP추적] {op_hist_compact['quarter']}(E) 추적 {len(op_hist_compact['stocks'])}종목 (누적 상향 강조 {up_tracked_cnt}종목)")
+
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
+    op_hist_payload = json.dumps(op_hist_compact, ensure_ascii=False).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -2699,9 +2990,49 @@ def build_web_dashboard(here):
     tbody tr:nth-child(even) td {{
       background: #f8fafc;
     }}
-    tbody tr:hover td:not(.tone-up1):not(.tone-up2):not(.tone-up3):not(.tone-down1):not(.tone-down2):not(.tone-down3) {{
+    tbody tr:hover td:not(.tone-up1):not(.tone-up2):not(.tone-up3):not(.tone-down1):not(.tone-down2):not(.tone-down3):not(.name-up1):not(.name-up2):not(.name-up3):not(.name-up4) {{
       background: #eef2ff !important;
     }}
+    /* 현재 분기 예상 영업이익 누적 상향 횟수별 종목명 단계별 농도 색상 (1회 → 2회 → 3회 → 4회↑) */
+    td.name-up1 {{
+      background: #fff1f2 !important;
+      color: #9f1239;
+      box-shadow: inset 3px 0 0 #fda4af;
+      cursor: help;
+    }}
+    td.name-up2 {{
+      background: #fecdd3 !important;
+      color: #881337;
+      box-shadow: inset 3px 0 0 #f43f5e;
+      cursor: help;
+    }}
+    td.name-up3 {{
+      background: #fb7185 !important;
+      color: #4c0519;
+      box-shadow: inset 3px 0 0 #be123c;
+      cursor: help;
+    }}
+    td.name-up4 {{
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      box-shadow: inset 3px 0 0 #7f1d1d;
+      cursor: help;
+    }}
+    td.name-up4 strong {{ color: #ffffff !important; }}
+    td.name-up4 .ext-link {{ background: rgba(255,255,255,0.22); color: #ffffff; }}
+    .op-cnt-badge {{
+      display: inline-block;
+      margin-left: 3px;
+      padding: 0px 4px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      vertical-align: middle;
+    }}
+    .op-cnt-1 {{ background: #ffe4e6; color: #be123c; }}
+    .op-cnt-2 {{ background: #fda4af; color: #881337; }}
+    .op-cnt-3 {{ background: #be123c; color: #ffffff; }}
+    .op-cnt-4 {{ background: #7f1d1d; color: #fef08a; }}
     /* 틀 고정 (종목코드~섹터2) */
     .freeze-on th.sticky-col-0, .freeze-on td.sticky-col-0 {{
       position: sticky; left: 0px; z-index: 15; min-width: 58px; max-width: 58px;
@@ -3085,10 +3416,12 @@ def build_web_dashboard(here):
         </select>
         <select id="toneSelect" class="select-box">
           <option value="">전체 (예상이익 변동 무관)</option>
-          <option value="up">▲ 예상이익 상향 전체</option>
+          <option value="qop1">🔥 현재분기 OP 누적상향 (1회↑)</option>
+          <option value="qop2">🔥🔥 현재분기 OP 2회 이상 상향</option>
+          <option value="up">▲ 예상이익 상향 전체 (직전 대비)</option>
           <option value="up5">▲ 예상이익 +5% 이상 상향</option>
           <option value="up10">▲▲ 예상이익 +10% 이상 대폭 상향</option>
-          <option value="down">▼ 예상이익 하향 전체</option>
+          <option value="down">▼ 예상이익 하향 전체 (직전 대비)</option>
           <option value="down5">▼ 예상이익 -5% 이하 하향</option>
           <option value="down10">▼▼ 예상이익 -10% 이하 대폭 하향</option>
         </select>
@@ -3124,7 +3457,13 @@ def build_web_dashboard(here):
         <span id="pageRangeInfo" style="color:#64748b; font-weight:600;"></span>
       </div>
       <div class="legend-bar">
-        <span style="color:#475569;">색상 농도:</span>
+        <span style="color:#475569;">종목명(분기OP 누적상향):</span>
+        <span class="lg-chip" style="background:#fff1f2; color:#9f1239; border-left:3px solid #fda4af;">▲1회</span>
+        <span class="lg-chip" style="background:#fecdd3; color:#881337; border-left:3px solid #f43f5e;">▲2회</span>
+        <span class="lg-chip" style="background:#fb7185; color:#4c0519; border-left:3px solid #be123c;">▲3회</span>
+        <span class="lg-chip" style="background:#dc2626; color:#fff; border-left:3px solid #7f1d1d;">🔥4회↑</span>
+        <span style="color:#cbd5e1; margin:0 2px;">|</span>
+        <span style="color:#475569;">셀 변동:</span>
         <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
         <span class="lg-chip" style="background:#fca5a5; color:#7f1d1d;">▲5~10%</span>
         <span class="lg-chip" style="background:#dc2626; color:#fff;">▲10%↑</span>
@@ -3189,6 +3528,8 @@ def build_web_dashboard(here):
   <script>
     const DB = {json_payload};
     const REPORTS_DATA = {reports_payload};
+    const OP_HIST = {op_hist_payload};
+    const OP_HIST_STOCKS = (OP_HIST && OP_HIST.stocks) ? OP_HIST.stocks : {{}};
     const marketKeys = Object.keys(DB);
     let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
     let currentMarket = marketKeys.includes('KOSPI') ? 'KOSPI' : marketKeys[0];
@@ -3945,7 +4286,14 @@ def build_web_dashboard(here):
           const repTip = `[오늘의 기업 리포트 · ${{r0.broker}}]\\n${{r0.title}}\\n• 목표가: ${{r0.target_price}}원 (${{r0.target_change || r0.opinion}})\\n(클릭 시 리포트 요약 보기)`;
           repBtn = `<span class="rep-badge-link" onclick="selectReportsView('${{code}}')" data-tip="${{escapeHtml(repTip)}}">📄</span>`;
         }}
-        return `<strong title="${{escapeHtml(String(val))}}">${{escapeHtml(String(val))}}</strong>
+        const oh = OP_HIST_STOCKS[code];
+        let cntBadge = '';
+        if (oh && oh.lv >= 1) {{
+          const bIcon = oh.lv >= 4 ? '🔥' : '▲';
+          cntBadge = `<span class="op-cnt-badge op-cnt-${{oh.lv}}">${{bIcon}}${{oh.u}}</span>`;
+        }}
+        const titleAttr = (oh && oh.m) ? '' : `title="${{escapeHtml(String(val))}}"`;
+        return `<strong ${{titleAttr}}>${{escapeHtml(String(val))}}</strong>${{cntBadge}}
           <a class="ext-link" href="${{naverUrl}}" target="_blank" title="네이버 금융 열기">N</a>
           <a class="ext-link" href="${{fnUrl}}" target="_blank" title="에프앤가이드 열기">Fn</a>${{repBtn}}`;
       }}
@@ -4047,14 +4395,21 @@ def build_web_dashboard(here):
           if (secType === '섹터2' && String(r.v[s2Idx] || '') !== secVal) return false;
         }}
         if (toneFilter) {{
-          if (!r.t) return false;
-          const tones = Object.values(r.t);
-          if (toneFilter === 'up' && !tones.some(t => t.startsWith('up'))) return false;
-          if (toneFilter === 'up5' && !tones.some(t => t === 'up2' || t === 'up3')) return false;
-          if (toneFilter === 'up10' && !tones.some(t => t === 'up3')) return false;
-          if (toneFilter === 'down' && !tones.some(t => t.startsWith('down'))) return false;
-          if (toneFilter === 'down5' && !tones.some(t => t === 'down2' || t === 'down3')) return false;
-          if (toneFilter === 'down10' && !tones.some(t => t === 'down3')) return false;
+          if (toneFilter === 'qop1' || toneFilter === 'qop2') {{
+            const cd = String(r.v[0] || '');
+            const oh = OP_HIST_STOCKS[cd];
+            const minLv = toneFilter === 'qop2' ? 2 : 1;
+            if (!oh || oh.lv < minLv) return false;
+          }} else {{
+            if (!r.t) return false;
+            const tones = Object.values(r.t);
+            if (toneFilter === 'up' && !tones.some(t => t.startsWith('up'))) return false;
+            if (toneFilter === 'up5' && !tones.some(t => t === 'up2' || t === 'up3')) return false;
+            if (toneFilter === 'up10' && !tones.some(t => t === 'up3')) return false;
+            if (toneFilter === 'down' && !tones.some(t => t.startsWith('down'))) return false;
+            if (toneFilter === 'down5' && !tones.some(t => t === 'down2' || t === 'down3')) return false;
+            if (toneFilter === 'down10' && !tones.some(t => t === 'down3')) return false;
+          }}
         }}
         return true;
       }});
@@ -4121,7 +4476,15 @@ def build_web_dashboard(here):
           const tone = r.t ? r.t[String(idx)] : null;
           if (tone) classes.push(`tone-${{tone}}`);
 
-          const note = r.n ? r.n[String(idx)] : null;
+          let note = r.n ? r.n[String(idx)] : null;
+          if (c.name === '종목명') {{
+            const cd = String(r.v[0] || '');
+            const oh = OP_HIST_STOCKS[cd];
+            if (oh) {{
+              if (oh.lv >= 1) classes.push(`name-up${{oh.lv}}`);
+              if (oh.m) note = oh.m;
+            }}
+          }}
           const tipAttr = note ? `data-tip="${{escapeHtml(note)}}"` : '';
           const arrow = tone ? (tone.startsWith('up') ? ' ▲' : ' ▼') : '';
 
@@ -4206,6 +4569,7 @@ def auto_push_to_github(here, commit_msg=None):
             "kospi200_yoy.py",
             "index.html",
             "hankyung_reports.json",
+            "op_estimate_history.json",
             "requirements.txt",
             "kospi_top200_latest.xlsx",
             "kosdaq_top200_latest.xlsx",
