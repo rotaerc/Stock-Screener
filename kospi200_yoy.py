@@ -2438,14 +2438,14 @@ def auto_push_to_github(here, commit_msg=None):
                     print(f"  [경고] 자동 병합 실패: {r_rb.stderr.strip()}")
                     return False
 
-        r_push = run_git(["push", "origin", "main"])
+        r_push = subprocess.run(["git", "-C", here, "push", "origin", "main"])
         if r_push.returncode == 0:
             print(" ★ GitHub 자동 업로드 완료! (약 1분 뒤 웹페이지에 자동 반영됩니다)")
             print("   👉 https://rotaerc.github.io/Stock-Screener/")
             print(f"{'='*80}")
             return True
         else:
-            print(f"  [경고] GitHub 업로드(push) 실패:\n{r_push.stderr.strip()}")
+            print("  [경고] GitHub 업로드(push) 실패: GitHub 로그인이 필요하거나 네트워크 오류가 발생했습니다.")
             print(f"{'='*80}")
             return False
     except Exception as e:
