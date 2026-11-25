@@ -1,6 +1,6 @@
 {
   "date": "2026-11-25",
-  "updatedAt": "2026-11-25 14:14",
+  "updatedAt": "2026-11-25 14:32",
   "retentionDays": 60,
   "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business",
   "dates": [
@@ -33,7 +33,8 @@
           "12개월 선행 EPS에 최근 1년 평균 PER 9.4배 적용, 투자의견 매수·목표주가 43만원으로 커버리지 개시(상승여력 +19.8%)."
         ],
         "current_price": 359000,
-        "upside_pct": 19.8
+        "upside_pct": 19.8,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -55,7 +56,8 @@
           "투자의견 매수·목표주가 12만원으로 커버리지 개시(상승여력 +25.5%)."
         ],
         "current_price": 95600,
-        "upside_pct": 25.5
+        "upside_pct": 25.5,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -74,7 +76,8 @@
           "SK증권 모빌리티 커버리지 신규 개시 종목으로 투자의견 매수, 목표주가 370,000원 제시.",
           "완성차 공급 정상화와 글로벌 신차 사이클 진입에 따른 출하량 회복 및 믹스 개선 모멘텀에 주목.",
           "※ 참고: 한경 컨센서스 서버의 해당 PDF 링크(654543)에 동일 작성자의 기아 리포트 파일이 중복 첨부되어 있어, 현대차 상세 재무 수치는 증권사 원문 확인이 필요합니다."
-        ]
+        ],
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -95,7 +98,8 @@
           "내년 예상 PER 2.0배, PBR 0.2배의 지나친 저평가 구간. 주당 400원 배당 시 배당수익률 6.5% 및 연내 기업가치 제고 계획 공시 기대감(목표주가 9,500원 유지, 상승여력 +51.0%)."
         ],
         "current_price": 6290,
-        "upside_pct": 51.0
+        "upside_pct": 51.0,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -116,7 +120,8 @@
           "2027년 상반기 데뷔 목표 미국 신인 보이·걸그룹 흥행 시 중장기 이익 성장 가시성 확대(단기 4Q는 서구권 공연 축소·남미 투어로 QoQ 둔화 예상, 목표주가 29만원 유지)."
         ],
         "current_price": 172800,
-        "upside_pct": 67.8
+        "upside_pct": 67.8,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -137,7 +142,8 @@
           "3Q MD/라이선싱 매출 621억원(+24% YoY) 서프라이즈로 수익화 역량 입증. 할인율 축소를 반영해 목표주가를 130,000원으로 +18% 상향(중국 본토 공연 재개 시 최대 수혜)."
         ],
         "current_price": 95900,
-        "upside_pct": 35.6
+        "upside_pct": 35.6,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -159,7 +165,8 @@
           "환율·플랫폼 영구성장률 조정으로 목표주가는 22만원→18만원 하향했으나 주가 낙폭 과대 및 12월 학회 이벤트 기대로 업종 Top Pick 유지."
         ],
         "current_price": 52600,
-        "upside_pct": 242.2
+        "upside_pct": 242.2,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -181,7 +188,8 @@
           "현재 판매 중인 엑스코프리 가치만 반영해 목표주가 15만원으로 상향, 향후 오파칼림·RISE3 데이터 확인 시 추가 리레이팅 기대."
         ],
         "current_price": 84100,
-        "upside_pct": 78.4
+        "upside_pct": 78.4,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -202,7 +210,8 @@
           "고농도 SCIG 제형 변화의 장기 업사이드 및 2027년 별도 EBITDA 기준 SOTP 기업가치 2.4조원을 반영해 목표주가 18만원 → 21만원으로 상향."
         ],
         "current_price": 122300,
-        "upside_pct": 71.7
+        "upside_pct": 71.7,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -223,7 +232,8 @@
           "주1회 GLP-1 비만치료제 '에크노글루타이드' 국내 3상 연내 투약 종료·내년 출시 예정. 2027E 영업이익 1,810억원(+41.4% YoY) 전망 및 목표주가 6만원 → 7만원 상향."
         ],
         "current_price": 38900,
-        "upside_pct": 79.9
+        "upside_pct": 79.9,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -243,7 +253,8 @@
           "주력 삼중 기능성 면역항암제 'AR170'이 전임상에서 완전관해(CR) 50%(3/6)·면역기억 형성·영장류 초기 안전성을 확보, 2027년 미국 IND 제출 및 조기 글로벌 L/O 추진.",
           "공동개발 OXTIMA(글로벌 임상 2a상) 마일스톤 및 인투셀 'ITC-6146RO' 2027년 조기 L/O 모멘텀 보유. 다만 2026년 매출 25억원(-14.2%)·영업손실 178억원 적자 지속 전망."
         ],
-        "current_price": 7590
+        "current_price": 7590,
+        "source": "한경"
       },
       {
         "date": "2026-11-25",
@@ -264,7 +275,720 @@
           "실적 추정치 조정으로 목표주가 12만원 → 10만원 하향했으나, 배당성향 25%→30% 상향 및 자사주 500억원 추가 매입으로 예상 배당수익률 5.8% 주주환원 매력 부각."
         ],
         "current_price": 69100,
-        "upside_pct": 44.7
+        "upside_pct": 44.7,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "한세실업",
+        "stock_code": "105630",
+        "title": "3Q26 Review: 외부 환경도 힘들다",
+        "target_price": "9,000",
+        "target_change": "하향",
+        "opinion": "Hold",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98488",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_972806000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98488",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 매출액은 5,887억원(+8.3%yoy, 달러 기준 약 +5.9%)으로 외형은 성장했다. 다만 영업이익은 2억원(-99.3%yoy)으로 어닝 쇼크를 기록했다.",
+          "OEM(별도 기준) 달러 기준 매출이 로우싱글 성장하며 대체로 부합했다. 주요 고객사별 매출 비중으로는 중저가 고객사 33%, 중고가 고객사 24%, 마트 고객사 20% 초반을 기록했다. 고객 비중은 전년과 비슷한 수준이다. 마트 주문의 수량이 늘어나며 전체 매출을 끌어올렸으나 단가가 하락하며 매출 상승폭을 제한했다.",
+          "별도 손익에는 일회성 요인과 환율 요인이 겹쳤다. 미국 유아동복 유통 고객사 칠드런스플레이스가 11월 파산하면서 관련 매출채권에 대손상각비 약 170억원이 반영됐다. 이를 제외하면 영업이익은 약 175억원 수준이며, 이역시 기존 예상과는 동떨어진 수준이다. 다른 원인은 원달러 환율 하락이다. 회사는 1~2분기(약 2개월 선행) 환율로 원자재를 사고 당분기 환율로 매출을 잡는 구조여서,...",
+          "원단 자회사 칼라앤터치 매출액은 전년대비 50% 성장했다. 내부 거래 비중은 줄어들고 외부 고객 비중이 늘어났다. 과테말라 생산 기지 관련 비용은 부담이다. 과테말라 공장은 2022년부터 2026년까지 약 1.7억불을 투자했다. 고기능성 원단 제작 및 수직계열화에 필요한 작업을 메인으로 하고 있으며 고객사들이 고기능성 원단부터 당사를 선택해 제조까지 이어질 수 있도록 하는 것이 목표이다..."
+        ],
+        "current_price": 7230.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "디어유",
+        "stock_code": "376300",
+        "title": "K-Trend를 지렛대로 K-Fandom Monetization 확장",
+        "target_price": "30,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "한화투자증권",
+        "report_idx": "naver_98487",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261125_company_594234000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98487",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "버블하우스: K-Trend를 지렛대 삼아…",
+          "11월 14일 뉴욕 맨해튼 유니언 스퀘어에 약 400평 규모의 상설 매장 Bubble House가 오픈했다. Bubble의 팬 경험을 오프라인으로 옮긴 플래그쉽 스토어다. 입장시 $15의 입장료가 발생되나 버블 구독 1년 이상 회원의 경우 무료 입장이 가능하다. 초기 수익원은 K-Pop 관련 굿즈 및 한국 F&B 브랜드를 활용한 굿즈 판매/자체 Beauty 상품 판매 매출로 대부분 구성...",
+          "한편 K-Food 및 K-Beauty에 관심 있는 (서구권)외국인의 관심을 유도해 Bubble 서비스를 홍보할 수 있다는 점에서 초기 상품 판매 매출 이상의 효과를 기대할 수 있다는 점에서 긍정적이다. 중국 및 일본을 비롯한 아시아 시장에서는 Bubble이라는 아티스트-팬덤 간 채팅 서비스가 익숙한 반면, 서구권 시장에서는 여전히 생소한 면이 있다. 금번 Bubble House 오픈을..."
+        ],
+        "current_price": 20100.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "종근당",
+        "stock_code": "185750",
+        "title": "기다려야 할 구간",
+        "target_price": "80,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98486",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_514721000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98486",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 기다려야 할 구간",
+          "종근당은 2026년 3분기 별도기준 매출액 약 4,307억원(+0.8% YoY) 및 영업이익 약 237억원(+15.4% YoY, OPM 약 5.5%)로 컨센서스 대비 매출액 약 4,812억원은 10.5% 하회하였으나 영업이익 약 217억원은 9.2% 상회하였다. 이는 위탁연구비 및 임상시험비 감소 등으로 경상연구개발비 축소에 기인한다.",
+          "기존 상위 매출 품목인 프롤리아주, 글리아티린 등의 매출 감소를 위고비, 아일리아 등의 상품으로 상쇄하고자 하여 OPM은 지속적으로 감소하고 있다. 올해 6월부터 HK이노엔, 대원제약의 프롤리아 시밀러가 추가로 급여 등재됨에 따라 프롤리아 약가는 기존 12만 3,760원에서 10만 8,290원으로 약 -12.5% 인하되었으며 이에 따라 프롤리아주 매출액은 약 255억원(-22.6% Yo..."
+        ],
+        "current_price": 59900.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "덴티움",
+        "stock_code": "145720",
+        "title": "기다림의 시간",
+        "target_price": "60,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98485",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_668086000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98485",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 기다림의 시간",
+          "덴티움은 2026년 3분기 매출액 약 783억원(+0.1% YoY, -12.4% QoQ) 및 영업이익 약 159억원(+27.6% YoY, +8.4% QoQ, OPM 약 20.3%)로 컨센서스 대비 매출액은 약 12% 하회하였으나 영업이익은 약 14% 상회하였다. 이는 덴티움 매출 믹스의 변화에 따른다. 임플란트 매출이 약 631억원으로 견조한 가운데 디지털 장비 매출이 약 65억원(-2...",
+          "중국은 매출액 약 396억원(+38.7% YoY, -0.4% QoQ)로 3분기가 전통적으로 비수기임에도 불구하고 전분기 수준을 유지하며 견조한 성장을 보였다. 반면 내수 시장 및 아시아 지역은 각각 약 129억원(-17.1% YoY, -13.7% QoQ) 및 약 133억원(-14.0% YoY, -10.8% QoQ)로 부진하였다. 유럽은 2분기 러시아 지역 선적 집중에 따른 기저효과로 약..."
+        ],
+        "current_price": 39800.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "대원제약",
+        "stock_code": "003220",
+        "title": "기다리며 회복을 준비",
+        "target_price": "10,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98484",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_893156000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98484",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 기다리며 회복을 준비",
+          "대원제약은 2026년 3분기 별도기준 매출액 약 1,393억원(-3.2% YoY) 및 영업손실 약 41억원(적자 축소)을 달성하였다. 매출원가율은 약 52.6%로 전년 동기 대비 약 2.6% 개선되었다. 매출 감소는 정부 약가 인하 및 호흡기 수요 둔화에 기인한다.",
+          "기존 핵심 매출 품목이었던 펠루비정이 올해 5월 1일부터 180원에서 96원으로 약 46%, 펠루비서방정이 304원에서 234원으로 약 23% 약가가 인하되었다. 3분기부터 이러한 약가 인하 영향이 온기 반영됨에 따라 펠루비 매출액은 2분기 약 116억원(-19.3% YoY), 3분기 약 96억원(-32.9% YoY)으로 감소하였다.",
+          "대원제약은 이러한 호흡기 매출액 감소를 만성질환 처방 확대 및 건강기능식품 신제품 출시로 만회하고 있다. 만성질환에서는 이상지질혈증 치료제 타바로젯 약 59억원(+20.2% YoY), 고혈압 치료제 이달비 제품군 약 43억원(1Q26 판매계약 체결, +5.7% QoQ) 등으로 견조한 성장세를 이었다."
+        ],
+        "current_price": 7520.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "LS머트리얼즈",
+        "stock_code": "417200",
+        "title": "27년 주목할 턴어라운드 기업",
+        "target_price": "14,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98483",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_464462000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98483",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표주가 14,000원 제시",
+          "LS머트리얼즈에 대해 투자의견 매수와 목표주가 14,000원을 제시한다. 목표주가는 PSR 방식을 활용했으며 27년 이익 회복 초기 국면인 점을 고려했다. 27년 실적 회복의 핵심은 연료전지 향으로의 매출확대와 주요 자회사의 적자 폭 축소에 기인한다. 올해 AIDC 연료전지용 UC 물량 689억원(초도물량 제외)을 확보했으며 연내 추가 수주도 기대된다. 기존 풍력발전과 UPS용 외 새롭..."
+        ],
+        "current_price": 9150.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "이수페타시스",
+        "stock_code": "007660",
+        "title": "3Q26 Re: 놀라운 수익성의 연속",
+        "target_price": "120,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98482",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_228183000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98482",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Re: 환부담에도 높은 수익성 기록",
+          "3Q26 연결 기준 매출액 3,892억원(+2% QoQ), 영업이익 949억원(+23% QoQ, OPM 24%)으로 컨센서스에 부합하는 실적을 기록하였다. 원달러 환율 하락이 매출액 성장에 부담으로 작용했으나 수익성은 견조했다. 1) 페타시스는 전분기 대비 수익성이 +5%p 개선되었다. 다중적층 매출 비중 증가, 판가 인상 효과, 원재료 래깅효과가 복합적으로 작용했다는 판단이다. 생산..."
+        ],
+        "current_price": 73600.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "코오롱인더",
+        "stock_code": "120110",
+        "title": "3Q26 Re: 유가 안정을 기다릴 때",
+        "target_price": "70,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98481",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_530349000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98481",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Re: 본업은 원가·환율 부담, IT 소재는 성장 지속",
+          "3Q26 실적은 매출액 1조 2,747억원(-4% QoQ), 영업이익 402억원(-58% QoQ, OPM 3%)으로 컨센서스를 하회하였다. 실적 부진의 핵심 원인은 환율하락과 역래깅 효과(고가 원료의 후행적 투입에 따른 스프레드 축소가 수익성을 제약)다. 산업자재는 아라미드 원가 상승과 타이어코드 수익성 저하, POM 스프레드 축소로 영업손실 -48억원을 기록하였다. 화학은 석유수지 원..."
+        ],
+        "current_price": 34550.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "롯데관광개발",
+        "stock_code": "032350",
+        "title": "결국 좋은 업황을 따라갈 주가",
+        "target_price": "15,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98480",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_709258000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98480",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "홀드율에 따른 단기 실적 부진만 반영된 주가 수준",
+          "3Q26 실적이 표면상으로는 기대치에 미치지 못한 것처럼 비춰지며 실적 발표 이후 긍정적 뉴스 플로우에도 주가는 단기 소폭 반등 이후 큰 반전을 보여주지 못하고 있다. 3Q26 카지노 매출액은 1,273억원(-8.6% YoY)를 기록하며 역성장한 것처럼 보일 수 있으나 단기 실적은 홀드율에 의해 변동이 있을 수 있는 점을 감안하면 연간 성장 흐름에 초점을 맞춰야 한다는 판단이다. 그리고...",
+          "카지노 월 순매출액 300억원을 전후로 이익 레버리지 효과가 극대화되는 것으로 추정되는 점을 감안하면 아직 레버리지 효과가 본격화되는 구간에는 진입하지 않았다고 판단된다. 롤링프로그램 강화에 의한 일시적 홀드율 하락에 따른 부진은 안정적인 고객 데이터베이스 증가로 이어져 결국은 27년 더 큰 성장으로 돌아올 전망이다."
+        ],
+        "current_price": 10060.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "SBS",
+        "stock_code": "034120",
+        "title": "27년 본격 턴어라운드 전망",
+        "target_price": "20,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98479",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_619430000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98479",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26Re: 광고 수익 방어됐으나 제작 비용 증가로 수익성 둔화",
+          "SBS의 26년 3분기 실적은 연결 매출액 2,549억원(+7% YoY), 영업이익 101억원(-22% YoY, OPM 4%)을 기록했다. 별도 총광고수익은 693억원(+9% YoY)으로 아시안게임 중계 효과와 드라마 <재벌X형사2> 시청 성과가 맞물리며 호조를 보였다. 사업수익은 1,037억원(-1% YoY) 온라인수익 392억원(-7% YoY)으로 넷플릭스와 전략적 파트너십(25~3..."
+        ],
+        "current_price": 13050.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "HL D&I",
+        "stock_code": "014790",
+        "title": "3Q26 Review: 대손 반영에도 수익성 개선 지속",
+        "target_price": "5,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98478",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_508548000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98478",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 대손 반영에도 수익성 개선 지속",
+          "HL D&I의 2026년 3분기 연결 매출액 4,717억원(YoY -1.1%)과 영업이익 301억원(YoY +18.1%)을 기록. 매출액과 영업이익 모두 시장 컨센서스 부합. 개발·건축 GPM은 18.3%로 전분기 대비 4.9%p 개선. 일부 도급 현장의 원가 절감과 공사비 증액에 따른 누계 이익반영 영향. 2분기 자체사업의 일시적 원가 부담 해소도 기여. 인프라도 저수익 현장 종료로..."
+        ],
+        "current_price": 2295.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "에이디테크놀로지",
+        "stock_code": "200710",
+        "title": "변하지 않은 방향성, 늦어지는 증명",
+        "target_price": "28,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98477",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_430584000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98477",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액 252억원, 영업적자 14억원",
+          "에이디테크놀로지의 연결 실적은 매출액 252억원(YoY -31.5%), 영업적자 14억원(YoY 적자전환, OPM -5.7%)을 기록. 예상치를 크게 하회한 실적을 기록한 핵심은 고객사 설계지연 및 메모리 확보 난항에 따른 프로젝트 매출 인식 이연. 인식되어야할 프로젝트들이 4분기, 또는 내년까지도 매출 인식이 이연될 것으로 예상. 특히, HBM이 사용되는 개발 프로젝트는 HBM 확보..."
+        ],
+        "current_price": 15470.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "솔브레인",
+        "stock_code": "357780",
+        "title": "사이클 속에서 안정적인 선택지",
+        "target_price": "420,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98476",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_273720000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98476",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액 3,449억원, 영업이익 506억원",
+          "솔브레인의 3Q26 연결 실적은 매출액 3,449억원(YoY +43.0%), 영업이익 506억원(YoY +47.2%, OPM 14.7%)을 기록. 고객사 신규 라인의 적극적인 램프업 수요 대응과 연결 자회사 편입 효과 등으로 호실적 추이를 유지. 편입효과를 제외하더라도 동사는 올해 반도체 출하량 증대에 발맞춰 QoQ 두자릿수 성장세를 시현. 동사는 고객사들의 웨이퍼 투입량 증가와 비례한..."
+        ],
+        "current_price": 250000.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "네패스",
+        "stock_code": "033640",
+        "title": "NDR 후기: 선도 OSAT를 향한 방향성",
+        "target_price": "40,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98475",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_228619000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98475",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액 1,648억 원, 영업이익 168억 원",
+          "네패스의 3Q26 연결 실적은 매출액 1,648억원(YoY +19.9%), 영업이익 168억원(YoY +29.9%, OPM 10.2%)을 기록. 비우호적인 환율 환경에도 불구하고 단가 인상 및 신규 물량 및 전자재료 대응 증가에 따라 긍정적인 실적 추이 유지. 8인치 Bumping에 대한 단가가 꾸준히 상승하는 추세, 8인치의 수익성이 개선되며 긍정적인 이익률에 기여. 당 분기 특징은..."
+        ],
+        "current_price": 17460.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "에이비엘바이오",
+        "stock_code": "298380",
+        "title": "많이 빠지기도 했다",
+        "target_price": "120,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98474",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_767257000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98474",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "1) 토베시미그; COMPANION-002 임상 내 ORR은 위약군 대비 유효성 입증했으나(18.0%vs5.3%) OS는 통계적 유의성 미확보. 이는 교차 투약에 기인. 다만 FDA는 BLA 제출 전 생존이점 입증하는 추가 연구 권고. 기술 도입한 컴패스 테라퓨틱스의 경우 3분기 실적발표까지 FDA 협의와 함께 추가 임상 없이 BLA 제출 준비 진행 중임을 언급. 사전 상업화 비용 및...",
+          "2) Grabody-B; 25년 BBB 셔틀에 대한 딜 러쉬 이후 해당 영역에 대한 시장의 관심은 소강 상태. 로슈는 최근 알렉터의 파킨슨병 효소대체요법 후보물질 AL050을 12억 7천만 달러 규모로 라이선스 아웃 계약 추가 진행. 여전히 BBB 셔틀에 대한 높은 기대감 반영 딜은 다수 체결 중. 2028년 내 BBB 셔틀에 대한 관심을 환기시켰던 로슈의 트론티네맙 임상 3상 완료되어...",
+          "3) 지바스토미그; 노바브릿지와 공동 개발 중인 파이프라인으로 ESMO 내 1b상 8mg/kg 투여 환자군에 대한 추가 분석 결과 공개. ORR 79% 및 DCR 97% 수준. 현재 FDA와의 3상 주요 설계 합의 완료되어 후속 임상 진입 예정"
+        ],
+        "current_price": 34350.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "알테오젠",
+        "stock_code": "196170",
+        "title": "잘하고 있는데 왜 그래요",
+        "target_price": "400,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98473",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_266346000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98473",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "특허 이슈 해소, 키트루다 Qlex 전환 가속화",
+          "키트루다 Qlex 전환율 꾸준히 상승. 3Q26 해당 매출은 약 1.1조원 수준으로 QoQ 79.3% 성장. MSD는 출시 2년 내 전환율 30~40% 달성을 목표로 진행 중이며, 해당 전망에 on track으로 성장하고 있는 모습 확인. 이에 따라 28년까지 총 10억 달러의 판매 마일스톤 무리 없이 수령 가능할 것으로 추정",
+          "11월 5일 CMS의 약가 협상 최종규칙 발표되었는데, 키트루다 SC제형 또한 약가 협상 대상에 포함되며 시장의 우려 존재. 다만 이는 초안 발표 시 짐작 가능했던 내용. 협상된 약가는 29년부터 적용될 예정. 또한 제형 변경에 대한 니즈는 IRA 약가 방어에만 존재했던 것이 아닌, 투약 편의성 개선에도 존재한다고 판단. 키트루다 Qlex의 전환율이 출시 직후 빠른 속도로 상승하고 있는...",
+          "할로자임-MSD의 특허 분쟁 또한 승기를 잡으며 마무리되는 방향으로 진행 중. 독일의 경우 키트루다SC 판매금지 가처분은 취소되었으며, 미국 내 PGR 또한 14건에서 모두 승리. 뉴저지 연방법원에 제기된 특허침해 소송은 본안 판단 앞두고 있으나 특허 침해의 근거가되는 청구항들이 PGR 내 특허성 부정되어 해당 소송 또한 큰 이슈 없을 것으로 추정"
+        ],
+        "current_price": 159700.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "유한양행",
+        "stock_code": "000100",
+        "title": "3Q26 Review; 다져가는 시간",
+        "target_price": "130,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98472",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_671669000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98472",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3분기 매출액 6,043억원, 영업이익 332억원 기록",
+          "유한양행 3분기 연결 매출액 6,043억원 (YoY +6.0%), 영업이익 332억원 (YoY +50.8%, OPM 5.5%) 기록. 약품사업부의 매출은 3,738억원 기록하며 전년동기대비 4.5% 성장. 안티푸라민 및 마그비 등 주요 품목이 매출 성장 견인. 래피콜 파워 연질캡슐 출시하며 호흡기 질환 시즌에 대응 중. 헬스케어 사업부의 경우 692억원 기록하며 전년동기대비 32.7%...",
+          "연결 기준 영업이익은 332억원(YoY +50.8%, OPM 5.5%) 기록. 연초 제시했던 가이던스 대비 이익은 소폭 상회 가능할 것으로 추정. 유한화학의 실적 개선이 이익 성장의 주요 동력이 되는 것으로 판단. 해외사업부의 경우 분기 편차로 인한 일부 역성장 존재했으나 수주 증가의 흐름은 유지되고 있다고 추정",
+          "3분기 라이선스 수익은 78억원 기록. 로열티 수익의 연초 가이던스는 하향. 아미반타맙 SC 제형의 J-Code 발효됨에 따라 향후 처방 확대가 기대. MARIPOSA 임상의 mOS 데이터 공개가 처방 확대의 마지막 키라고 판단되는 만큼 추가 매출 확대의 기대감 유효"
+        ],
+        "current_price": 77300.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "달바글로벌",
+        "stock_code": "483650",
+        "title": "NDR 후기: 과도한 시장 우려, 사업은 순항 중",
+        "target_price": "310,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98471",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_353577000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98471",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 환율 우려에도 수익성 선방",
+          "3분기 연결 매출액 및 영업이익은 각각 1,556억원(YoY 36%), 334억원(YoY 101%) 시현. OPM은 21.5%(YoY +6.9%p)로 비우호적 환율에도 견조한 수익성 시현. 마케팅 효율화, 해운 운송 비중 확대 등으로 비용 방어. 북미 232억원(YoY 31%, QoQ -33%) 시현. 행사 부재 및 부정적 환율에도 틱톡샵 호조로 상쇄. 오프라인도 순항 중, 최근 ULT..."
+        ],
+        "current_price": 128900.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "에이프릴바이오",
+        "stock_code": "397030",
+        "title": "보유 현금보다 싼 시가총액",
+        "target_price": "45,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98470",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_185233000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98470",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "1) APR-R3; 2b상의 경우 글로벌 임상으로 중등도~중증 성인 아토피피부염 환자 200명을 대상으로 진행될 예정. 27년 중반 임상 개시 목표. 2a상에서 IV제형을 통한 투약을 평가했으나, 2b상에서는 SC제형을 통해 500mg 4주 간격 투약군, 500mg 투여 후 250mg 4주 간격 투약군, 500mg 투약 후 250mg 2주 간격 투약군, 위약군 등 4개의 환자군을 평가할...",
+          "또한 궤양성대장염으로도 적응증 확대 예정. 별도의 2a상을 통해 중등도~중증의 궤양성대장염 환자 84명을 평가할 계획. 해당 적응증의 결과는 28년 확인 가능할 것으로 전망. R3를 기술도입한 에보뮨의 경우 자사 파이프라인 EVO756 2b상 유효성 입증 실패 후 R3를 리드에셋으로 변경하며 적응증 확장 전략 진행 중. 27년~28년에 걸친 AD 2b상, UC 2a상 결과 발표에 주목 권고",
+          "2) APR-A1; 룬드벡이 기술도입해 TED 적응증으로서 개발 중이던 파이프라인이었으나, 8월 1b상 결과를 토대로 해당 적응증 개발 중단을 발표. 시장은 현재 해당 파이프라인에 대한 반환 우려 존재하는 상황이나, 3Q26 실적 발표 IR 자료 내에는 여전히 해당 파이프라인이 포함. CD40L 차단 기전을 기반으로 TED 외 타 적응증 개발 확정 시 우려 해소 가능하다고 판단"
+        ],
+        "current_price": 12660.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "알테오젠",
+        "stock_code": "196170",
+        "title": "신뢰와 수급의 회복이 필요하다",
+        "target_price": "410,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98469",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_319916000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98469",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "Enhertu SC 임상1상의 환자 수 감소, 유사한 사례도 있다",
+          "알테오젠의 ALT-B4가 적용된 Enhertu SC 제형의 임상1상 NCT07015697의 현재 임상 현황이 11/19일자로 업데이트 되었다. 여기서 Status가 “Recruiting”에서 “Active, not recruiting”으로 변경된 것과 등록 환자수가 기존 76명(예상)에서 17명(실제)으로 변경되는 것이 문제되었다. 이 중 Status 변경은 현재 모집된 환자로만 우선...",
+          "유사한 사례로 같은 Daiichi Sankyo가 Sponsor인, Valemetostat와 Dxd 계열 ADC와의 병용 1상 NCT06244485를 보면, 2026년7월 “Active, not recruiting”으로 Status가 변경되면서 환자 수가 기존 210명(예상)에서 98명(실제)으로 변경되었다. 이후 해당 임상은 2026년9월 환자 수가 다시 기존 210명(예상)으로 증가했..."
+        ],
+        "current_price": 159700.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "한화생명",
+        "stock_code": "088350",
+        "title": "3Q26 NDR 후기 - 대규모 투자손실은 일회성일 뿐",
+        "target_price": "6,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98468",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_297696000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98468",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "신계약 CSM 성장세 지속, 상품 믹스 개선에 따른 수익성 강화",
+          "동사는 신계약 판매량 감소에도 불구하고 상품 포트폴리오 개선을 통한 견조한 신계약 CSM 성장세를 유지하고 있다. 3Q26 누적 신계약 CSM은 2.1조원(YoY +40%)을 기록했으며, 보장성 신계약 CSM 배수는 13.5배로 전년동기대비 6.1배 상승했다. 이는 금리 상승과 중장기납 종신보험 중심의 상품 믹스 개선, 갱신형 건강보험 신상품 출시 효과에 기인하며, 판매량 감소(월평균..."
+        ],
+        "current_price": 3520.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "진에어",
+        "stock_code": "272450",
+        "title": "메가 LCC 출범, 매크로 턴어라운드에 통합 효과까지",
+        "target_price": "10,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98467",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_782901000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98467",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2027년 3월 17일 통합 진에어 출범",
+          "2027년 3월 17일부로 진에어를 중심으로 한 진에어/에어부산/에어서울 3사 통합 법인이 출범할 예정이다. 통합 법인의 연간 매출액은 3조원 규모로 추정하며, 보유 기재는 총 60대로 국내 최대 규모의 LCC가 된다. 11월 24일 개최된 주주간담회에서는 통합을 통해 1) 노선/스케줄 효율화를 통한 수익 증대, 2)계약/시설 통합을 통한 비용 절감이라는 두가지 시너지 효과를 기대하고..."
+        ],
+        "current_price": 7530.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "CJ제일제당",
+        "stock_code": "097950",
+        "title": "잃을 것 없는 주가와 올라갈 실적",
+        "target_price": "370,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98466",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_903219000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98466",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2026년 11월 25일 I 기업분석_기업분석(Report) CJ제일제당 (097950) 잃을 것 없는 주가와 올라갈 실적 실적 부진이 기반영된 시가총액 CJ제일제당의 5년 전 물류 제외한 연결 이익 체력은 1.2조원 내외였다.",
+          "올해 물류 제외한 연결 영업이익은 7천원 내외로 추정된다.",
+          "동기간 시가총액은 7조원에서 2.7조원으로 감소했 다."
+        ],
+        "current_price": 180200.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "한솔케미칼",
+        "stock_code": "014680",
+        "title": "과산화수소 증설, High-K로 확장",
+        "target_price": "310,000",
+        "target_change": "신규",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유안타증권",
+        "report_idx": "naver_98465",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/18/20261125_company_280183000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98465",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "4Q26 예상 영업이익 246억원, 성과급 반영으로 일시 둔화",
+          "4Q26 연결기준 예상 매출액과 영업이익은 각각 2,461억원(QoQ +1.7%, YoY +10.6%), 246억원(QoQ -49.3%, YoY +45.8%, OPM 10.0%)으로, ①과산화수소 판매량는 견조한 수준을 유지하는 가운데 프리커서 점유율이 일부 회복되며 전분기대비 공급 규모가 늘어나겠지만, ②연말 성과급 약 250억원이 일시에 반영되며 전사 영업이익은 단기적으로 감소할 전..."
+        ],
+        "current_price": 165000.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "지에프아이",
+        "stock_code": "493330",
+        "title": "IR 後記: ESS, UPS 부품주로 절대적인 저평가",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98464",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_928339000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98464",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "회사 소개: ESS 및 UPS 등에 탑재되는 스마트 화재안전 솔루션 보유업체.",
+          "‘14년 ㈜지에프아이(GFICo.,Ltd) 설립. ‘26년 1월 14일에 ‘대신밸런스제18호기업인수목적㈜’를 흡수합병으로 코스닥 시장에 상장함. 동사는 스마트 화재안전 솔루션 기업임. 동사는 세계 최초로 소화약제를 마이크로캡슐화에 성공하고, 마이크로캡슐을 ‘AEGIS(이지스)’라고 명명함. 마이크로캡슐화 개발 역량을 바탕으로 '2차전지용 소화안전 Sheet'와 'DI-KIT'를 신규 개...",
+          "주요 제품별 매출비중(2025년 연결기준)은 DI-KIT 41.7%, 공사매출 27.8%, 2차전지 소화시트 20.0%, 멀티탭 4.8%, 소화패치 0.9% 등",
+          "투자포인트 1) ESS 시장 수요 확대와 함께 주요고객 매출 중심 성장 견인."
+        ],
+        "current_price": 8000.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "금양그린파워",
+        "stock_code": "282720",
+        "title": "AIDC 수주로 내년부터 턴어라운드",
+        "target_price": "20,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98463",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_600752000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98463",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "금양그린파워는 원주에 건설되는 AIDC에 대해 2,300억원의 전기공사를 수주. 약 40MW 규모로 국내 업체가 임대할 것으로 추정됨. 사업자인 메가데이타코리아는 현재의 싸이트에 99MW의 전력망 연결 허가를 받은 상태이고, AIDC를 최종적으로 120MW까지 증설할 계획. 따라서 동사의 이번 AIDC 계약은 2년의 단발 실적이 아닌 지속적일 가능성이 높아. 국내 최대의 전기 공사 사업...",
+          "육상 풍력 공급 계약도 최종 단계 진입",
+          "개발 중인 경북 1 육상 풍력(37.2MW)은 최종 지자체 개발 행위 허가 심의를 진행하고 있고, 생산된 전력의 구매처도 확정된 것으로 파악됨. 국내 RE100 기업들의 재생에너지 확보 수요가 큰 상태인데 비해, 규모가 큰 단지가 부족한 상태여서 최종 계약 확정은 무난할 것으로 판단. 금양그린파워는 풍력 터빈 공급업체로 Vestas를 선정한 것으로 파악됨. 계약이 확정되면 20년간 총...",
+          "내년부터 실적 부진에서 탈피할 가시성 높아져"
+        ],
+        "current_price": 10930.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "리노공업",
+        "stock_code": "058470",
+        "title": "반등을 꿈꾸며",
+        "target_price": "78,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98462",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261125_company_565463000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98462",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "실적 정상화와 함께 2027년 반등 포인트 점검",
+          "3분기 실적 추정치 하회. 파업으로 인한 생산 차질 영향. 4Q26 고객사 수요 정상화와 함께 실적 반등 기대. 산업 및 제품 다변화에 따른 고성능 소켓 및 핀 수요는 견고할 것으로 전망. 제품 가격 상승 분위기가 핵심. 2027년 수요>공급 시장을 전망하며 실적 및 밸류에이션 재평가 기대"
+        ],
+        "current_price": 48500.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "티로보틱스",
+        "stock_code": "117730",
+        "title": "AMR에서 휴머노이드까지, 로봇 사업 확장",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "SK증권",
+        "report_idx": "naver_98459",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/64/20261125_company_631732000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98459",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 별도 실적은 매출액 148 억원(+14.1% YoY)과 영업이익 27 억원(+295.5% YoY, OPM 17.9%)으로 큰 폭 개선됐다. 글로벌 디스플레이 고객사의 설비투자 재개에 따른 진공로봇 출하 회복이 실적 개선을 견인했다. 반면 연결 기준으로는 자회사 모션디바이스(물류로봇), 에이아이로보틱스(스마트팩토리) 등의 적자가 반영되며 매출액 208억원(+58.7% YoY)과...",
+          "진공로봇 출하 회복과 포드 에너지 ESS 공장향 AMR 매출 반영에 힘입어 26 년 별도기준 연간 흑자전환이 전망되며, 연결 기준으로는 매출액 621 억원(+41.7% YoY)과 영업손실 38 억원(적자축소)이 예상된다. 내년부터는 ①포드에너지향 AMR 공급 확대 ② 다크팩토리 실증 플랫폼 'KAIROS'향 휴머노이드 공급 ③에이아이로보틱스의 고객사 확대 등이 더해지며 27 년 연결 매..."
+        ],
+        "current_price": 11870.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "파두",
+        "stock_code": "440110",
+        "title": "주가 빠진다고 업황 빠지진 않는다",
+        "target_price": "50,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98458",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261125_company_399326000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98458",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "낸드 업황은 견조, 28년 성장 동력은 세 가지",
+          "3Q26 영업이익 361억원으로 분기 최대. 낸드 우려에 주가는 10/15부터 50% 하락. 27년 주문 유지로 우려 해소 구간. 심리적 하락이란 판단"
+        ],
+        "current_price": 28800.0
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "GS글로벌",
+        "stock_code": "001250",
+        "title": "상사업의 회복을 기다리며, 해상풍력 독점력에 주목",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "한국IR협의회",
+        "report_idx": "naver_98456",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_867216000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98456",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "GS엔텍 모노파일 생산능력 연간 15만톤으로 확대, 국내 대형 모노파일 시장에서 사실상 독점적 공급 지위 확보. 정부의 2035년까지 55GW 해상풍력 입찰 추진에 따른 중장기 수주 확대 기대. 2027년 하반기 생산 정상화 및 2028년 흑자전환 여부 확인 필요",
+          "2026년 이란 전쟁에 따른 호르무즈해협 통항 차질로 중동향 고마진 철강 거래 수익성 악화. 3Q26 무역/유통 영업이익 82억원(-14.2% YoY)으로 감소. 2027년 지정학적 긴장 완화 시 프로젝트 발주 재개와 운임 부담 축소 기대. 통항 정상화 시점 및 거래 마진 회복 여부 확인 필요",
+          "2026년 연결 매출액 4조 4,128억원(+7.4% YoY), 영업이익 331억원(-36.7%), OPM 0.7%(-0.52%p) 전망. 무역/유통 부문의 외형 성장에도 GS엔텍 설비전환에 따른 매출 공백과 고정비 부담으로 연결 이익 감소 예상. 2027년 영업이익 406억원(+22.7%YoY)으로 반등 전망"
+        ]
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "지투파워",
+        "stock_code": "388050",
+        "title": "2027년 실적 퀀텀점프, 본격적인 밸류업 원년",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "한국IR협의회",
+        "report_idx": "naver_98455",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_181282000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98455",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자포인트: 1)원전시장 고압배전반 수주 모멘텀 지속, 2)정부의 태양광 보급 확대 정책 수혜와 태양광 IPP 사업 확대 본격화, 3)차세대 성장동력은 액침냉각형 에너지저장장치(I-ESS), 4)기업가치제고 계획 발표: 2030 중장기 성장 로드맵과 주주환원",
+          "2027년 매출액 1,162억 원(YoY +53.7%), 영업이익 143억 원(YoY +60.3%) 전망, 창립이후 처음으로 매출액 1,000억 원, 영업이익 100억 원대 개막, 2025년 수주한 신한율 3·4호기 원전용 고압배전반 매출 본격화, 정부의 태양광 확대 정책에 따른 태양광/ESS 부문 외형 성장"
+        ]
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "디와이에이",
+        "stock_code": "002880",
+        "title": "눈에 확 띄는 실적 개선",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "한국IR협의회",
+        "report_idx": "naver_98453",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_765798000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98453",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2026년 기업가치 제고계획을 통해 중장기 재무구조 개선 목표와 2027년 결산배당 재개 계획 제시",
+          "기아 광주공장 완성 시트 전량 공급 지위를 기반으로 공급 차종 확대와 인주/울산공장 신설을 통한 중장기 성장 기대",
+          "신형 셀토스와 EV5/PV5의 양산 물량 확대에 힘입어 2026년 영업이익 481억원(+59.1% YoY)으로 큰 폭 개선 전망"
+        ]
+      },
+      {
+        "date": "2026-11-25",
+        "stock_name": "LIG아큐버",
+        "stock_code": "073490",
+        "title": "정상화를 넘어선 도약의 시작",
+        "target_price": "44,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98452",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261125_company_269255000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98452",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "서서히 돌아서는 통신 업황, 실적은 2연속 서프라이즈",
+          "2023년 이후 글로벌 5G 투자가 감소하면서 통신장비 업황도 급격히 악화되었고, 동사의 실적도 급격한 하락세를 보였다. 그러나 2Q26, 3Q26 2개 분기 연속 어닝서프라이즈를 기록하며 통신 장비 업황이 회복되고 있다는 소식을 알렸다. 업황이 돌아서는 초입부터 실적 급등세가 나타나고 있어 5G SA(단독망) 및 글로벌 통신 주파수 경매로 인한 인프라 투자 본격화 시 본격적인 성장이..."
+        ],
+        "current_price": 35050.0
       }
     ],
     "2026-11-24": [
@@ -287,7 +1011,8 @@
           "①안성 물량 증가와 미코세라믹스 ESC 매출 확대로 외형은 성장하지만, ②인건비 및 감가상각비를 포함한 고정비의 가파른 증가세와 상반기 일회성 이익(대손 환입) 소멸 영향이 불가피 할 것으로 예상하기 때문이다.",
           "2027~2028년 증설 효과로, 2년 연속 이익 성장 전망 고정비 영향을 고려하여 보수적으로 추정해도, 2027/2028년 연결기준 예상 영업이익은 각각 1,305억원(+30.5% YoY), 1,564억원(+19.9% YoY)으로 2년 연속 성장할 전망이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -308,7 +1033,8 @@
           "실제로 수 익성 및 재고 건전성 확보를 위해 차량 매입에는 최대한 보수적인 움직임을 보이면서 동사의 판매 대수도 살짝 주춤한 모습을 보였지만, 일회성 비용이 반영되었던 2 분기를 제외한 수익성 흐름은 양호한 모습을 보였다.",
           "거래되는 차량의 구성을 비롯하여 중고차 시장의 규칙이 빠르게 변화하고 있기 때문이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -329,7 +1055,8 @@
           "중국, 일본 등 근거리 여행지에 대한 선호는 계속되었기 때문이다.",
           "실제로 아웃바운드 FIT 고객은 3분기에만 YoY +15% 성장했고, 하나투어 온라인 전체 회원수는 2024년 초 730만 명에서 2026 년 9 월말 기준 973 만명까지 급성장했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -349,7 +1076,8 @@
           "원/달러 환율, 모바일, 전장 실적 부진이 원 인이었다.",
           "핵심 성장 동력인 MLCC는 예상치에 근접한 실적이었다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -371,7 +1099,8 @@
           "동사는 ‘27년 부천 48MW를 시작으로 향후 개봉[20MW], 군산[40MW], 용산[28MW], 안산[32MW] 데이터센터를계획중.안산을제외하고는 Lease방식으로, CapEX지출은상대적으로제한된반면빠르게 수도권용량을확대할수있을것으로기대.",
           "’26년,’27년예상 DPS는각각 2,400원 2,500원,배당수익률은 5.4%.또한 25년~28년 4개년 1조원자사주 매입 계획을 기반으로 27~28년 약 5,000억원 자사주 매입 예정. 현재 전기통신사업법상 외국인지분율 상한[49%]속소각이지연되고있으나,소각감안시 26년주주환원수익률은 7.5%로배당매력부각. ’27년, 본업 회복 및 KT Cloud 성장 기대 2027년 통신/통신장..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -393,7 +1122,8 @@
           "해당계약들은 10년이상의장기계약으로체결되어향후안정적인실적성장을지탱할전망이며,수도권내 데이터센터공급부족속상면단가역시지속적으로높아지고있는것으로파악된다.’30년목표전사 AIDC 용량은약 400MW[Owned 270MW, Leased 130MW]이다.",
           "’26E,‘27E예상 DPS는각각 700원, 780원으로제시.현주가 14,720원기준시가배당률 4.8%수준.파주 AIDC증설에따른 CapEX증가는불가피하지만,전사수익성개선애따른현금흐름확대속 DPS우상향기조는 유지될전망. 장기 테넌트가 확보된 파주 AIDC 중심 성장 기대 2027년 통신/통신장비 산업 전망"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -415,7 +1145,8 @@
           "’27년부터동사는자체데이터센터는 SK브로드밴드로부터인적분할될‘SK호라이즌’, GW규모급데이터센터 사업개발은 100%자회사 SK호라이즌을통해진행될예정.중장기목표용량은 SK호라이즌이’30년 318MW, SK하이퍼는중장기 5GW를목표로‘29년부터일부용량이가동될예정. SK하이퍼는이미 2GW전력규모의 토지는확보한상황이며,빅테크,프론티어 LLM,네오클라우드등 3~4곳과구체적협의진행중",
           "’26년예상 DPS는 3,400원,시가배당률 4.8%.’27년역시현재주주환원정책의하단인 [조정당기순이익의 60%이상]하단은유지될것.구체적인환원규모와방안은’27년초 3개년주주환원계획을통해발표할예정. AIDC 테넌트 가시화가 본격화될 2027년 2027년 통신/통신장비 산업 전망"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -437,7 +1168,8 @@
           "MIP 효과가 가시화되는 시점은 27년 2분기 말 또는 3분기 초반인 셈. 가격 상승을 확인하기까지 너무 멀다면, 동사는 27년 초부터 물량 증가라도 확실하게 나타날 수 있다는 점에서 상대적으로 편안한 선택이 될 수 있어",
           "지난 8월 우주용 태양광 발전을 추진하는 미국 고객사와 폴리실리콘+웨이퍼 LTA 계약을 체결했고, 1Q27부터 출하 예정. 이에 27년 TerraSus 판매량 3만톤 근접하며 YoY +30% 증가 예상. 28~29년에 증설 순차적으로 이뤄지고, 고객사 셀 생산 증가 및 미국 테크 업체향 신규 공급 실행되며 판매량 추가 확대. 선수금 일부 확보하며 증설 시작했고, take or pay 구..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -458,7 +1190,8 @@
           "그러나 종전 감안하더라도 27년 정유 호시황은 지속될 전망. 미-이란 및 러-우 전쟁으로 타격 입은 중동/러시아 정제설비는 글로벌 생산량의 5~6% 수준. 지난 20~21년 이후 CDU 순증설이 수요를 하회하면서 글로벌 정제품 공급 타이트하던 중에 설비 차질이 추가된 만큼 단기에 수급밸런스 정상화되긴 어렵다고 판단해 매수의견 유지. 지난 3분기까지 정유사 실적의 최대 우려 요인이었던 V...",
           "엔무브는 중동 기유 공급차질 속에 가격 인상 뿐만 아니라 미국 정유사를 신규 고객으로 확보하며 그 반사수혜 강도를 대폭 강화했음. E&S는 카타르 공급 차질로 인한 LNG 공급 타이트에도 호주 CB 가스전 상업가동을 통해 상대적으로 저가에 LNG 조달하고 있어 안정적인 이익 창출 가능. 여기에 그동안 EV 전지 판매 부진으로 대규모 적자 이어왔던 On은 BOSK 청산 이후 비용 부담이..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -479,7 +1212,8 @@
           "특히 탄소섬유는 데이터센터 BTM 발전의 숨겨진 수혜가 될 수 있음에 주목. BTM 주요 수단으로 가스발전이 활용되고 있는데, 인근까지 연결된 파이프라인이 없는 곳에서는 압축한 천연가스를 고압용기에 담아 트레일러에 실어서 운송해야 함. 이에 CNG와 여기에 사용되는 탄소섬유 수요 동반 증가 예상. 미국에서 고압용기 생산하는 Hexagon은 26년 7월 북미 최대 CNG 트레일러 운송업체...",
           "이와 같은 북미 CNG 고압용기 사용량 확대가 최근 탄소섬유 수요 증가의 주 요인으로 작용하며 동사도 하반기에 전주/베트남공장 가동 재개. 상반기부터 드론용으로 물량 늘기 시작한 중국공장에 이어, 27년에는 베트남/전주 전 공장의 출하량 증가로 탄소섬유 외형확대 및 고정비 축소되며 BEP 수준으로 적자 대폭 축소할 수 있을 전망 BTM 발전의 숨겨진 수혜, 탄소섬유 Buy(Maintai..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -500,7 +1234,8 @@
           "2026년 매출액 5조 1,557억원(+0.4%YoY), 영업이익 980억원(-26.3%YoY)으로 추정. CJ ENM의 2026년 PBR은 0.4배로 역사적 밸 류에이션 하단. 지속적인 밸류에이션 반등을 위해서는 ROE 개선 확인이 필요",
           "참고 1) 표지 재무지표에서 안정성 지표는 ‘부채비율’, 성장성 지표는 ‘매출 액 증가율’, 수익성 지표는 ‘ROE’, 활동성지표는 ‘총자산회전율,’ 유동성지표는 ‘유동비율’임. 2) 표지 밸류에이션 지표 차트는 해당 산업군내 동사의 상대적 밸류에이션 수준을 표시. 우측으로 갈수록 밸류에이션 매력도 높음."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -519,7 +1254,8 @@
           "정지~승인 소 요 기간은 고리 2호기 31.2개월, 고리 3호기 24.9개월, 고리 4호기 14.7개월 로 축소되었음.",
           "전체 심사 기간(주기적 안전성평가보고서(PSR) 제출 후 최종 계속운전 승인까지) 43~49개월은 줄지 않았으나, 수명 만료 전 빠른 심사 신 청, 동일 부지 내 원전의 일괄 승인 등을 통해 만료 후 잔여 심사 기간(수명 만료 정지일 ~ 최종 승인일)이 축소되었음 주기적 안전성평가보고서 제출일 이후 총 심사 기간을 49개월로 가정할 경 우, 한빛 1호기는 18~19개월, 한빛 2호기는..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-24",
@@ -536,7 +1272,562 @@
         "summary": [
           "불확실성의 시대, 가장 확실한 성장 스토리"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "한컴",
+        "stock_code": "030520",
+        "title": "P/E 10배에 얹힌 AI 옵션",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98451",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261124_company_720512000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98451",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "본업은 AI 전환 진행 중. 현재는 비용 발생 구간",
+          "3Q26 별도 매출액은 483억원(YoY +9.6%)으로 성장을 이어갔으나, 영업이익은 97억원(YoY -21.0%)으로 감소함. AI 매출은 148억원으로 별도 매출의 30.7%까지 확대됐지만, 노마디안 출시를 앞둔 국내·미국 사전 광고비로 판관비가 36.6% 증가한 영향."
+        ],
+        "current_price": 12700.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "씨에스윈드",
+        "stock_code": "112610",
+        "title": "NDR 후기: 이제는 긍정적 변화에 집중",
+        "target_price": "66,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "한화투자증권",
+        "report_idx": "naver_98448",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261124_company_551813000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98448",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "미국 타워 사업이 이끄는 2027년 성장",
+          "2027년에는 타워 중심의 실적 성장이 이어질 전망이다. 미국 타워 법인은 고객사와의 Capacity Agreement 체결을 통해 올해 대비 약 10% 증가한 내년 생산 물량을 확정했으며, 기존 1개사에 집중됐던 고객 기반도 다변화됐다. 추가적인 이익 개선은 자체 생산성 향상이 관건이다. 타워 부문은 3분기 실적에서 이미 AMPC를 제외하고도 5% 수준의 경상적인 이익률을 달성했으며,..."
+        ],
+        "current_price": 39200.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "모나용평",
+        "stock_code": "070960",
+        "title": "단기 분양 실적보다 지속될 개발에 주목",
+        "target_price": "2,500",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98447",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261124_company_975553000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98447",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "단기 실적 변동성은 있겠으나 변함없는 방향성",
+          "3Q26 매출액 515억원(+7.2% YoY)과 영업이익 74억원(+62.8% YoY, OPM 14.3%)을 기록하며 상대적으로 분양 공백이 발생했던 상반기 모습을 반전시키는 실적을 보였다. 2분기에 이어 3분기 루송채 잔여 물량에 대한 분양이 이어지며 3분기 분양 매출액 164억원(+61.3% YoY)를 기록했다.",
+          "용평 단지 내 개발보다는 올림픽 빌리지 2차 개발이 선제적으로 진행되는 등 개발 계획이 다소 변경되며 루송채 잔여 물량을 제외하고는 올해 매출 반영되는 분양 실적은 제한적일 전망이다. 다만 단기 분양 실적보다는 30년까지 꾸준하게 이어질 개발 건수들에 주목한다. 30년까지 꾸준히 이어질 단지 내 분양 건수는 결국 객실 수 증가로 이어져 운영 매출 성장의 기반이 되어줄 전망이다. 분양과..."
+        ],
+        "current_price": 1681.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "한미글로벌",
+        "stock_code": "053690",
+        "title": "2027년을 기대하며",
+        "target_price": "20,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98446",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261124_company_417259000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98446",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표주가 20,000원으로 하향",
+          "한미글로벌에 대해 투자의견 매수를 유지하고 목표주가는 20,000원으로 하향한다. 목표주가는 2027년 예상 EPS에 Target PER 9.1배를 적용했다. 2026년은 중동 전쟁에 따른 사우디 지역에서의 적자로 실적이 부진했고 이는 전사 이익 감소의 배경으로 작용했다. 반면 국내와 미국은 하이테크 부문에서의 수주가 계속 유입되고 있다. 특히 국내는 데이터센터와 재건축 물량도 많이 들..."
+        ],
+        "current_price": 14560.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "AP시스템",
+        "stock_code": "265520",
+        "title": "반도체 레이저 장비사로의 체질 변화",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98445",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261124_company_73387000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98445",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "AP시스템은 2017년 ㈜APS에서 인적분할하여 4월 재상장 하였으며 삼성디스플레이의 A3 투자 사이클시 ELA, LLO 등 핵심 공정장비로 큰 성장. 주력 OLED 장비는 전공정 ELA, LLO 장비와(매출비중 20%) 후공정 MDS, MLS 장비(매출비중 15%), 부품(매출 40%)이 주력 제품.",
+          "반도체는 급속열처리장비(Rapid Thermal Processing, RTP)는 짧은시간 이내에 웨이퍼를 고온으로 처리하는 공정과 레이저를 이용하여 캐리어에서 웨이퍼를 떼어내는 디본더 장비 제조기술을 보유하고 있음."
+        ],
+        "current_price": 13780.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "금호건설",
+        "stock_code": "002990",
+        "title": "3Q26 Review: 수익성 회복하며 컨센서스 부합",
+        "target_price": "11,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98444",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261124_company_273354000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98444",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 수익성 회복에 이어 외형 성장 기대",
+          "금호건설의 2026년 3분기 연결 매출액 4,945억원(YoY -5.5%)과 영업이익 222억원(YoY +44.2%)을 기록. 매출액과 영업이익 모두 시장 컨센서스 부합. 주택은 GPM 15.5% 기록하며 양호한 수익성 지속. 다만 일부 현장 인허가 지연으로 매출 전환이 늦어지며 주택 매출은 전분기 대비 감소. 토목은 GPM이 전분기 -3.4%에서 2.6%로 회복되며 전사 영업이익 증가..."
+        ],
+        "current_price": 9460.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "HL홀딩스",
+        "stock_code": "060980",
+        "title": "지분법 쇼크는 비현금성, 배당수익률은 7%",
+        "target_price": "40,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98443",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261124_company_363243000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98443",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "추가 하방은 제한적, 반등의 열쇠는 HL만도",
+          "HL홀딩스에 대한 투자의견 BUY를 유지하나, 자회사 지분가치 하락을 반영해 목표주가를 5.5만원에서 4.0만원으로 하향한다. 3분기 실적은 지분법이익 부진으로 기대치를 크게 하회했다. 최근 주가가 큰 폭으로 하락했지만, P/B 0.2배 중반의 낮은 Valuation과 7%의 기대 배당수익률, 자기주식 소각(2026년 108억원 완료, 2027년 100억원 예상)이 추가 하방을 제한할..."
+        ],
+        "current_price": 31950.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "LG유플러스",
+        "stock_code": "032640",
+        "title": "12월 전략 - 내년엔 2만원까지는 오를 것입니다",
+        "target_price": "20,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98442",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261124_company_822473000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98442",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "매수 의견 유지/TP 20,000원 유지, 현 가격대에선 매수가 정답",
+          "LGU+에 대한 투자의견 매수, 12개월 목표주가를 20,000원을 유지한다. 추천 사유는 1) 2026년 높은 이익 성장에 이어 2027년에도 이익 성장을 지속할 전망이고, 2) 2027년엔 올해대비 14% 증가한 DPS 800원 지급이 예상되며, 3) 장기 DPS 성장 기대감이 높아질 수 있음을 감안하면 2027년 실적 기준 5%를 상회하는 기대배당수익률 매력적이고, 4) 2027년..."
+        ],
+        "current_price": 14720.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "SK텔레콤",
+        "stock_code": "017670",
+        "title": "12월 전략 - 7만원 매수는 엄청난 기회입니다",
+        "target_price": "140,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98441",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261124_company_936222000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98441",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "매수/TP 14만원/11월 Top Pick 제시, 배당 가치만 봐도 주가 현저히 싸다",
+          "SKT에 대한 투자의견 매수, 12개월 목표주가 14만원을 유지한다. 더불어 국내 통신서비스 업종 12개월/12월 Top Pick으로 제시한다. 추천 사유는 1) 현 주가는 SKT 앤트로픽 보유 가치 및 데이터센터 가치를 반영하지 않은 수준이고, 2) 2027년 요금제 개편 논의 이후 이익/배당 성장 기대감이 높아진다고 가정하면 기대배당수익률 3% 수준까지 매수세 유입이 가능할 수 있어..."
+        ],
+        "current_price": 64600.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "KT",
+        "stock_code": "030200",
+        "title": "12월 전략 - 단기 호재는 없지만 가격은 너무 쌉니다",
+        "target_price": "76,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98440",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261124_company_965725000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98440",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표가 76,000원으로 유지, 업황 회복 감안한 매수 추천",
+          "KT에 대한 투자 의견 매수, 12개월 목표주가 76,000원을 유지한다. 추천 사유는 1) 곧 2027년으로 투자가들의 시각이 이동할 것인데 올해와 달리 내년도 KT 실적 전망은 낙관적이며, 2) 2028년도엔 다시 DPS 증가가 예상되고, 3) 최근 주가 하락으로 기대배당수익률이 5%를 상회하고 있어 장기 이익/배당 성장 기대감이 높아질 것임을 감안하면 매력적인 수준이며, 4) 20..."
+        ],
+        "current_price": 43900.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "감성코퍼레이션",
+        "stock_code": "036620",
+        "title": "달라질 27년 중국 매장 확대 속도",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유안타증권",
+        "report_idx": "naver_98438",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/18/20261124_company_228379000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98438",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 실적은 매출액 546.3억원, 영업이익 73.8억원으로 각각 전년대비 19.0%, 19.0% 개선되었다. 3Q26누적 실적은 매출액 1,716.8억원, 영업이익 259.5억원으로 3Q25누적 대비 각각 17.4%, 19.1% 성장하였다.",
+          "성장의 축은 의류사업(브랜드명: 스노우피크)이다. 3Q26 의류사업은 523.4억원으로 전년대비 20.5% 증가했다. 수출액 증가와 단체복 매출 개선에 기인한다. 주목해야 할 사항은 수출액이 큰 폭으로 개선되었다는 점이다. 일본, 대만, 중국으로 수출이 되고 있다. 3Q26 수출총액은 95.4억원으로 전년대비 76.2% 상향되었다. 특히 중국향 매출액이 3Q25 24.9억원에서 3Q26..."
+        ],
+        "current_price": 3310.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "한전KPS",
+        "stock_code": "051600",
+        "title": "언제나 마무리가 중요하다",
+        "target_price": "48,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98437",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261124_company_272720000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98437",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "언제나 마무리가 중요하다"
+        ],
+        "current_price": 32800.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "전진건설로봇",
+        "stock_code": "079900",
+        "title": "3Q26 Review: 수익성 개선 긍정적, 매출 회복 기대",
+        "target_price": "48,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98436",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261124_company_214589000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98436",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 전년동기 대비 매출액 감소 불구 영업이익은 증가.",
+          "최근(11/13) 발표한 3분기 실적(연결 기준)은 매출액 355억원, 영업이익 56억원으로 전년동기 대비 매출액은 21.0% 감소했으나, 영업이익은 13.1% 증가함. 시장 컨센서스(매출액 481억원, 영업이익 60억원) 대비 매출액은 하회하였지만 영업이익은 유사한 수준을 기록하였음.",
+          "국내는 물론 북미, 유럽 지역에서 실적 부진, 다만 수익성 개선은 긍정적.",
+          "3분기 실적이 부진했던 이유는 국내는 물론 북미, 유럽지역에서 콘크리트펌프 제품 매출이 전분기에 이어 감소세를 보이고 있기 때문임. ① 본사의 콘크리트펌프 제품 매출(매출 비중 84.7%)이 전년동기 대비 26.1% 감소했음. ② 지역별로 살펴보면, 국내는 전분기에 이어 전년동기 대비 6.8% 감소하였음. 북미 및 유럽 지역에서도 전년동기 대비 각각 7.4%, 84.1% 감소하였음. 다..."
+        ],
+        "current_price": 35550.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "인화정공",
+        "stock_code": "101930",
+        "title": "콥데이 후기: 이익률은 오르고, 환원은 늘고",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98435",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261124_company_402566000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98435",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "이익률 상승, 풍부한 순현금, 환원 강화",
+          "대형 2행정 선박엔진 구조물 국내 최대 생산업체. 투자포인트는 ① 단가 인상과 대형 엔진 비중 확대에 따른 2027년 영업이익률 상승 ② 시가총액의 80%에 달하는 순현금·투자자산 ③ 연결 영업이익 50% 이상의 주주환원. 2027년 물량 배정은 대부분 완료, 2028년 물량을 협의 중. 본업 영업이익 증가와 주주환원 확대가 동시에 진행되는 구간에 진입한 것으로 판단"
+        ],
+        "current_price": 6020.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "세미파이브",
+        "stock_code": "490470",
+        "title": "흑자전환 직전",
+        "target_price": "17,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98434",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261124_company_35409000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98434",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "수주잔고 2,455억원으로 확대, 이익 회복은 지연",
+          "IP·설계·양산을 묶은 AI ASIC 디자인 솔루션 기업. 3Q26 매출액 514억원(+23.2% YoY, 이하 생략), 영업적자 97억원으로 컨센서스(매출 518억원, 영업적자 66억원) 대비 적자 폭 확대. 북미 고객 IP 인도가 4분기로 밀려 IP 매출이 99억원(-38.7% QoQ)에 그친 결과. 반면 신규 수주 1,784억원(+437%)을 더해 수주잔고는 2,455억원으로 전기..."
+        ],
+        "current_price": 10830.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "엘앤씨바이오",
+        "stock_code": "290650",
+        "title": "리투오 수출 성장 가시성이 높아지는 시점",
+        "target_price": "26,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98431",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261124_company_356679000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98431",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "리투오, 내수 고성장에 더해지는 수출 본격화",
+          "리투오는 인체조직에서 추출한 세포외기질(ECM) 원료의 스킨부스터로 내수 미용의료 시장에 새로운 카테고리를 형성했다. 2024년 12월 출시 이후 매출은 2025년 연간 67억원 → 1Q26 81억원 → 2Q26 147억원 → 3Q26 170억원 → 4Q26E 205억원으로 빠르게 증가 중이다. 여기에 수출이 새로운 성장축으로 더해진다. 2025년 싱가포르와 일본을 시작으로 2026년..."
+        ],
+        "current_price": 20450.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "엑시콘",
+        "stock_code": "092870",
+        "title": "국산화를 넘어, 대량 공급의 시작",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98429",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261124_company_343958000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98429",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "CLT, 외산 장비 대체에서 신규 투자 수혜까지",
+          "삼성전자의 DRAM 검사장비 국산화가 본격화되면서 구조적 성장 국면에 진입했다. 핵심은 기존 어드반테스트 장비를 대체하는 CLT(챔버형 저주파 검사장비)다. 기존 장비의 동시 검사 수량이 512개인 반면, 동사 CLT는 최대 11,520개로 약 22.5배에 달한다. 생산성 개선뿐만 아니라 고객사 요구에 따른 소프트웨어 최적화가 가능하다는 점도 경쟁력이다. 특히 2027년 삼성전자의 베트..."
+        ],
+        "current_price": 51300.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "바이오노트",
+        "stock_code": "377740",
+        "title": "본업 성장과 기업가치 재평가 가능성",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "한국IR협의회",
+        "report_idx": "naver_98428",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261124_company_828863000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98428",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "바이오노트는 동물용 체외진단 제품 및 인체용 진단 원료 전문기업으로, 종합 동물진단 플랫폼 확대와 시약 반복 매출 기반 강화",
+          "미국 시장 성장: 미국법인 매출 고성장과 현지 생산체계 구축을 통한 글로벌 사업 확대 및 중장기 성장동력 확보",
+          "실적 개선 및 기업가치 제고: 2026년 영업이익 48.0% 증가 전망, 투자자산 활용과 주주환원 확대를 통한 기업가치 재평가 기대"
+        ]
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "고려아연",
+        "stock_code": "010130",
+        "title": "본격 성장은 28년 이후, 중장기 최선호주",
+        "target_price": "1,250,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98426",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_235400000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98426",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "26년 4분기까지 실적 둔화 불가피. 환율 및 귀금속 가격 하락에 따른 매출액 감소 및 Metal loss 효과가 지속되기 때문. 여기에 미국 등 해외 자회사의 일시적 적자 요인도 지속",
+          "그러나 26년 4분기를 바닥으로 실적 및 주가는 점진적으로 좋아질 것: 1) 귀금속 가격 턴어라운드: 종전 기대감 확산에 따른 유가 안정화 및 금리 하락 분위기가 귀금속 가격을 강력히 지지, 2) 27년 1분기 유의미한 실적 개선 전망. 귀금속을 포함한 주력 판매 품목 가격 안정화 및 원료인 정광에 적용되는 환율 하락 등",
+          "27년 실적은 환율 하락, 고금리 기조 및 일부 자회사 적자 기조 지속으로 26년 대비 부진할 전망. 27년 1) 게르마늄 및 [올인원 니켈 제련소] 배터리용 황산 니켈 등 신규 생산, 2) 구리 건식/습식 제련 증설 등 추가 증익 요인이 존재하나 정상 가동까지의 소요 기간 감안 시 실제 실적 기여도는 크지 않을 것. 미국 자회사 적자도 단기 실적에는 부담. 이에 본격 실적 성장은 28...",
+          "투자의견 Buy, 목표주가 125만원 유지. 단기 모멘텀 둔화에도 업종 내 가장 유망한 사업 모델을 영위하고 있음. 중장기 관점에서는 최선호주"
+        ],
+        "current_price": 792000.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "POSCO홀딩스",
+        "stock_code": "005490",
+        "title": "불확실한 시기 업종 내 대안주",
+        "target_price": "400,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98425",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_601285000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98425",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "27년 철강 부문의 의미 있는 개선은 만만치 않을 것. 1) 어려워진 수출 환경 : 높아진 무역 장벽으로 미국/EU 등 주력 시장에서의 성장 둔화 불가피. 또한 동남아/남미 등 관세 장벽이 상대적으로 낮은 지역에서는 중국산 등 타국과의 경쟁 심화로 높은 수익성을 기대하기 어려움, 2) 소비 위축 등으로 27년 내수 수요 부진 전망. 반도체 공장 등 민간 설비 투자는 증가할 것이나 수혜...",
+          "역시 주요 자회사 실적이 Key Factor. 27년에도 리튬 자회사 적자 폭 축소가 연결 실적 개선을 견인할 것. 구체적으로 1) 포스코 아르헨티나 연중 완전한 흑자 기조 전환: 제 1공장 인증 제품 확대 등을 통한 수익성 개선, 제 2공장 상업 생산 및 가동률 상향, 2) 포스코필바라리튬솔루션 적자 축소: 26년 인식했던 재고자산평가손실 효과 소멸 및 호주 정광 공급 확대 등으로 인...",
+          "투자의견 Buy와 목표주가 40만원 유지. 업종 내 차선호주로 추천. 지금과 증시 불확실성 국면에서는 밸류에이션 매력을 보유한 동사가 아웃퍼폼 할 수 있는 시기"
+        ],
+        "current_price": 259500.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "세아베스틸지주",
+        "stock_code": "001430",
+        "title": "27년 업종 최선호주 유지",
+        "target_price": "45,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98424",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_825011000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98424",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "27.1Q 까지 실적 모멘텀 둔화 전망. 8월부터 중국산 특수강 봉강 관세 부과 전 가수요 효과로 수입 물량이 급증했기 때문. 급증한 중국산 수입 물량 중 일부가 저가로 판매되면서 유통 가격도 최근 하락 중. 재고가 소진되는 27. 1Q까지 실적 모멘텀은 크지 않을 전망. 참고로 잠정덤핑방지관세 [25~27%]는 26년 12월 1일부터 27년 3월 31일까지 총 4개월간 부과. 열연강판...",
+          "동사 최대 강점은 업황과는 무관한 자체적인 성장 동력을 보유하고 있다는 점: 1) 원전 습식저장소 포화에 따른 CASK [사용 후 핵연료 저장장치] 수주 가능성 확대, 2) 27년 SGSI [연 STS 강관 2만톤 Capa] 상업 생산 시작, 3) 세아항공방산소재 27년 상반기 신공장 [연 770톤] 준공 등. 시장의 최대 관심사인 특수합금 생산법인 미국 SST는 현재 준공 완료 후 시...",
+          "27년 업종 최선호주. 투자의견 Buy와 목표주가 4.5만원 유지"
+        ],
+        "current_price": 31850.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "팬오션",
+        "stock_code": "028670",
+        "title": "벌크의 안정적인 이익과 탱커 선대 확대",
+        "target_price": "8,500",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98423",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_18651000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98423",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2027년 연결 매출액 8.5조원(+12.3% YoY), 영업이익 7,800억원(+7.2% YoY) 전망. 벌크 영업이익은 3,180억원으로 안정적인 이익 체력 유지 예상. 증익의 핵심은 탱커로, SK해운에서 인수한 VLCC 10척의 온기 실적 반영과 VLCC·MR 신조선 각각 2척의 인도 효과 기대. 탱커 영업이익은 2026년 1,500억원에서 2027년 2,330억원으로 증가하며 벌...",
+          "2027년 벌크 선복량 +4.3%, 물동량 +1.6%, 톤마일 +3.3% 증가 예상. 공급 증가율이 톤마일 증가율을 상회하나, 기니, 브라질발 장거리 화물 확대가 공급 부담을 일부 완화할 전망. 시만두 증산으로 기니 철광석 수출은 2026년 2,600만톤에서 2027년 5,700만톤으로 증가하고, 보크사이트 수출도 +7.5% 늘어날 것으로 예상. 중국의 브라질산 철광석 수입도 호주산보다...",
+          "투자의견 Buy와 목표주가 8,500원 유지. 목표주가는 12개월 선행 BPS에 Target P/B 0.64배를 적용. 현재 주가는 12개월 선행 P/E 4.9배, P/B 0.37배로 극단적인 저평가 구간으로 판단. 벌크의 안정적인 이익 체력과 탱커 선대 확대에 따른 증익을 감안하면 밸류에이션 매력은 높음"
+        ],
+        "current_price": 4875.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "CJ대한통운",
+        "stock_code": "000120",
+        "title": "실적 회복 예상되나, 단가 회복 시점은 여전히 불확실",
+        "target_price": "100,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98422",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_83856000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98422",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2027년 연결 매출액 14조3,790억원(+7.4% YoY), 영업이익 4,750억원(+6.2% YoY) 전망. 2026년에는 택배 단가 하락과 서비스 확대 비용, CL 수익성 둔화로 전사 영업이익이 12.0% 감소할 것으로 예상. 2027년에는 물동량 확대와 CL, 글로벌 부문의 이익 개선으로 실적 회복 전망. 다만 택배 물동량은 18.1억박스(+3.2% YoY), ASP는 2,24...",
+          "2027년 국내 택배 물동량은 74.2억박스(+8.0% YoY) 전망. 소형화, 분할 배송 확대가 시장 성장을 지지하나 쿠팡 성장 재가속으로 기존 택배사들의 성장 여력은 제한적. CJ대한통운도 단가 인하를 통해 물량·점유율 확대를 추진하며 한진, 롯데글로벌로지스와의 경쟁이 심화. 경쟁사들의 비택배 사업과 현금흐름을 감안하면 단기간 경쟁 완화는 어렵고, 택배 단가 역시 빠른 반등을 기대하...",
+          "투자의견 Buy 유지, 목표주가는 기존 110,000원에서 100,000원으로 하향. 현재 주가는 12개월 선행 P/E 7.7배, P/B 0.36배로 저평가 구간이나, 단가 회복 지연과 경쟁 심화로 이익 성장의 가시성이 불확실. 이를 반영해 Target P/B를 0.56배에서 0.51배 적용"
+        ],
+        "current_price": 69800.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "대한항공",
+        "stock_code": "003490",
+        "title": "유가 부담 완화와 합병 시너지 본격화",
+        "target_price": "40,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98421",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261124_company_395371000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98421",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2027년 연결 매출액 28.1조원(-2.3% YoY), 영업이익 2.2조원(+201.3% YoY) 전망. 국적사 여객기 증가율은 2026년 +3.2%에서 2027년 +1.0%로 둔화되는 반면 국제선 여객은 +5.4% 증가할 것으로 예상. 공급 확대 부담 완화로 기본운임 강세가 지속되고, 반도체발 수출 호조가 화물 운임도 지지할 전망. 2027년 항공유 가격은 배럴당 101달러로 현재...",
+          "2027년 아시아나항공 합병 시너지는 운임 통합, 환승 여객 증가, 비용 절감에서 발생할 전망. 아시아나 운임이 대한항공 수준으로 상승하되 기존 발권분을 감안해 첫해 적용률 75%, 증분 매출의 이익 전환율 80%를 가정하면 운임 효과는 5,818억원으로 추정. 미주, 유럽이 각각 2,250억원, 2,513억원을 차지. 미주 증편과 아시아 연결편 조정으로 환승 수요를 확보하고, 양사 미..."
+        ],
+        "current_price": 31300.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "코미코",
+        "stock_code": "183300",
+        "title": "뿌린 대로 거두리라",
+        "target_price": "22,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98420",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261124_company_757519000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98420",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "웨이퍼 생산량 증가는 매출 확대의 토양",
+          "코미코는 반도체 장비 부품 세정 및 코팅 서비스 업체로, 삼성전자와 SK하이닉스를 비롯한 글로벌 칩메이커에 서비스를 제공하고 있다. 식각 및 증착 공정 중 부품 표면에 쌓인 오염물질은 웨이퍼 불량을 유발할 수 있어 부품을 주기적으로 세정하고 코팅을 보강해야 한다. 코미코의 세정 및 코팅 물량과 매출은 웨이퍼 생산량과 밀접하게 움직여 왔다. 웨이퍼 생산량 증가에 힘입어 2026년 매출액은..."
+        ],
+        "current_price": 16670.0
+      },
+      {
+        "date": "2026-11-24",
+        "stock_name": "제주항공",
+        "stock_code": "089590",
+        "title": "성수기 흑자 전환, 결손금도 털었다",
+        "target_price": "8,000",
+        "target_change": "유지",
+        "opinion": "중립",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98419",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261124_company_996322000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98419",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 영업이익 559억원, 컨센서스 크게 상회",
+          "3Q26 연결 매출액은 4,978억원(+28.2% YoY), 영업이익은 559억원(흑자전환)으로 컨센서스(영업이익 40억원)를 크게 웃돌았다. 국제선 Yield가 89원(+39.1% YoY)으로 오르고 탑승률이 90.2%(+6.8%p YoY)로 높아졌다. 외화환산이익과 항공기 처분이익으로 지배주주 순이익은 1,959억원을 기록했고, 1~3분기 누적 1,634억원으로 결손금을 해소했다."
+        ],
+        "current_price": 7820.0
       }
     ],
     "2026-11-23": [
@@ -559,7 +1850,8 @@
           "2027년 벌크 선복량 +4.3%, 물동량 +1.6%, 톤마일 +3.3% 증가 예상. 공급 증가율이 톤마일 증가율을 상회하나, 기니, 브라질발 장거리 화물 확대가 공급 부담을 일부 완화할 전망. 시만두 증산으로 기니 철광석 수출은 2026년 2,600만톤에서 2027년 5,700만톤으로 증가하고, 보크사이트 수출도 +7.5% 늘어날 것으로 예상. 중국의 브라질산 철광석 수입도 호주산보다...",
           "투자의견 Buy와 목표주가 8,500원 유지. 목표주가는 12개월 선행 BPS에 Target P/B 0.64배를 적용. 현재 주가는 12개월 선행 P/E 4.9배, P/B 0.37배로 극단적인 저평가 구간으로 판단. 벌크의 안정적인 이익 체력과 탱커 선대 확대에 따른 증익을 감안하면 밸류에이션 매력은 높음 벌크의 안정적인 이익과 탱커 선대 확대 Buy(Maintain) 목표주가(12M)..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -580,7 +1872,8 @@
           "2027년 국내 택배 물동량은 74.2억박스(+8.0% YoY) 전망. 소형화, 분할 배송 확대가 시장 성장을 지지하나 쿠팡 성장 재가속으로 기존 택배사들의 성장 여력은 제한적. CJ대한통운도 단가 인하를 통해 물량·점유율 확대를 추진하며 한진, 롯데글로벌로지스와의 경쟁이 심화. 경쟁사들의 비택배 사업과 현금흐름을 감안하면 단기간 경쟁 완화는 어렵고, 택배 단가 역시 빠른 반등을 기대하...",
           "투자의견 Buy 유지, 목표주가는 기존 110,000원에서 100,000원으로 하향. 현재 주가는 12개월 선행 P/E 7.7배, P/B 0.36배로 저평가 구간이나, 단가 회복 지연과 경쟁 심화로 이익 성장의 가시성이 불확실. 이를 반영해 Target P/B를 0.56배에서 0.51배 적용 실적 회복 예상되나, 단가 회복 시점은 여전히 불확실 Buy(Maintain) 목표주가(12M)..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -600,7 +1893,8 @@
           "2027년 연결 매출액 28.1조원(-2.3% YoY), 영업이익 2.2조원(+201.3% YoY) 전망. 국적사 여객기 증가율은 2026년 +3.2%에서 2027년 +1.0%로 둔화되는 반면 국제선 여객은 +5.4% 증가할 것으로 예상. 공급 확대 부담 완화로 기본운임 강세가 지속되고, 반도체발 수출 호조가 화물 운임도 지지할 전망. 2027년 항공유 가격은 배럴당 101달러로 현재...",
           "2027년 아시아나항공 합병 시너지는 운임 통합, 환승 여객 증가, 비용 절감에서 발생할 전망. 아시아나 운임이 대한항공 수준으로 상승하되 기존 발권분을 감안해 첫해 적용률 75%, 증분 매출의 이익 전환율 80%를 가정하면 운임 효과는 5,818억원으로 추정. 미주, 유럽이 각각 2,250억원, 2,513억원을 차지. 미주 증편과 아시아 연결편 조정으로 환승 수요를 확보하고, 양사 미..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -622,7 +1916,8 @@
           "27년 실적은 환율 하락, 고금리 기조 및 일부 자회사 적자 기조 지속으로 26년 대비 부진할 전망. 27년 1) 게르마늄 및 [올인원 니켈 제련소] 배터리용 황산 니켈 등 신규 생산, 2) 구리 건식/습식 제련 증설 등 추가 증익 요인이 존재하나 정상 가동까지의 소요 기간 감안 시 실제 실적 기여도는 크지 않을 것. 미국 자회사 적자도 단기 실적에는 부담. 이에 본격 실적 성장은 28...",
           "투자의견 Buy, 목표주가 125만원 유지. 단기 모멘텀 둔화에도 업종 내 가장 유망한 사업 모델을 영위하고 있음. 중장기 관점에서는 최선호주 본격 성장은 28년 이후, 중장기 최선호주 Ⅳ. 기업분석 - 고려아연(010130)"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -644,7 +1939,8 @@
           "투자의견 Buy와 목표주가 40만원 유지. 업종 내 차선호주로 추천. 지금과 증시 불확실성 국면에서는 밸류에이션 매력을 보유한 동사가 아웃퍼폼 할 수 있는 시기 불확실한 시기 업종 내 대안주 Ⅳ. 기업분석 - POSCO홀딩스(005490)",
           "단기 악재 [SMM 재고 이슈, EU의 중국산 PHEV 수입 제한, 중국의 ESS 배터리 공급 과잉 이슈] 가 몰리면서 최근 리튬 가격 급락"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -665,7 +1961,8 @@
           "동사 최대 강점은 업황과는 무관한 자체적인 성장 동력을 보유하고 있다는 점: 1) 원전 습식저장소 포화에 따른 CASK [사용 후 핵연료 저장장치] 수주 가능성 확대, 2) 27년 SGSI [연 STS 강관 2만톤 Capa] 상업 생산 시작, 3) 세아항공방산소재 27년 상반기 신공장 [연 770톤] 준공 등. 시장의 최대 관심사인 특수합금 생산법인 미국 SST는 현재 준공 완료 후 시...",
           "27년 업종 최선호주. 투자의견 Buy와 목표주가 4.5만원 유지 27년 업종 최선호주 유지 Ⅳ. 기업분석 - 세아베스틸지주(001430)"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -686,7 +1983,8 @@
           "외형 부진은 원화강세와 고객 사의 Site 설치 일정 변경에 따른 게이트웨이(약 100억원) 출하 및 Eutelsat Oneweb(이사 Eutelsat) 의 군용 맨팩 제품 재고조정에 따른 ESA 출하 시점 조정에 기인한다.",
           "수익성은 부진한 외형과 8월부 터 가동을 시작한 미국 생산 법인 램프업 비용 등에 따른 고정비 증가가 부담으로 작용했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -705,7 +2003,8 @@
         "summary": [
           "금융투자분석사의 확인 및 중요 공시는 Appendix 참조 목표주가 27,000원 (M) 직전 목표주가 27,000원 현재주가 (11/20) 16,310원 시가총액 2,595억원 총발행주식수 15,910,775주 60일 평균 거래대금 6억원 60일 평균 거래량 32,503주 52주 고/저 21,400원 / 15,450원 주요주주 강원호 외 15 인 주가수익률 (%) 1개월 3개월 12개..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -724,7 +2023,8 @@
         "summary": [
           "금융투자분석사의 확인 및 중요 공시는 Appendix 참조 목표주가 97,000원 (D) 직전 목표주가 120,000원 현재주가 (11/20) 62,100원 시가총액 8,572억원 총발행주식수 13,802,780주 60일 평균 거래대금 12억원 60일 평균 거래량 18,081주 52주 고/저 97,700원 / 59,800원 외인지분율 15.88% 주요주주 종근당홀딩스 외 5 인 주가수익..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -745,7 +2045,8 @@
           "3분기 상대적으로 저조 했던 실적에 대한 우려를 단숨에 해소한 것이다.",
           "3분기 실적 이 방문객이나 드롭액의 부진이 아니라 홀드율에 따른 변화였음을 감안한다면, 대수의 법칙을 따르는 카지노 홀드율은 결국 평균으로 회귀한다는 점에서 크게 우려할 만한 요 인은 아니었다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -766,7 +2067,8 @@
           "지난해 같은 기간 대비 8.3% 늘어난 수치다.",
           "두 개 분기 연속으로 THAAD 배치 이전 기록을 넘어서면서 이제는 새로운 역사를 쓰는 구간으로 진입하고 있다는 판단이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -787,7 +2089,8 @@
           "2027 년 지배주주순이익은 6.85 조원(YoY +3.4%), ROE 는 10.9%로 전망한다.",
           "불안정한 시장 환경에서 안정적인 선택지로서 최선호주로 제시한다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -808,7 +2111,8 @@
           "2027 년 지배주주순이익은 3.56 조원으로 전년 대비 8.8% 증가하며 업종 내 가장 높은 이익 성장률을 기록할 전망이다.",
           "또한, 그동안 비은행 이익 기여도가 낮다는 점이 디스카운트 요인이었다면, 2027년에는 증권업 기저 부담이 제한적이어서 오히려 우위로 작용할 것이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -827,7 +2131,8 @@
           "투자포인트: 1) 중국 수출 회복과 호주법인 성장: 한국법인 수출은 중국 직구 규제 강화로 일시 감소했으나 3Q26을 기점으로 회복되고, 호주법인은 최대 고객사 'Swisse'의 오메가3 물량 회복으로 3개 분기 연속 60% 이상 성장. 2027년에는 미국·유럽 신규 고객사 매출이 더해지며 해외 성장이 이어질 전 망, 2) 신유통 채널 주도의 내수 성장: 올리브영·다이소 등 신유통 채널...",
           "2026F PER 1.8배(일회성 이익 제외 5.5배)·PBR 0.9배로 국내 건강기능식품 ODM 피어와 비슷한 수준. 3Q26 수출 감소에 따른 실적 우려에 업종 할 인 요인(낮은 성장성·수익성, 높은 이익 변동성)이 더해진 결과로 판단. 단기적으로는 중국 수출 반등에 따른 이익 회복이, 중장기적으로는 수출 지역 다변 화에 따른 이익 변동성 할인 완화가 재평가 요인으로, 지역 다변화가..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-23",
@@ -848,7 +2153,395 @@
           "여기에 더해 동사의 자체적인 시장 점유율 확대와 수율 향상에 따 른 생산 효율성 개선이 맞물리며 17개 분기 만에 두 자릿수 영업이익률을 회복하는 동시에 분할 상장 이후 최대 실적을 경신했다.",
           "4Q26 Preview: 북미향 본격 출하 시작 4Q26 실적은 매출액 1,826억원(+196.9% YoY), 영업이익 172억원(흑자전환 YoY) 을 전망한다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "두산테스나",
+        "stock_code": "131970",
+        "title": "NDR 후기: 계획대로 탄탄하게",
+        "target_price": "100,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98415",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261123_company_730425000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98415",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액 734억 원, 영업이익 10억 원",
+          "두산테스나의 3Q26 실적은 매출액 734억원(YoY -11.8%), 영업이익 10억원(YoY -78.1%, OPM 1.4%)을 기록. 컨센서스 하회의 핵심은 SET 출하 부진 및 파운드리 생산 스케줄링에 따른 영향으로 파악. 높아진 메모리 가격으로 인한 SET 부진은 동사의 세부 부문 중 CIS, AP 단의 악영향을 준 것으로 파악. 최근 상승세를 견인해온 Auto 부문 또한 파운드리..."
+        ],
+        "current_price": 66600.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "메디톡스",
+        "stock_code": "086900",
+        "title": "3Q26 Review: 이익률 개선의 길",
+        "target_price": "100,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98414",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261123_company_333573000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98414",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 매출액 593억원, 영업이익 155억원",
+          "3Q26 매출액 593억원 (YoY -2.9%, QoQ -13.7%), 영업이익 155억원 (YoY +72.2%, OPM +26.1%)을 기록하며 영업이익 컨센서스 상회",
+          "수출 톡신 209억원 기록하며 전년동기대비 16.8% 성장. 뉴럭스 승인국가 확대 및 판매 시작됨에 따라 3공장 가동 시작. ROW 국가 확장에 따른 글로벌 시장 다변화 또한 진행 중. 해외 필러 매출은 146억원 기록하며 전년동기대비 55.3% 성장. 수익성 개선을 위해 판매 채널 정비 과정에서 발생한 매출 조정. 중국 필러 시장 진출 시 성장세 재 입증 가능할 것으로 추정. 국내의...",
+          "신제품 ‘누비쥬’ 출시에 따른 신규 성장 동력 확보. 9월 기준 출시 6개월만에 누적 판매 3만 바이알 돌파. 누비쥬의 경우 최초의 콜산 성분 지방개선주사제. 콜산 계열은 경쟁 제품 대비 다운타임 감소된 제품으로 국내 지방개선주사제 시장 성장에 기여할 것으로 판단"
+        ],
+        "current_price": 69200.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "삼립",
+        "stock_code": "005610",
+        "title": "바닥 통과 중",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98413",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261123_company_845264000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98413",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 바닥 통과 중",
+          "3분기 연결 매출액 및 영업이익은 각각 8,234억원(YoY -5%), 19억원(YoY -79%) 시현.",
+          "[베이커리] 매출액 2,117억원(YoY -1%, QoQ -4%), 영업이익 22억원(YoY -63%, QoQ -12%) 시현. 매출액은 SKU 효율화(약 -21%) 및 영업일수 감소로 QoQ 감소했으나, 포켓몬빵, 호떡, 디저트 등 주요 카테고리는 성장 흐름인 것으로 파악됨. 영업이익은 교대제 개편, 설비투자, 원재료 부담으로 YoY 부진했으나, QoQ로는 점진적 회복 국면임. 동사의...",
+          "[푸드] 매출액 1,607억원(YoY -15%, QoQ -7%), 영업이익 -21억원(YoY, QoQ 적지) 시현. 저수익 SKU 합리화, 육가공 B2C 철수 진행 영향으로 부진했으나, 영업적자는 전분기대비 축소된 점 긍정적."
+        ],
+        "current_price": 39350.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "에스엘",
+        "stock_code": "005850",
+        "title": "실적도 바닥, 밸류에이션도 바닥",
+        "target_price": "60,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98412",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261123_company_952715000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98412",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "P/E 5배, 기대 배당수익률 7% 등이 하방을 제한",
+          "에스엘에 대한 투자의견 BUY를 유지한 가운데, 목표주가는 8.5만원에서 6.0만원으로 하향한다. 3분기 실적부진을 반영한 2026년/2027년 실적추정을 하향하고, 목표 P/E도 실적 변동성 확대를 반영하여 10배에서 8배로 조정했기 때문이다. 3분기 실적은 외형 성장에도 전자 부품들의 원가 상승과 환율 급락에 따른 수출 채산성 하락 등으로 기대치를 크게 하회했다. 다만, 주가가 단기..."
+        ],
+        "current_price": 35600.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "진성티이씨",
+        "stock_code": "036890",
+        "title": "3Q26 Review: 매출은 견조, 비용은 부담",
+        "target_price": "14,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98411",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261123_company_854905000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98411",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수 유지, 목표주가 14,000원으로 -22.2% 하향 조정",
+          "27년 기말 지배주주 BPS에 Target PBR 0.9배 적용해 목표주가 산출. 실적 추정치 및 고금리 환경을 반영해 멀티플 또한 하향 조정. 동사는 잉여현금흐름이 지속 증가하는 기업으로 26년 배당성향 20% 유지 전망, 배당수익률은 4.1%로 투자의견 매수 유지"
+        ],
+        "current_price": 8620.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "전진건설로봇",
+        "stock_code": "079900",
+        "title": "3Q26 Review: 중동 전쟁 및 비용 부담 지속",
+        "target_price": "46,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98410",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261123_company_157011000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98410",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수 및 목표주가 46,000원으로 8.0% 하향 조정",
+          "27년 기말 지배주주 BPS에 Target PBR 4.0배를 적용해 목표주가 산출. 중동 전쟁 지속에 따라 실적 불확실성이 증대되고 있는 국면으로 실적 추정치 하향을 통해 목표주가 또한 하향 조정. 27년 종전에 따른 실적 개선을 기대하며 투자의견은 매수 유지"
+        ],
+        "current_price": 39050.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "가온전선",
+        "stock_code": "000500",
+        "title": "부스덕트/배전케이블 고성장은 시작일 뿐",
+        "target_price": "300,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98409",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261123_company_199771000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98409",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "목표주가 300,000원으로 하향. 미국 AIDC 건설 불확실성 해소 필요",
+          "목표주가를 300,000원(2030년 예상 EPS에 PER 22배 적용)으로 하향. 목표주가는 글로벌 전선/통신선 Peer의 밸류에이션 하락 반영, 6개월 목표주가 현실화 등을 반영해 하향 조정했음. 주가 상승 재개를 위해서는 미국 AI데이터센터 및 전력 인프라 건설 지연 불확실성 해소 필요. 1) 2027년 상반기 내 미국 주지사 및 하원의원들의 행정, 입법화 등을 통한 AI데이터센터..."
+        ],
+        "current_price": 218500.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "GKL",
+        "stock_code": "114090",
+        "title": "中 한한령 해지 수혜 기대",
+        "target_price": "11,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유안타증권",
+        "report_idx": "naver_98405",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/18/20261123_company_296385000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98405",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액 +0.3% yoy, 영업이익 -44.4% yoy",
+          "3Q26 연결 기준 매출액은 1,097억원(+0.3% yoy), 영업이익은 96억원(-44.4% yoy)으로 컨센서스 154억원을 크게 하회하는 실적을 기록하였다. 3Q26 매출액은 전년 동기와 유사한 수준을 기록했으나, 영업비용이 80억원 YoY 증가하며 영업이익이 큰 폭으로 감소하였다. 매출원가 단에서는 호텔 ADR 상승과 유류할증료 인상에 따른 항공비 부담 확대로 콤프비용이 증가했...",
+          "총 드롭액은 9,903억원으로 전년동기대비 +1.7% 상승, 객당 드롭액 1,577만원(-10.5% yoy), 홀드율 11.1%pt(-0.1%pt, yoy), 카지노 이용객 수는 5.3만명(+15.1% yoy)을 기록하였다. 객당 드롭액 전년비 감소에도 카지노 이용객 수가 15.1% 증가하며 드롭액을 방어했다. 국적별로는 일본(+20.9% yoy), 기타 (+18.8% yoy), 중국(..."
+        ],
+        "current_price": 7650.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "인텔리안테크",
+        "stock_code": "189300",
+        "title": "매출 이연으로 인한 3분기 실적 부진",
+        "target_price": "100,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98402",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261123_company_40014000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98402",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3분기 매출액 762억원(-21.7%qoq, -1.4%yoy), 영업손실 28억원(적자전환yoy)으로 컨센서스(매출액 944억원, 영업이익 58억원)를 크게 하회함",
+          "매출 부진은 수요 훼손보다 출하 시점 이연에 기인함. 고객사 사이트 설치일정 조정으로 게이트웨이 매출이 축소(-25%qoq)됐고, 군용 납품 일정 역시 4분기로 밀리며 Mil/Gov 매출이 급감함(-80%qoq). 해당 물량의 상당부분은 4분기로 이연될 전망. 반면 해상용 ESA(+47%yoy)와 상업용 Land ESA(전분기 대비 2배 이상)는 성장세를 유지함",
+          "수익성 훼손의 핵심은 제품 믹스 악화. 판가가 높은 군용 물량이 빠지며 매출총이익률은 37.5%(-4.0%p qoq, -2.0%p yoy)로 하락했고, 판관비는 313억원(-6.0%qoq)으로 절감됐으나 매출 감소분을 흡수하기에는 부족했음. 순손실 244억원은 외환손익 -161억원, 금융상품손익 -25억원, 순이자 -18억원 등 영업외손익 -209억원에 기인한 것",
+          "4분기는 분기 최대 매출을 기록할 것으로 전망함. 유텔샛 신규 대형 PO가 연말 납기로 반영되고, 스타링크 의존도를 낮추려는 유럽군의 맨팩 긴급 수요가 출하로 연결되고 있음. 게이트웨이 또한 Company A Gen1과 AST Gen2 출하가 동시에 진행되며 3분기 이연 물량이 더해져 내부 목표를 상회할 전망. 12월 맨팩 증산과 2027년 1분기 FPA 생산계획 상향을 감안하면 연간..."
+        ],
+        "current_price": 41050.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "에스엔시스",
+        "stock_code": "0008Z0",
+        "title": "외형 성장과 고객 다변화, 증설로 도약",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98401",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261123_company_944661000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98401",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "숨 고른 3분기, 중국 공장 가동과 육상 배전반 본격화",
+          "3분기 매출액은 파워솔루션 납품 확대에 힘입어 전년 동기 대비 20.3% 성장. 상여금 및 해외 법인 설립·신사업 관련 비용, 재고자산평가손실 반영으로 영업이익은 전분기대비 감소. 중국 난통공장 가동, 육상 배전반, 증설을 발판으로 2027년 실적 레벨업 기대, 비중 확대 전략 유효"
+        ],
+        "current_price": 16910.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "디오",
+        "stock_code": "039840",
+        "title": "7개 전략국가 성장세로 내년 사상 최대 매출 가시화",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "iM증권",
+        "report_idx": "naver_98400",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/61/20261123_company_409498000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98400",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "올해 4분기 재차 중국 매출 정상화 되면서 사상 최대 분기 매출 기록할 듯",
+          "올해 3분기 동사 K-IFRS 연결기준 실적의 경우 매출액 383억원(-7.6% YoY, -14.7% QoQ), 영업이익 21억원(-49.8% YoY, -52.3% QoQ)으로 컨센서스를 하회하였다. 이는 중국 내 판매용 일부 제품이 비정상 유통경로를 통해 유입되면서 현지 공식 유통 채널의 매출이 일시적으로 감소한 영향을 받았기 때문이다.",
+          "이에 대하여 동사는 국내 판매용 제품의 중국 내 인허가를 정리하는 등 비정상 유통경로 등을 차단시키는 조치가 이루어지면서 재차 중국 매출이 정상화 되고 있는 중이다. 즉, 중국 내 월 매출의 경우 7월 14억원, 8월 18억원으로 주춤하였으나 비정상 유통경로 등을 차단시키는 조치 시행 이후 9월 34억원, 10월 36억원으로 증가하는 등 정상화되고 있다.",
+          "이에 따라 올해 4분기 동사 K-IFRS 연결기준 매출액 493억원(+5.6% YoY, +28.7% QoQ), 영업이익 51억원(+264.3% YoY, +142.9% QoQ)으로 예상되면서 실적개선이 가속화 될 것이다. 무엇보다 해외 전략국가들의 매출 증가가 지속되는 가운데 중국 매출 정상화로 사상 최대 분기 매출이 예상된다."
+        ],
+        "current_price": 8280.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "오리온",
+        "stock_code": "271560",
+        "title": "글로벌 수요가 만드는 성장의 선순환",
+        "target_price": "160,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98399",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261123_company_74236000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98399",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "글로벌 수요가 만드는 성장의 선순환"
+        ],
+        "current_price": 117400.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "AJ네트웍스",
+        "stock_code": "095570",
+        "title": "든든한 국밥을 찾으신다면",
+        "target_price": "6,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98398",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261123_company_942838000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98398",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "우호적인 전방 수요와 미국 법인 체질 개선",
+          "아픈 손가락이던 미국 법인의 사업 초점은 기존의 산업장비 렌탈에서 ESS 배터리팩 포장·운송으로 이동. 주 고객인 LG에너지솔루션의 ESS 출하량 확대에 따라 회수용 파렛트 및 현지 운송 수요 동반 증가 예상. 시장 변동성 확대 속 배당주로서 상대적 투자 매력도 부각 기대"
+        ],
+        "current_price": 3975.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "코스모신소재",
+        "stock_code": "005070",
+        "title": "필름이 버티고, 양극재가 올라온다",
+        "target_price": "34,000",
+        "target_change": "하향",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98397",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261123_company_961834000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98397",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "26년 3분기, 외형성장 지속, 환율과 고정비 부담으로 수익성은 둔화",
+          "코스모신소재의 3Q26 매출액은 1,441억원(QoQ +4.7%), 영업이익은 18억원(QoQ -60.8%), OPM은 1.3%(QoQ -2.1%p)를 기록했다. 양극재 출하량은 전분기와 유사한 가운데 MLCC 이형필름 판매가 소폭 증가하며 외형 성장을 이어갔으나, 수출 비중이 높은 사업 구조에서 원/달러 환율 하락이 원화 환산 매출과 수익성에 부담으로 작용했다. 여기에 신규 증설 자산..."
+        ],
+        "current_price": 29700.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "세미파이브",
+        "stock_code": "490470",
+        "title": "Spec to Silicon",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "SK증권",
+        "report_idx": "naver_98396",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/64/20261123_company_254237000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98396",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "삼성 파운드리 진영의 Spec-to-Silicon 턴키 파트너",
+          "세미파이브는 2019 년 SiFive 에서 출발한 삼성 파운드리 DSP 로, 칩 스펙 정의·IP 선정부터 프론트엔드/백엔드 설계, 패키징·테스트·SW, 양산 공급까지 일괄 수행한다. TSMC 진영의 Broadcom·Alchip·GUC 에 대응하는 포지션으로, 삼성 파운드리를 택한 AI 팹리스·세트 업체가 프론트엔드부터 맡길 수 있는 국내 대표 턴키 파트너다."
+        ],
+        "current_price": 11160.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "CJ",
+        "stock_code": "001040",
+        "title": "올리브영에 대한 믿음은 지속",
+        "target_price": "152,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98394",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261123_company_759965000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98394",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수 유지, 목표주가 152,000원으로 하향",
+          "목표주가는 NAV 8조 7,688억원에서 구형우선주를 차감하고 목표 할인율 45.1%를 적용한 152,000원(기존 166,000원)으로 하향한다. 33%의 상승여력으로 매수의견을 유지한다.",
+          "올리브영 2026년 예상 EBITDA를 1조 348억원(기존 1조 1,536억원)으로 낮추고, 국내 유통·K뷰티, 유통 PEER를 반영해 배수를 9.0배로 조정했다. 올리브영 합병은 결의 공시 전으로 확정되지 않아 반영하지 않았다. 다만 2026년 12월 9일 시행되는 공정가액 합병 제도는 향후 합병 시 합병비율 산정 기준을 바꾼다. 영업외 비용 부담은 리스크요인이나 주가 조정은 장기적..."
+        ],
+        "current_price": 114200.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "LS",
+        "stock_code": "006260",
+        "title": "고성장에도 지속되는 NAV 하락",
+        "target_price": "291,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98393",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261123_company_271617000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98393",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수 유지, 목표주가 291,000원으로 하향",
+          "목표주가는 2026년 11월 19일 종가 기준 NAV 13조 1,309억원에 목표 할인율 39.4%를 적용한 291,000원(기존 452,000원)으로 하향한다. 60%의 상승여력으로 매수의견을 유지한다.",
+          "NAV 감소는 LS일렉트릭 주가 하락(지분가치 8조 7,810억원), LS엠앤엠 이익 하향, 비상장 자회사 평가의 EV 기준 정비(NAV 1조 1,458억원 감소) 때문이다. 목표 할인율은 39.4%로 낮췄다. 비상장 자회사 평가 방식 변경, 비상장 자산의 검증 가능성 점수, 할인율 산출식 교정을 반영했다. LS엠앤엠 제련수수료와 상장 자회사 주가 변동은 리스크요인이다."
+        ],
+        "current_price": 182000.0
+      },
+      {
+        "date": "2026-11-23",
+        "stock_name": "두산퓨얼셀",
+        "stock_code": "336260",
+        "title": "탐방노트: 흑자로 가는 길",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98392",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261123_company_310943000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98392",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "높은 비용 부담, 이제는 끝이 보인다",
+          "향후 두산퓨얼셀은 전 사업 영역에서 비용 부담이 완화될 것으로 예상된다. 1) PAFC의 주요 원재료인 백금 가격이 하락하고 있고, 2) 서비스 사업에서는 셀스택 조기 교체가 2027년 상반기에 마무리될 예정이며, 3) SOFC 수율 개선을 통해 원재료비 부담이 완화될 것으로 전망되기 때문이다."
+        ]
       }
     ],
     "2026-11-20": [
@@ -869,7 +2562,8 @@
         "summary": [
           "금융투자분석사의 확인 및 중요 공시는 Appendix 참조 목표주가 97,000원 (M) 직전 목표주가 97,000원 현재주가 (11/19) 35,250원 시가총액 3,225억원 총발행주식수 9,511,000주 60일 평균 거래대금 65억원 60일 평균 거래량 148,259주 52주 고/저 72,500원 / 24,650원 주요주주 김상균 외 7 인 주가수익률 (%) 1개월 3개월 12개..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -891,7 +2585,8 @@
           "오히려 기회 요인으로 본다. 데이터센터가 전력 공급 방식을 내재화하지 않으면 인허가를 받기 어려워지는 흐름이기 때문이다. 소형원전이나 가스터빈은 도시 인근 설치 시 전기요금과 환경 문제로 주민 반발이 크지만, SOFC 는 배출물이 전기와 물 에 그쳐 수용성 측면에서 유리하다. Q2. 반도체 패키징 업체가 SOFC 장비를 수주하게 된 배경은?",
           "블룸에너지가 생산능력을 확대하는 과정에서 반도체 업계 출신 엔지니어를 다수 영입했고, 이들이 동사를 추천한 것이 계기가 됐다. 이후 국내외 4 개사가 참여한 입 찰에서 단독으로 선정됐다. Q3. 향후 공급 업체 이원화 가능성은?"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -911,7 +2606,8 @@
           "힌지 매출액이 예상 대비 크게 부진한 영향이다.",
           "소비 위축에 따른 영향과 메모리 등 원가 상승으로 폴더블 판매량 이 기대에 못 미친 영향이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -928,7 +2624,8 @@
         "summary": [
           "업황 개선 사이클과 안정적인 주주환원 모두 기대 가능"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -945,7 +2642,8 @@
         "summary": [
           "전자 배당의 주주환원 활용 여부가 관건"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -962,7 +2660,8 @@
         "summary": [
           "주주환원 확대에 대한 기대감"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -979,7 +2678,8 @@
         "summary": [
           "업종 사이클 하락 구간에서 가장 높은 방어력"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -996,7 +2696,8 @@
         "summary": [
           "기저효과와 은행 중심 이익구조가 부각될 전망"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1013,7 +2714,8 @@
         "summary": [
           "높은 안정성이 부각되는 구간"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1030,7 +2732,8 @@
         "summary": [
           "Analyst 김성래 sr.kim@hanwha.com 3772-7751 Buy (유지) 목표주가(유지): 440,000원 현재 주가(11/19) 308,500원 상승여력 ▲42.6% 시가총액 84,603억원 발행주식수 27,424천주 52 주 최고가 / 최저가 938,000 / 183,900원 90 일 일평균 거래대금 211.33억원 외국인 지분율 2.5% 주주 구성 현대자동차 (외 5..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1051,7 +2754,8 @@
           "현재 가파 른 수출 수요 증가로 야적장 부족이 병목으로 작용하고 있으며, 이를 해결하기 위해 자동화 입체창고 (같은 면적에서 공간 활용 6배 증가) 도입을 가속 중이다.",
           "[단기 수요 전망] 2027년 4월 1일부터 적용되는 수출 차량 부가가치세 (증치세) 환급 률 축소 (13% → 9%)가 밀어내기 효과를 야기할 것이다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1072,7 +2776,8 @@
           "3Q26 말 기준 수주잔 고는 7,849억원(vs. 2Q26 말 6,222억원)으로 추가 확대되었으며, 수주잔고 내 다중 적층 제품의 비중 역시 33%까지 상승해 향후 고부가 제품 중심의 믹스 개선과 이에 따른 추가적인 수익성 향상이 기대된다.",
           "바뀌지 않는 ASIC의 중심 최근 엔비디아를 둘러싼 다양한 우려가 재부각되면서 ASIC 시장의 성장 잠재력에 대 한 시장의 관심이 다시 높아지고 있다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1091,7 +2796,8 @@
           "1) 2027년 상반기 내 미국 주지사 및 하원 의원들의 행정, 입법화 등을 통한 AI데이터센터 및 전력인프라 건설 지연 불확실 성 해소 기대. ERCOT 등 RTO/ISO가 2026년 12월 제도 개편 발표 등을 선행하고 있으며, 각 주 규제기관도 제도 개편이 이루어지고 있는 점을 감안 시, 추가할 규 제안은 많지 않을 수 있음.",
           "규제 확정, AI데이터센터 인허가 심사 재개 시점이 우 려보다 빨라질 가능성도 존재. 2) 향후 미국 AI데이터센터 증설은 장기간 전력소비 및 구입전력량(8~15년, 전력망 85%, 발전 60% 등), 수요감축(DR: 수요반응) 계 약 등을 확정할 수 있는 하이퍼스케일러 중심으로 재편될 가능성 높음."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-20",
@@ -1108,7 +2814,333 @@
         "summary": [
           "성장 위한 자금조달 가시화"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "성일하이텍",
+        "stock_code": "365340",
+        "title": "3Q26 Review: 매출 성장 불구, 아쉬운 수익성",
+        "target_price": "30,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98391",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261120_company_441141000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98391",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출액의 성장에도 불구하고, 영업이익은 어닝쇼크 시현.",
+          "최근(11/16) 발표한 동사의 3분기 실적(연결 기준)은 매출액 753억원, 영업손실 93억원으로 전년동기 대비 매출액은 72.0% 증가하면서 6분기 연속 전년동기 대비 두 자리 수 증가율을 유지하였음. 다만, 영업이익은 적자를 지속하였지만, 손실폭은 감소함. 시장 컨센서스(매출액 819억원, 영업이익 42억원) 대비 매출액은 유사한 수준이었지만, 영업이익은 적자로 전환되면서 어닝쇼크...",
+          "매출 성장세 지속은 긍정적이나, 외부 요인에 따른 수익성 하락은 아쉬워.",
+          "3분기 실적에서 긍정적인 것은 스크랩의 안정적인 확보와 함께 새만금 3공장의 플가동과 2공장의 일부 가동에 따라 매출이 6분기 연속(2Q25A ~ 3Q26A) 큰 폭의 매출 성장세를 유지하였다는 것임."
+        ],
+        "current_price": 22800.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "엘앤에프",
+        "stock_code": "066970",
+        "title": "하이니켈 고객 확대와 LFP 성장의 가시화",
+        "target_price": "280,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98389",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261120_company_533498000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98389",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "하이니켈 고객 확대와 LFP 성장의 가시화",
+          "엘앤에프는 2027년 하이니켈 공급 증가와 LFP 출하 확대에 힘입어 매출 기반이 넓어질 전망. 하이니켈은 46파이 원통형 배터리용 양극재 공급과 기존 고객사의 신규 프로젝트가 성장을 견인할 것으로 예상. 유럽 고객 확대도 특정 고객에 대한 의존도를 낮추고 판매 기반을 넓히는 요인임. 고객사의 배터리 생산이 계획대로 늘어날 경우 출하 증가와 가동률 상승이 함께 나타나며, 기존 설비의 고...",
+          "LFP는 전기차 중심의 매출 구성을 ESS로 확장하는 핵심 제품임. 국내 주요 배터리 셀 3사와 체결한 중장기 공급계약은 초기 양산 물량과 생산 계획의 가시성을 확보했다는 점에서 의미가 있음. 북미 ESS 시장의 중국 외 소재 조달 수요를 바탕으로 공급 확대가 예상되며, 2027년에는 양산 규모 확대에 따른 신규 매출 기여 기대. 이후 수율 안정화와 가동률 상승이 동반되면서 이익 기여도...",
+          "이익 회복의 강도는 물량 증가에 따른 원가 개선과 신규 공장 비용 부담의 완화에 달려 있음. 리튬 가격과 환율 변동은 판가와 재고평가손익을 통해 분기 이익의 변동성을 높일 수 있음. 따라서 재고평가손익을 제외한 수익성 개선이 이어지는지가 중요하며, LFP 생산 안정화가 추가 이익 개선 요인으로 작용할 전망. 증설과 운전자본에 필요한 자금 부담을 고려하면 영업현금흐름의 개선도 함께 확인할..."
+        ],
+        "current_price": 72800.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "LG에너지솔루션",
+        "stock_code": "373220",
+        "title": "ESS 외형 성장",
+        "target_price": "570,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98388",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261120_company_749303000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98388",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "북미 ESS 시장은 재생에너지 확대와 전력망 운영 효율 개선 수요가 맞물리며 성장 기반 강화되고 있음. 빅테크의 데이터센터 투자 확대와 함께 고객시설에 직접 설치하는 BTM ESS 수요도 부각되고 있으며, 직접 계약을 통한 고객 및 적용처 다변화가 진행 중임. 현지 생산과 비중국 공급망 확보의 중요성이 높아지면서 북미 생산 기반을 보유한 국내 배터리 업체의 수주 기회 확대될 전망. 물량...",
+          "유럽에서는 LFP·HVM 등 중저가 제품 대응 확대가 고객 물량 확보와 공장 가동률 회복으로 이어지고 있음. EV 수요 회복 속도는 지역과 고객사별로 차이가 있어, 확보한 생산능력을 실제 출하로 연결하는 제품 경쟁력이 중요해지는 구간임. 가동률 회복과 제품 믹스 개선이 고정비 부담 완화 및 점진적인 수익성 개선을 뒷받침할 전망."
+        ],
+        "current_price": 302000.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "삼성SDI",
+        "stock_code": "006400",
+        "title": "미국 생산 본격화",
+        "target_price": "880,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98387",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261120_company_930693000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98387",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "삼성SDI는 북미 ESS 수주 확대와 미국 현지 생산 본격화를 바탕으로 성장 기반을 강화하고 있음. 재생에너지 연계 저장 수요와 전력망 투자, AI 데이터센터의 전력 확보 수요가 ESS 시장의 성장을 뒷받침할 전망. 미국 현지 생산과 비중국 소재 공급망을 갖춘 각형 배터리의 수주 경쟁력 강화 기대됨. 10월 말 기준 올해 ESS 신규 수주 60GWh 이상 확보했으며, 주피터파워향 LFP...",
+          "공급 측면에서는 10월 미국 스타플러스에너지의 LFP 양산 개시와 추가 라인 전환을 통해 생산 기반 확대 중임. 출하 증가와 가동률 상승에 따른 고정비 부담 완화, 미국 생산 증가에 따른 AMPC 확대가 이익 개선을 지원할 전망. 초기 수율 안정화와 고객별 납기 대응력이 실적 개선 속도를 결정할 핵심 변수임.",
+          "소형전지는 BBU와 우주항공·휴머노이드 등 신규 응용처를 중심으로 성장 기회 확대 중임. 전고체 배터리는 샘플 출하와 고객 평가를 진행하며 상용화 준비를 이어가고 있음. 전기차 사업의 하이니켈·LFP·미드니켈 제품 다변화와 유럽 신규 프로젝트 확보도 추가 성장 동력으로 작용할 전망."
+        ],
+        "current_price": 428500.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "포스코퓨처엠",
+        "stock_code": "003670",
+        "title": "LFP 전환과 음극재 확장",
+        "target_price": "280,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98386",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261120_company_992376000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98386",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "4분기는 양극재와 음극재의 출하 회복과 LFP 초도 공급이 맞물리는 시기임. 양극재는 이연 물량의 출하와 전동공구용 공급, 음극재는 해외 고객사향 판매가 물량 회복을 뒷받침할 전망. 기존 삼원계 양극재 생산라인의 LFP 전환을 통해 ESS와 보급형 전기차용 소재 수요에 대한 대응 범위를 확대하고 있음. 향후 신규 공급물량이 더해지면서 제품 구성과 매출 기반이 점진적으로 다변화될 것으로...",
+          "인조흑연 음극재는 국내 생산시설의 고객사 공급 확대와 베트남 생산거점 구축을 통해 중장기 성장 기반을 강화 중임. 완성차와 배터리 고객사의 공급망 다변화 수요에 대응해 원료부터 제품 생산까지 연결되는 공급체계를 정비하고 있음. 현대차그룹과의 투자 및 구매 협력 논의도 고객 기반 확대 측면에서 긍정적임. 현재 투자 검토 단계로 구체적인 조건 확정이 필요하며, 향후 해외 거점의 양산이 더해..."
+        ],
+        "current_price": 166000.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "피에이치에이",
+        "stock_code": "043370",
+        "title": "환율이 가린 해외 성장, 강화되는 주주환원",
+        "target_price": "16,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98385",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261120_company_711771000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98385",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "P/E 5배대, P/B 0.2배대, 배당수익률 4.2%, 자기주식 취득/소각",
+          "피에이치에이에 대한 투자의견 BUY와 목표주가 1.6만원을 유지한다. 3분기 영업이익은 85억원으로 기존 예상치에 부합했다. 원화 강세로 수출 비중이 높은 한국 법인이 영업적자를 기록했지만, 해외 법인의 영업이익은 증가했다. 북미 매출액은 신공장 램프업으로 30% (YoY) 증가했고, 인도는 2분기 생산차질에서 벗어나며 23% (YoY) 반등했다. 북미/인도는 향후 수년간 외형 성장을..."
+        ],
+        "current_price": 10630.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "한국항공우주",
+        "stock_code": "047810",
+        "title": "사천 사업장 탐방 후기: 완전히 달라진 체급",
+        "target_price": "173,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98381",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261120_company_987343000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98381",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "당시와 다르게 고정익, 회전익 생산시설 모두 국내외 물량 대응으로 생산시설이 풀캐파 상태에 가까웠음, 고정익 생산시설에서는 폴란드, 말레이시아, 필리핀 FA-50 및 국내 KF-21이 생산되고 있었으며 회전익 생산시설에서는 주로 국내 LAH가 생산되고 있었음. 여기에 KF-21 최초 수출 및 LAH, FA-50 추가 수출까지 성사될 경우 27년 실적 추정치 상향 조정 필요. KF-21의...",
+          "시뮬레이터 사업 또한 향후 전망이 밝아 보였음. 미국 UJTS 사업에서도 비용 절감을 위해 시뮬레이터를 활용한 훈련을 강조하고 있으며 최근 비용 절감이 절실한 동남아시아 국가들 또한 시뮬레이터에 대해 관심도가 높아지고 있는 상황. 해당 사업은 소프트웨어 기반 사업으로 마진율이 기존 완제기 사업보다 높은 특성 상 실적 기여도 증가할 것이라 전망",
+          "국내외 PBL 사업 또한 확대될 것임. 현재 T/FA-50 및 회전익 운용 대수가 800대를 넘어섰으며 KF-21이 제품 포트폴리오에 추가되며 항공 PBL 또한 규모가 커지게 됨. 최근 1,000억원 규모 필리핀 FA-50 PBL 계약과 유사하게 T/FA-50 운용국들의 추가적인 PBL 계약 체결을 기대"
+        ],
+        "current_price": 103000.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "리노공업",
+        "stock_code": "058470",
+        "title": "4Q26 실적 시장 기대치 하회 예상",
+        "target_price": "97,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98379",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261120_company_806558000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98379",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "4Q26 영업이익 418억원, 컨센서스 하회 예상",
+          "리노공업의 4Q26 실적이 매출액 888억원(+7%QoQ, +5%YoY)과 영업이익 418억원(+6%QoQ. +4%YoY)으로, 시장 컨센서스(FnGuide: 매출액 1,035억원, 영업이익 488억원)을 하회할 것으로 예상된다. 사업 정상화 과정에서의 일시적 실적 부진이 예상되지만, 동사의 중장기 실적 드라이버인 AI 추론칩과 첨단 패키징에 대한 수요는 여전히 견조한 것으로 파악된다....",
+          "사업 부문별 매출액은 Leeno Pin 213억원(+9%QoQ, +1%YoY), IC Test Socket 567억원(+4%QoQ, +8%YoY), 의료기기/기타 108억원(+25%QoQ, -3%YoY)을 각각 기록할 전망이다."
+        ],
+        "current_price": 53400.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "포스코DX",
+        "stock_code": "022100",
+        "title": "수주 회복과 Physical AI가 만드는 성장 기회",
+        "target_price": "27,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98378",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261120_company_876479000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98378",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "주가의 방향성은 AI와 Non-Captive 매출이 결정",
+          "수주잔고 매출 전환과 외부 AI 수주 확대를 확인할 필요. 2027년 상반기 인천공항 프로젝트도 주요 관전 포인트"
+        ],
+        "current_price": 22150.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "동방메디컬",
+        "stock_code": "240550",
+        "title": "27년에도 성장이 기대되는 저평가주",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98377",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261120_company_34136000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98377",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "동사는 국내 1위의 한방 의료기기 사업을 기반으로, 필러, 니들, 봉합사 등의 미용성형 의료기기를 생산하는 업체이다. 3분기 누적 매출 기준 미용성형 의료기기 비중이 66%, 한방 의료기기 부문이 34%를 차지한다.",
+          "3Q26 동사의 실적은 매출액 293억원(YoY -2%), 영업이익 54억원(YoY 34%)을 기록했다. 계절적 비수기 영향에도 수익성 개선세가 지속되고 있는 점을 주목한다. 상대적으로 고부가제품인 미용성형 의료기기 부문이 견조한 성장을 보이고 있으며, 한방 의료기기 부문의 생산 설비 이전(인도네시아)에 따른 영향도 반영되었다. 필러는 다양한 국가로 수출 물량이 증가하고 있으며, 니들류...",
+          "이에 동사의 26년 실적은 매출액 1,267억원(YoY 12%), 영업이익 236억원(YoY 39%, OPM 18.6%)을 전망한다."
+        ],
+        "current_price": 5440.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "이수페타시스",
+        "stock_code": "007660",
+        "title": "이익 레벨업, 탈중국 + 지정학적 요소에 주목",
+        "target_price": "130,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98376",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261120_company_404957000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98376",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 높아진 이익 레벨",
+          "3Q26 매출액 3,892억원(YoY +31%, 이하), OP 949억원(+62%, OPM 24.4%)로, 컨센서스 매출액/OP 4,315억원/958억원을 각각 하회했으나, OPM 컨센서스 22.2%를 상회했다. 환율 영향으로 매출액은 하락했으나, 2Q중 실시한 판가인상 일부 반영, 상반기 매입한 원재료의 낮은 가격 래깅 효과로 인한 이익률 서프라이즈가 발생했다. 월 수주액이 생산량을..."
+        ],
+        "current_price": 83000.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "지씨지놈",
+        "stock_code": "340450",
+        "title": "지놈 아저씨 미국 간대요",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98375",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261120_company_820478000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98375",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "일부 매출액 지연에도 전년 동기 대비, 전 분기 대비 성장",
+          "3Q26 실적은 매출액 89억(YoY +1.2%, QoQ +7.8%), 영업이익 9억(YoY +10.3%, QoQ +97.0%, 영업이익률 9.5%)을 기록했다.",
+          "리스크 스크린, 지놈 헬스 등 일부 검사들을 재출시하는 시점이 7월에서 9월로 미뤄졌다. 그에 따라 검사를 중단하는 기간이 발생했고, 관련 매출액 약 10억이 4Q26로 지연된 영향이 있었다. 그럼에도 매출액은 성장세를 이어가며 국내 사업의 순조로운 모습을 유지했다.",
+          "산전 선별 검사 ‘G-NIPT’: 3Q26 검진 건수 11,300건(YoY +46.8%, QoQ +61.4%)을 기록했다. 국내 판가 35만 원, 일본 120-160만 원, 미국 240-320만 원 수준으로 해외 진출에 따른 판가 상승을 크게 기대할 수 있다."
+        ],
+        "current_price": 8210.0
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "아이쓰리시스템",
+        "stock_code": "214430",
+        "title": "군수용 적외선 영상센서의 양산 기술력을 바탕으로 사업 영역 확대 추진",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "서울평가정보",
+        "report_idx": "naver_98373",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/75/20261120_company_584022000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98373",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "군수용 적외선 영상센서의 국산화·양산 기술 기반으로 사업 확대 중",
+          "국방 수요 확대와 민수용 기술 발전에 따라 성장하는 시장",
+          "해외시장 진출과 생산기반 확충을 통한 차세대 영상센서 사업화 추진"
+        ]
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "진양폴리",
+        "stock_code": "010640",
+        "title": "연질 폴리우레탄폼 제조·가공 기술을 기반으로 사업경쟁력 강화 중",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "서울평가정보",
+        "report_idx": "naver_98372",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/75/20261120_company_469201000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98372",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "연질 폴리우레탄폼을 주력으로 생산설비 자동화 추진 중",
+          "경기·원가 변동 속 기능성·친환경 소재 중심의 성장이 전망되는 시장",
+          "신공장 투자와 기능성·재생 소재 확대 및 주주환원 강화 추진 중"
+        ]
+      },
+      {
+        "date": "2026-11-20",
+        "stock_name": "엔케이",
+        "stock_code": "085310",
+        "title": "선박 소화설비와 고압가스용기 제조기술 기반 해양 안전설비 전문기업",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "NICE평가정보",
+        "report_idx": "naver_98371",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/69/20261120_company_15750000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98371",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "선박용 소화장치 중심 해양 안전 및 산업용 고압설비 전문기업",
+          "고정식 소화설비와 압력용기 제조기술 기반 설비 경쟁력 확보",
+          "주요 조선소와 글로벌 공급망을 기반으로 사업 기반 확보"
+        ]
       }
     ],
     "2026-11-19": [
@@ -1131,7 +3163,8 @@
           "밸류에이션 방식을 사업부별 Peer 평균 P/E를 적용 후 합산하는 SOTP에서 12MF P/E로 변경했다.",
           "데이터센터 건설 지연, 젠슨황 사임 이후 불확실성이 겹치며 MLCC와 기판 업체들의 평균 P/E는 ‘27년 15~17배, ‘28년 10~13배로 낮아졌다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1152,7 +3185,8 @@
           "매출에 포함되는 지분법손익이 - 128억원(3Q25 +144억원)으로 적자 전환한 영향이 컸다.",
           "HL만도 지분법손익이 -156 억원(3Q25 +124억원)으로 전년 대비 280억원 줄어 감소분의 대부분을 차지했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1173,7 +3207,8 @@
           "2027년 매출액 3,130억 원, 영업이익 582억 원으로 전년대비 각각 36.9%, 141.5% 급증할 전망. 2026년 신규수주가 3,056억 원 수준으 로 41.6% 급증하며 2027년 매출에 반영될 전망. 캐나다 LNGC향 STS 제품 매출 반영, 2026년 6월 삼성중공업이 수주한 델핀 FLNG 해양 플랜트의 피팅 기자재 발주로 STS 비중이 상승하며 제품믹스 개선이 전망되며...",
           "참고 1) 표지 재무지표에서 안정성 지표는 ‘이자보상배율’, 성장성 지표는 ‘매출액 증가율’, 수익성 지표는 ‘영업이익률’, 활동성지표는 ‘총자산회전율,’ 유 동성지표는 ‘유동비율’임. 2) 표지 밸류에이션 지표 차트는 해당 산업군내 동 사의 상대적 밸류에이션 수준을 표시. 우측으로 갈수록 밸류에이션 매력도 높음."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1193,7 +3228,8 @@
           "유리기판용 BDF Etcher를 시작으로 반도체 장비 시장 진입 추진. 2023년 Absolics에 BDF Etcher 1대 공급. Metal Etcher와 HDP CVD의 고객사 평가를 추진 중이며, 향후 유리기판 양산 투자 확대와 공정 채택에 따른 신규 매출 기대",
           "2026F 매출액 2,236억 원(+13.5% YoY), 영업이익 98억 원(+119.6% YoY) 전망. 상반기 부진 이후 국내 OLED 보완투자와 중국 8.6세 대 신규 투자 관련 장비 매출이 하반기에 집중되면서 실적 회복 예상"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1213,7 +3249,8 @@
           "전자기기용 잉크젯 잉크와 광변조 디스플레이용 코팅액은 고객사 평가가 진행 중이며, 2027년 초기 매출 발생 전망. 이차전지용 SWCNT 분 산액은 실리콘 음극재의 전도성 확보에 활용되는 소재로, 고객사 평가와 생산체계 구축을 거쳐 2028년 사업 가시화 목표",
           "2026년 매출액 43억원(YOY -31.1%), 영업손실 10억원 전망. 기존 차량용 소재 매출 감소와 개발비 부담으로 적자 전환이 예상되며, 향후 실적 확대는 신규 소재의 양산 공급 시점과 공급 규모에 좌우될 전망"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1234,7 +3271,8 @@
           "다만 별도 기준으로는 HDI와 패키지 부문 모두 메모리향 매출이 확대 되며 영업이익 기준 당사 추정치를 7.2% 상회했다.",
           "특히 SoCAMM 매출이 본격적 인 양산 전환에 힘입어 전분기 대비 2배 이상 증가하며 실적 성장을 견인했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1251,7 +3289,8 @@
         "summary": [
           "고성장 기업들이 경험하는 성장통을 경험하고 있다고 생각. 보유 기술 가치를 통한 돌파구를 마련할 수 있을 것이라 생각. 1) NX-TSH의 경우, Advanced Packaging 투자 확대 속, 신규수주의 재개가 예상되고, 2) 원자현미경 (산업용 AFM, Hybrid WLI, NX-Mask)의 신규 수주 강세 또한 지속. 3) FX 시리즈 (공진 주파수를 활용하여 속도를 대폭 개선,..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-19",
@@ -1268,7 +3307,383 @@
         "summary": [
           "주주가치 제고를 위 한 주주환원 정책의 강화, M&A를 통한 Inorganic Growth의 가능성 모두가 열 려 있다는 판단. 가격 조정이 상당 부분 이뤄진 현 시점을 강한 비중 확대의 기회로 삼을 필요 (12m Fwd P/E: 17.8배, 2026-2028년 평균 OPM: 58%). 반도체를 둘러싼 외생 변수의 영향보다 기업의 성장가치에 집중할 때. 1. 전응용처에 걸친 신규 수주의..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "현대글로비스",
+        "stock_code": "086280",
+        "title": "상하이 탐방: 중국발 성장의 현장을 확인",
+        "target_price": "280,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98370",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261119_company_36522000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98370",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "하이통 터미널 탐방: 선박 부족과 야드 병목 확인",
+          "2026년 11월 17일 현대글로비스 경영진과 함께 상하이 하이통(Haitong) 터미널과 대표적인 전기차 업체 중 하나인 니오(NIO)를 방문했다.",
+          "하이통은 외고교(철송 연계 공사 중), 태청(양쯔강 바지선 연계), 상하이 남항(테슬라 기가팩토리 8km, 연 140만대 처리)으로 분업되어 있으며, 중국발 호주향 물량의 약 80%를 처리한다. 현장에서 확인된 물류 병목은 선박 부족 이상으로 부두 인근 야드다. 내륙 공장에서 부두까지 이송에 10일이 소요되어 10~20일치 물량인 15만대 규모의 보관 공간이 필요하고, 하이통은 다층 입..."
+        ],
+        "current_price": 204000.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "NHN",
+        "stock_code": "181710",
+        "title": "[NDR 후기] AI DC 옥석가리기, NHN이 돋보이는 이유",
+        "target_price": "93,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "한화투자증권",
+        "report_idx": "naver_98369",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261119_company_432162000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98369",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "이미 실적 기여가 시작되고 있는 국내 유일한 사업자",
+          "최근 국내외 AI DC 산업의 투자 판단 기준이 설비 확대에서 투자 효율성과 수익성 검증으로 이동하는 가운데, 동사는 이미 확보한 인프라를 안정적인 고객 계약과 이익으로 연결하면서 투자 부담을 통제할 수 있는 확장 동사는 프리미엄 가치를 받을 것으로 예상한다. 3분기 NHN클라우드 매출은 전년 대비 75.5% 증가했으며, 지속되던 적자에서 벗어나 흑자 구조로의 전환이 본격화되고 있다...."
+        ],
+        "current_price": 72100.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "한국항공우주",
+        "stock_code": "047810",
+        "title": "사천사업장 CFO 주관 간담회 후기",
+        "target_price": "150,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "한화투자증권",
+        "report_idx": "naver_98368",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261119_company_650425000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98368",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2027년 매출액 6조원대 진입 가능성, 2028년까지 인도량 확대",
+          "한국항공우주 사천공장 탐방 및 CFO 간담회를 진행했다. 회사는 그동안 추진해 온 대형 개발사업들이 마무리되면서 개발 중심에서 양산 중심으로 사업구조가 전환되고 있다고 설명했다. KF-21 양산이 본격화되고 있으며 LAH는 엔진 관련 품질 문제 해결 이후 납품을 재개했다. 폴란드와 말레이시아 FA-50 수출 물량의 생산도 확대되고 있다. 2027년 매출액의 6조원대 진입 가능성을 언급했다.",
+          "항공기 인도량도 크게 증가할 전망이다. 전체 항공기 인도 규모가 2027년 50대 이상, 2028년 90대 이상으로 확대될 것으로 예상했다. 최근 KF-21 엔진 부품 수급 이슈가 제기되고 있지만 2027년 계약 물량을 정상적으로 인도할 수 있다는 입장을 밝혔다. 2028년에는 전체 항공기 인도량이 더욱 증가하는 만큼 엔진을 비롯한 핵심 부품의 공급망 관리가 중요한 과제라고 설명했다...."
+        ],
+        "current_price": 103000.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "코나아이",
+        "stock_code": "052400",
+        "title": "쉬어가는 메탈카드, 버텨주는 배당",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "대신증권",
+        "report_idx": "naver_98367",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/15/20261119_company_935133000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98367",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review. 메탈카드 기저효과로 역성장",
+          "3Q26 연결 매출액은 713억원(-23.6% yoy), 영업이익은 204억원(-32.5% yoy)을 기록함. 전년 동기 아멕스 미러카드 출시 초기 대량 발주에 따른 높은 기저로 해외 DID 영업이익이 87억원(-58.4% yoy)으로 급감함. 반면 플랫폼 영업이익은 97억원(+21.8% yoy)으로 분기 기준 처음 해외 DID를 넘어섬. 결제금액 증가율(+2.3% yoy)보다 이익 증..."
+        ],
+        "current_price": 18780.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "뉴로핏",
+        "stock_code": "380550",
+        "title": "넓어진 판매 채널, 빅파마 계약만 발표된다면!",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98364",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261119_company_651083000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98364",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 분기 매출 감소, 영업손실 확대",
+          "매출 4.3억원(-44.7% QoQ, -43.2% YoY), 영업이익 -57억원(적자지속) 기록.",
+          "제품별 매출: Neurophet AQUA(1.1억원, +34.3% YoY), AQUA AD(0.9억원), 기타 (1.6억원)로 선방했으나, SCALE PET 0.4억원(3Q25 3.3억원), Imaging CRO 서비스는 0.4억원(3Q25 3.1억원)으로 크게 감소.",
+          "3Q26 말 장기공급계약 수주잔고는 4.7억원으로 Imaging CRO 2건(수주총액 13.9억원)의 미인식분이며, 2Q26 말(4.7억원)과 같음. 지난 6월 체결한 광주치매코호트연구단 공급 계약(4.5억원, 26년 6월~29년 6월)은 대금이 4차에 걸쳐 연차별로 분할 지급되는 조건."
+        ],
+        "current_price": 4830.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "아이엠비디엑스",
+        "stock_code": "461030",
+        "title": "4분기 캔서파인드 신제품 공급 개시",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98363",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261119_company_325831000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98363",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출은 전분기 대비 감소, 매출총이익률은 유지",
+          "매출 12.1억원(+8.1% YoY, -20.1% QoQ), 영업손실 21억원(3Q25 26억원, 2Q26 14억원) 기록",
+          "수출: 3분기 누적 수출은 21.2억원(+61.9% YoY)으로 25년 연간 수출(19.4억원)을 넘어섰고, 수출 비중은 25년 36%에서 53%로 상승. 대만 TSH 바이오팜을 중심으로 일본, 인도 등에 공급하는 해외 서비스 매출 21.2억원(+61.9% YoY).",
+          "내수: 3분기 누적 내수는 18.7억원(-19.3% YoY)으로 감소. 국내 서비스 매출이 6.3억원(-46.2% YoY)으로 줄었고, 캔서파인드 매출도 4.4억원(-30.3% YoY)으로 전년 동기를 하회. 캔서디텍트는 3Q26 매출이 1.4억원(+56.5% QoQ)으로 반등."
+        ],
+        "current_price": 2010.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "해성디에스",
+        "stock_code": "195870",
+        "title": "3Q26 Re: 찐 기판 업체로 성장 중",
+        "target_price": "75,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98362",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261119_company_916304000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98362",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Re: 환율 하락에도 호실적 기록",
+          "3Q26 실적은 매출액 2,453억원(+16% QoQ), 영업이익 338억원(+36% QoQ, OPM 14%)으로 환율 하락에도 불구하고 매출 증가 및 믹스 개선 효과에 힘입어 호실적을 기록했다. 리드프레임은 매출액 1,900억원(+13% QoQ)으로 전분기에 이어 분기 최대 매출경신을 이어갔다. 패키지기판 역시 2분기 판가 인상 효과와 DDR5 매출 증가에 힘입어 매출액 593억원(+..."
+        ],
+        "current_price": 41350.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "한솔케미칼",
+        "stock_code": "014680",
+        "title": "3Q26 Re: 예상된 부진",
+        "target_price": "300,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98361",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261119_company_513714000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98361",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "목표주가(하향) 300,000원 현재주가(11/18) 172,400원 KOSPI 5,067.4pt 시가총액(보통주) 1,857십억원 발행주식수 10,794천주 60일 평균거래량 46천주 60일 평균거래대금 10,122백만원 외국인 지분율 41.9% 52주 최고가 346,500원 52주 최저가 163,700원 조동혁(외 8인) 12.8% 국민연금공단(외 1인) 11.1% (%) 절대수익률...",
+          "2분기 대비 원달러 환율이 급격하게 하락하면서 분기 -40 억 수준의 영향이 반영되었다.",
+          "상반기 예상했던 대로 고객사 QD-LCD 사용량 감소로 인해 QD 부진이 이어지고 있다."
+        ],
+        "current_price": 172400.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "제주항공",
+        "stock_code": "089590",
+        "title": "한-중 FTA 타결, 중국 관광객도 제주항공을 타고 온다",
+        "target_price": "10,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98360",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261119_company_654029000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98360",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "한-중 FTA 추가 타결, 한국 여행사가 중국 주요 지역에서 중국인 대상 모객 가능",
+          "11월 18일 한중 정상회담에서 양국이 한중 FTA 서비스/투자 후속협상에 대해 실질 타결을 선언했다. 주요 내용 중에는 “중국 아웃바운드 관광시장 진출 여건 조성”이 포함되어 있었는데, 중국 내 23개 지역(베이징/상하이 등)에서 국내 여행사가 중국인을 대상으로 해외여행을 주선하는 아웃바운드 관광업을 영위할 수 있게 된 것이다. 이는 국내 LCC에게도 긍정적인 영향을 줄 것으로 예상한..."
+        ],
+        "current_price": 7500.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "현대글로비스",
+        "stock_code": "086280",
+        "title": "중국에서 확인한 PCTC에서의 성장 기회",
+        "target_price": "280,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98359",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261119_company_407767000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98359",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "중국 자동차 수출 급증과 맞물린 PCTC 선대 확장의 절묘한 타이밍",
+          "우리는 현대글로비스의 주관으로 자동차 운반선(PCTC)을 건조한 중국 조선소인 SWS와 상해 자동차 수출항구 운영사인 하이통물류를 견학했다. 이에 우리가 얻은 시사점은 다음과 같다.",
+          "1. 현대글로비스는 2026년 3분기말 기준으로 106척(6,500대 선적 기준)의 PCTC를 보유 중이다. 이번에 견학한 CSSC/SWS는 2023년 발주한 10,800대 선적 규모의 PCTC를 건조한 조선소이다. 현대글로비스는 연말까지 4척, 2027년 중으로 10척을 인도받을 예정인데, 14척이지만 6,500대 기준으로는 1.66배인 23척으로 환산될 수 있다. 즉, 내년말까지 P...",
+          "2. 신규 대형선은 운임이 높은 중국 등 비계열 물량을 싣고, LNG 추진선이어서 단위당 연료비도 낮아 매출과 수익성에 모두 기여할 것이다. 현대글로비스는 추가 용선도 최대한 확보해 선복을 늘린다는 계획이다."
+        ],
+        "current_price": 204000.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "SFA",
+        "stock_code": "056190",
+        "title": "NDR 후기: 27년 연결이익 대폭 레벨업",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98357",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261119_company_177206000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98357",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "4분기 수주 점프 확인 시 주가 턴어라운드 확신",
+          "3분기 수주 부진은 PO 컷오프에 따른 이연. 4분기 분기 최대 수주로 연간 1.3조원 목표 유효. 반도체 전공정 진입과 SFA반도체 턴어라운드가 겹치는 27년은 전사적 이익 레벨업 구간 진입"
+        ],
+        "current_price": 23250.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "쿠콘",
+        "stock_code": "294570",
+        "title": "3Q26 Review: 실적 성장 불구, 주가는 저평가",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98356",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261119_company_382695000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98356",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 분기 최대 매출액 달성과 함께 당사 추정치 부합.",
+          "최근(11/16) 발표한 3분기 실적은 매출액 203억원, 영업이익 51억원으로 전년동기 대비 매출액은 16.9% 증가하면서 분기 최대 매출액을 달성하였고, 영업이익은 6.6% 증가하면서 높은 수익성이 기록하였음. 당사 추정치(매출액 184억원, 영업이익 52억원)에 부합하는 수준이었음.",
+          "분기 최대 매출액 달성과 함께 영업이익은 9분기 연속 증가세(YoY) 유지.",
+          "이번 실적에서 긍정적인 것은 매출액이 분기 최고 매출액을 달성하면서 최초로 200억원대를 기록하였고, 영업이익은 전년동기 대비 9분기 연속 증가세를 보이면서 수익성 개선세를 지속하고 있다는 것임."
+        ],
+        "current_price": 19990.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "KX",
+        "stock_code": "122450",
+        "title": "3Q26 Review: 똑똑한 자회사들이 실적 성장 견인",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98355",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261119_company_953652000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98355",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 안정적인 매출 성장과 함께, 영업이익 시장 기대치 부합.",
+          "최근(11/16) 발표한 동사의 3분기 실적(연결 기준)은 매출액 1,160억원, 영업이익 216억원으로 전년동기 대비 각각 28.4%, 7.5% 증가하였음.",
+          "시장 컨센서스(매출액 1,015억원, 영업이익 227억원) 대비 매출액은 소폭 상회했고, 영업이익은 유사한 수준을 달성함.",
+          "방송 부문을 제외한 레저·제조·기타 부문이 매출 성장을 견인함."
+        ],
+        "current_price": 2150.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "하이비젼시스템",
+        "stock_code": "126700",
+        "title": "3Q26 Review: 27년의 실적이 기대되는 세 가지",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유진투자증권",
+        "report_idx": "naver_98354",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261119_company_69849000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98354",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 시장 기대치를 하회했으나, 실적 회복세로 전환.",
+          "최근(11/16) 발표한 3분기 실적(연결 기준)은 매출액 630억원, 영업이익 21억원으로 전년동기 대비 매출액은 7.4% 증가하면서 7분기만에 600억원대 매출을 회복하였고, 영업이익은 8분기만에 흑자 전환에 성공하였음. 시장 컨센서스(매출액 946억원, 영업이익 146억원) 대비 매출액과 영업이익은 크게 하회하였음. 시장 컨센서스를 크게 하회한 것은 ① IT/모바일 부문에서 일부...",
+          "7분기만에 600억원 매출 회복, 8분기만에 영업이익 흑자 전환에 성공.",
+          "이번 실적에서 긍정적인 것은 7분기만에 매출액이 600억원대를 회복했고, 8분기만에 영업이익 흑자로 전환되면서 수익성 개선에 성공했다는 것임."
+        ],
+        "current_price": 7780.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "삼양컴텍",
+        "stock_code": "484590",
+        "title": "수출 확대와 증설 효과 가시화",
+        "target_price": "7,500",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98350",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261119_company_841284000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98350",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "영업이익, 시장 기대치 11% 상회 3분기 별도 매출액과 영업이익은 각각 346억원(-5.7% yoy), 62억원(+23.2% yoy)을 기록했다.",
+          "컨센서스(393억원/56억원) 대비 매출은 하회했으나 영업이익은 상회했다.",
+          "수출은 207억원(+53.8% yoy)으로 증가한 반면, 내수는 국내 방산 물량 감소로 40.2%(yoy) 줄었다."
+        ],
+        "current_price": 4890.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "큐리오시스",
+        "stock_code": "494120",
+        "title": "M사를 통한 ODM 장비 글로벌 런칭이 목전",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98349",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261119_company_796076000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98349",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출 15% YoY, 영업적자 지속",
+          "매출 13억원(15% YoY), 영업적자 28억원 및 조정 EBITDA -23억원(적자지속).",
+          "지역별 매출(연결 기준): 국내 7억원(162% YoY), 해외 6억원(-35% YoY).",
+          "품목별 매출(별도 기준): 생명과학기기 5억원, 의료기기 4억원, 랩오토메이션 2억원."
+        ],
+        "current_price": 11370.0
+      },
+      {
+        "date": "2026-11-19",
+        "stock_name": "한라캐스트",
+        "stock_code": "125490",
+        "title": "시작된 로봇 양산",
+        "target_price": "13,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98348",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261119_company_852163000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98348",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "전장부터 로봇까지 요구되는 경량화 트렌드",
+          "휴머노이드에서 경량화는 필수적이다. 기체 내 수십 개의 관절이 동시에 구동되어 전력을 소비하는 만큼 제한된 배터리로 작동 시간을 극대화해야 하기 때문이다. 특히 모터/감속기/제어기가 집적된 관절부는 높은 강성과 방열 성능을 유지하면서 중량을 최소화해야 한다. 한라캐스트는 알루미늄(Al)과 마그네슘(Mg) 등 경량 금속을 활용한 다이캐스팅 전문기업이다. 다이캐스팅은 복잡한 형상의 부품을..."
+        ],
+        "current_price": 10180.0
       }
     ],
     "2026-11-18": [
@@ -1290,7 +3705,8 @@
           "2025년 중국 필러 ‘에피티크’ 출시로 현지 유통 기반을 구축하였으며, 2026년 10월 태국 톡신 첫 수출을 시작으로 글로벌 상업화가 확대되는 가운데 향후 공급물량 증가에 따른 원주 생산시설 가동률 상승과 영업 레버리지 효과 기대",
           "2026년 연결 매출액 778억원(+1.2% YoY), 영업이익 54억원(+41.4% YoY)을 전망하며, 중장기 기업가치 상승의 핵심은 중국 톡신 품목허 가와 장기 공급계약의 실제 매출 전환, 해외 수출 확대에 따른 수익성 개선 여부"
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1308,7 +3724,8 @@
           "Analyst 김성래 sr.kim@hanwha.com 3772-7751 Buy (유지) 목표주가(유지): 350,000원 현재 주가(11/17) 211,500원 상승여력 ▲65.5% 시가총액 31,029억원 발행주식수 14,671천주 52 주 최고가 / 최저가 405,000 / 158,400원 90 일 일평균 거래대금 816.82억원 외국인 지분율 6.9% 주주 구성 김병수 (외 3 인...",
           "중국 유니트리, 리더드라이브 Multiple 고려 목표 P/S (배) 53.1 적정주가 (원) 349,917 AVG of (Target PBR * BPS + Target PSR * SPS) 목표주가 (원) 350,000 현재주가 (원) 211,500 상승여력 (%) 65.5 자료: 한화투자증권 리서치센터 [표2] 로보티즈의 2026 년 3 분기 실적과 추정치 대비 괴리율 (단위: 십억..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1325,7 +3742,8 @@
         "summary": [
           "Analyst 김성래 sr.kim@hanwha.com 3772-7751 Buy (유지) 목표주가(하향): 69,000원 현재 주가(11/17) 40,550원 상승여력 ▲70.2% 시가총액 18,835억원 발행주식수 46,449천주 52 주 최고가 / 최저가 76,200 / 34,450원 90 일 일평균 거래대금 37.86억원 외국인 지분율 15.9% 주주 구성 이성엽 (외 10 인) 6..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1346,7 +3764,8 @@
           "다만 별도 기준으로는 HDI와 패키지 부문 모두 메모리향 매출이 확대 되며 영업이익 기준 당사 추정치를 7.2% 상회했다.",
           "특히 SoCAMM 매출이 본격적 인 양산 전환에 힘입어 전분기 대비 2배 이상 증가하며 실적 성장을 견인했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1366,7 +3785,8 @@
           "매출액은 예상치를 31%, 영업이익은 예상치(29억 원)를 72억 원 하회했다.",
           "위식도역류질환 치료제 자큐보의 국내 원외처방액은 288억 원(+109.6% YoY, +12.0% QoQ)으로 견조했다."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1387,7 +3807,8 @@
           "해외 성과가 고무적인데, 올해 3분기 누적 해외 매출은 약 502억원 (+93.5%yoy)으로 이미 작년 해외매출(351억원)을 크게 상회. 미국의 경 우, 약 2,000여개 타겟 매장에 티니핑 MD 동시 진출 예정으로 기존 MD에 북미향으로 개발한 제품 판매되며, 현재 3차까지 주문 확보한 상황에서 1차 물량 출고 완료되며 관련 숫자는 4분기 중 반영될 것으로 예상. 중국은, 미 니소...",
           "고무적인 점은 영화 티켓수익으로 이번 분기 약 35억원을 인식했는데, 30 여종의 한정판 MD 판매 매출로 약 28억원의 추가 매출 발생한 점. 올해까 지는 신규 캐릭터 기반 R&D 투자 이어지며 수익성은 다소 아쉬울 수 있지 만, 올해 4분기 티니핑 시즌7이 국내에서는 디즈니플러스에서 동시방영 되 고, 중국에는 시즌6 공개되는 가운데 내년 1분기 중 중국, 일본에서 영화 개 봉되며 콘..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1408,7 +3829,8 @@
           "4026 Preview: 신사업인 전방부품 매출 본격화로 큰 폭의 실적 성장 기대. 당사추정 4분기 예상실적(연결 기준)은 매출액 588억원, 영업이익 26억원 으로 전년동기 대비 매출액은 5.7% 감소하지만, 영업이익은 2,074.2% 증 가하면서 큰 폭의 수익성 개선이 있을 것으로 예상함. 4분기는 매출이 부진할 것으로 예상하는 이유 액추에이터 매출 부진이 지속 될 것으로 예상하기...",
           "4분기부터 전장부품 본격 공급 및 2027년 로봇부품 공급 가시화 기대. ① 자동차향 전장부품 사업은 올해 4분기부터 본격적인 공급이 예상되고 있어 긍정적임. 북미 자율주행차 3개 모델에 탑재될 것으로 예상하고 있는 가운데, 동사는 ‘ARP VINA’ 2공장 자동화 1개라인(월 40만개 생산 CAPA) 을 풀가동하면서 공급할 예정임. 또한, 내년 2분기에 현재 CAPA 대비 2배 수준인..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
       },
       {
         "date": "2026-11-18",
@@ -1429,7 +3851,529 @@
           "4Q26 Preview: 전년동기 대비 매출액 증가세 전환 및 수익성 개선 기대. 당사추정 올해 4분기 예상실적(연결 기준)은 성수기 진입과 함께, 매출액 249억원, 영업이익 61억원으로 전년동기 대비 각각 8.2%, 19.8% 증가할 것으로 전망함. 특히 ‘인비즈넷’의 전년동기 실적(매출액 36억원, 영업이익 0억원)을 반영한다면 매출액은 전년동기 대비 23.8% 증가를 예상함.",
           "AI 시대, 실적과 실력을 모두 겸비한 진정한 AI 보안 솔루션 강자 ① 5대 에이전틱AI 보안 솔루션 공개, 차세대 성장사업 가시화. 지난 9월 ‘시큐업 2026’에서 동사의 5대 에이전틱AI 보안 솔루션을 공개. AI신원·권 한 관리부터 악성 프롬프트 차단, 보안 운영 자동화, AI 기반 모의해킹까지 주요 기능을 제시. 기존 보안·인증 기술을 에이전틱AI 환경으로 확장하고, 공공·금..."
         ],
-        "curated": false
+        "curated": false,
+        "source": "한경"
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "씨젠",
+        "stock_code": "096530",
+        "title": "아쉬운 실적이나 환율효과를 고려하면 선방한 편",
+        "target_price": "39,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98347",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261118_company_696721000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98347",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출 및 영업이익 모두 시장기대치 하회",
+          "매출 1,231억원(8% YoY)과 영업이익 116억원(21% YoY, 마진 9.5%) 모두 시장 기대치 하회. 조정 EBITDA 282억원(5% YoY, 마진 23%)로 추정.",
+          "품목별 매출: 시약 950억원(8% YoY), 장비 및 기타 매출 281억원(9% YoY).",
+          "세부시약 매출(성장률 YoY 생략): HPV(19%), 소화기(13%)가 외형성장을 견인했고, 여성 건강(7%)과 호흡기(4%: PB 22%, 일반 호흡기 4%)는 상대적으로 부진."
+        ],
+        "current_price": 23950.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "코리안리",
+        "stock_code": "003690",
+        "title": "부진한 투자손익, 양호한 PAA손익",
+        "target_price": "17,500",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "한화투자증권",
+        "report_idx": "naver_98344",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261118_company_879182000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98344",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 별도 순이익 543억원(-27% YoY), 기대치 상회",
+          "코리안리의 3Q26 당기순이익은 543억원(-27% YoY)으로 컨센서스를 6% 상회. 상반기에는 시장성 손익의 호조로 호실적을 기록했으나, 동일하게 매매/평가익의 부진으로 3분기 실적은 감소한 것이 특이요인. 3Q26 보험손익은 746억원(-3% YoY)으로 감소. 일반모형 손익은 대부분 라인에서 전년 동기와 유사했으나 보험료 경험조정이 -230억원으로 나타나 YoY 감익을 기록. P..."
+        ],
+        "current_price": 12920.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "한국카본",
+        "stock_code": "017960",
+        "title": "현재는 어둡지만 미래는 밝다.",
+        "target_price": "31,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98343",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261118_company_655897000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98343",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 겹치는 악재 대비 선방한 실적",
+          "동사의 3Q26 실적은 매출액 1,975억원(YoY +10.7%), 영업이익 326억원(+9.3%, OPM 16.5%)을 기록하며 당사 영업이익 추정치를 크게 하회했다. 1) 고객사의 선박 건조 공정 스케줄 순연에 따른 탑라인 감소, 2) 원/달러 환율 하락에 따른 부정적 환율 효과, 3) 미국-이란 전쟁 장기화로 인해 주요 원자재 가격이 상승한 점이 주요했다. 다만 2025년 이후 수..."
+        ],
+        "current_price": 13160.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "동성화인텍",
+        "stock_code": "033500",
+        "title": "겨울이라 밤이 길어지는 것 뿐",
+        "target_price": "26,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "DS투자증권",
+        "report_idx": "naver_98342",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261118_company_291068000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98342",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 최악의 환경 속에서도 견조하게 방어한 실적",
+          "동사의 3Q26 실적은 매출액 2,055억원(YoY +2.2%), 영업이익 243억원(+3.3%, OPM 11.8%)을 기록하며 당사 영업이익 추정치를 소폭 하회했다. 원/달러 환율 하락에 따른 부정적 환율 효과와 미국-이란 전쟁 장기화로 인한 주요 원자재 가격 상승분이 분기 온기로 반영되며 수익성이 둔화됐지만 2024년 이후 수주한 고단가 물량의 매출 비중 확대에 따른 블렌디드 ASP..."
+        ],
+        "current_price": 11130.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "BGF리테일",
+        "stock_code": "282330",
+        "title": "NDR 후기: 수익성 개선 요인의 백화요란",
+        "target_price": "180,000",
+        "target_change": "하향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "교보증권",
+        "report_idx": "naver_98341",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261118_company_822222000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98341",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "수익성 개선을 위한 퍼즐이 맞춰지는 중",
+          "당사는 11월 11~13일 BGF리테일 NDR을 진행. 투자자들의 주요 관심은 외국인 매출 및 비용 절감에 따른 마진 개선 등에 집중",
+          "3Q26 외국인 매출액 성장률은 YoY +66.8%, 비중은 2.5%(YoY +1.0%p) 기록. 이는 추적 가능한 결제 수단 기준으로 현금 결제 등을 포함한 실제 비중은 3~4% 수준으로 추정. 외국인 관광 트렌드가 수도권 중심의 단체 관광에서 비수도권으로 확대되는 가운데, 동사 부산지역 외국인 매출액 성장률은 YoY +133.3% 증가. 전국에 걸친 점포망을 확보한 동사의 경우, 이...",
+          "상품 믹스 개선에 따른 GPM 상승세도 지속될 전망. 이는 1) 상대적으로 담배 매출 비중이 낮은 외국인 매출 성장세가 지속되고 있으며, 2) 제조사의 일반 상품 가격 인상 효과가 점차 반영될 것으로 예상되기 때문. 담배 가격 인상이 제한적인 가운데, 일반 상품의 가격 인상에 따른 매출 비중 확대는 상품 믹스 및 GPM 개선에 긍정적으로 작용할 전망. 참고로 3Q26 가공식품 매출 비중..."
+        ],
+        "current_price": 140800.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "셀트리온",
+        "stock_code": "068270",
+        "title": "혼란한 시장 속에 듬직한 회사",
+        "target_price": "310,000",
+        "target_change": "신규",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98340",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261118_company_608345000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98340",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26까지 약속한 성장세 보이는 중, 미국 매출 상승세 뚜렷",
+          "연결기준 3Q26 매출액은 1조 5,755억원(YoY+53%, QoQ+13%), 영업이익 5,253억원(YoY+74%, QoQ+16%, OPM33%)을 기록하였다. 신규 출시된 5개의 제품이 매출 성장을 견인하고 있고, 이 신규 제품 매출 비중이 증가하면서 영업이익률도 개선되고 있다. 아직 인수에 따른 상각비 때문에 이익 기여도는 없지만 올해부터 발생한 Eli Lilly향 CMO 매출도..."
+        ],
+        "current_price": 213000.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "대한해운",
+        "stock_code": "005880",
+        "title": "3Q26 Re: 장기 계약 수요가 증가하는 중",
+        "target_price": "2,500",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98339",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261118_company_492273000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98339",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3분기 영업이익 588억원(-1%, OPM 17.2%)",
+          "대한해운의 3분기 매출액은 8% (YoY) 증가한 3,425억원, 영업이익은 1% 감소한 588억원(영업이익률 17.2% (-1.5%p))을 기록했다. 본업인 해운 부문은 시황 상승에 따라 매출액/이익 모두 증가했으나, 주택분양 매출액/이익이 감소한 영향이다. LNG선은 전부 장기계약으로 이익이 YoY/QoQ 큰 변동이 없으나, 벌크선/탱커선 영업이익이 각각 23%/165%(YoY) 증..."
+        ],
+        "current_price": 1906.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "아이에스동서",
+        "stock_code": "010780",
+        "title": "일회성 비용이 나타난 3분기, 건설 반등 시점 모색",
+        "target_price": "19,000",
+        "target_change": "상향",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98338",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261118_company_799741000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98338",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "2026년 11월 18일 I 기업분석_Earnings Review 아이에스동서 (010780) 일회성 비용이 나타난 3분기, 건설 반등 시점 모색 3Q26 잠정실적: 컨센서스 하회 3Q26 매출액 2,800억원(+3.3%yoy), 영업이익 15억원(-83.4%yoy)으로 시장 추정치(240억 원)를 크게 하회했다.",
+          "건설은 덕은에서 평가손실 71억원이 원가에 반영되었으며, 울산 그랑라크 에일린의 뜰 현장이 실행예산 확정 전으로 원가율 100%로 인식된 영향이다.",
+          "실행예산 확정 시 이익은 소급해 적용될 예정이다."
+        ],
+        "current_price": 13480.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "케이엠더블유",
+        "stock_code": "032500",
+        "title": "호재 늘어나는 국면, 주가 움직일 때가 되었습니다",
+        "target_price": "70,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "하나증권",
+        "report_idx": "naver_98337",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261118_company_400964000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98337",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "매수/TP 7만원 유지, 통신장비 업종 탑픽 제시, 2027년으로 시각 이동해야",
+          "KMW에 대한 투자의견 매수, 12개월 목표주가 70,000원을 유지한다. 더불어 국내 통신 장비 업종 내 Top Pick으로 제시한다. 추천 사유는 1) 미국 시장 5G 투자 지연 가능성 낮고, 2) 2027년 국내 주파수 경매 가능성 높아지고 있으며, 3) 스페이스X의 기지국 투자 가능성이 고조되는 양상이고, 4) 3분기 실적 발표를 끝으로 대다수 악재가 소멸되는 가운데 발생될 호재..."
+        ],
+        "current_price": 19600.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "대성하이텍",
+        "stock_code": "129920",
+        "title": "3Q26 영업이익 흑자전환 & 수주잔고 증가 지속",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "유안타증권",
+        "report_idx": "naver_98336",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/18/20261118_company_473983000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98336",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "금융투자분석사의 확인 및 중요 공시는 Appendix 참조 NOT RATED (M) 현재주가 (11/17) 4,095원 총발행주식수 17,832,641주 60일 평균 거래대금 10억원 60일 평균 거래량 176,511주 52주 고/저 14,700원 / 3,495원 주요주주 최호형 외 4 인 주가수익률 (%) 1개월 3개월 12개월 절대 (46.1) (42.9) 8.5 상대 (34.1)...",
+          "정밀부품 매출액은 124.9억원으로 전년대비 73.3%, 스위스턴 자동선반은 141.2억원으로 25.3%, 컴팩트 머시닝센터는 83.3% 증가했다.",
+          "3Q26말 수주잔고는 793.0억 원으로 3Q25(268.5억원), 2Q26(764.9억원) 대비 개선되었다."
+        ],
+        "current_price": 4095.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "디오",
+        "stock_code": "039840",
+        "title": "중국 유통망 관리 과정의 일시적 부진",
+        "target_price": "18,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98335",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261118_company_969289000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98335",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출 및 영업이익 모두 시장 기대치 하회",
+          "매출 383억원(-8% YoY)으로 시장 기대치 하회. 영업이익 21억원(-50% YoY, OPM 5.4%)으로 시장 기대치 하회. 조정 EBITDA는 62억원(-31% YoY, 마진 16.2%)으로 추정.",
+          "지역별 매출: 국내 63억원(+9% YoY), 해외 수출 321억원(-10% YoY). 중국 67억원(-34% YoY), 미국 24억원(20% YoY), 멕시코 27억원(20% YoY), 포르투갈 24억원(13% YoY), 튀르키예 34억원(28% YoY), 러시아 11억원(-29% YoY), 인도 30억원(25% YoY), 호주 24억원(14% YoY).",
+          "품목별 매출: 의료기기 322억원(-12% YoY), 상품 61억원(21% YoY)."
+        ],
+        "current_price": 8280.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "넥스트바이오메디컬",
+        "stock_code": "389650",
+        "title": "펀더멘탈대비 낙폭과대 의료기기 기업 1순위",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98334",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261118_company_629427000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98334",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 매출 시장기대치 부합, 영업이익 시장기대치 하회",
+          "매출 52억원(6% YoY)으로 시장기대치 부합, 영업적자 9억원으로 시장 기대치 하회",
+          "품목별 매출: 넥스파우더 44억원(2% YoY, 사상최대 분기실적 경신), 넥스피어 8억원(33% YoY, 유럽 GAE 시술 증가세)",
+          "지역별 매출: 국내 3억원(44% YoY), 유럽 18억원(-15% YoY), 미국 22억원(-9% YoY), 기타 11억원(253% YoY)"
+        ],
+        "current_price": 23450.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "쎄트렉아이",
+        "stock_code": "099320",
+        "title": "숫자로 설명되는 구간",
+        "target_price": "100,000",
+        "target_change": "상향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98329",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261118_company_568663000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98329",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "원가율 정상화 확인, 27~28년은 수주 인식 증익 구간",
+          "상반기는 충당금 등 원가 부담으로 영업적자 6억원 기록. 3Q26 영업이익 82억원으로 컨센서스(59억원) 39.6% 상회, 매출원가율 73.4%(2Q26 84.4%)로 원가 정상화 확인. 2027~28년은 해외 장비 매출 인식에 따라 영업이익 각각 332억원(+95.1% YoY, 이하 생략), 451억원의 증익 구간"
+        ],
+        "current_price": 59300.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "PS일렉트로닉스",
+        "stock_code": "332570",
+        "title": "Corp.day 후기: 서버는 증명했고, 본업은 턴",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98328",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261118_company_394440000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98328",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "서버 추가 수주 기대감 유효한 가운데, 실적 회복 기대",
+          "AI 투자에 대한 시장의 우려와 달리 현장의 서버 수급은 오히려 더 타이트하며, 수주 확인 시 실적 가시성과 주가 간 괴리가 좁혀질 전망"
+        ],
+        "current_price": 6040.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "오킨스전자",
+        "stock_code": "080580",
+        "title": "성장에 대한 확신",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98327",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261118_company_498049000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98327",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "흔들린 건 마진, 성장 방향은 그대로",
+          "3Q26 마진은 기대치를 하회했으나 성장성 훼손으로 판단하지 않음. 2027년 차세대 테스트 설비 투자 확대에 따른 커넥터·번인소켓·프로브핀 실적 기여는 더욱 구체화. 수익성 눈높이는 낮추지만 외형 확대 가시성 강화"
+        ],
+        "current_price": 14950.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "이엔에프테크놀로지",
+        "stock_code": "102710",
+        "title": "성장의 시차를 견디는 시간",
+        "target_price": "60,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98326",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261118_company_104855000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98326",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "성장 스토리 고려 시 주가 업사이드는 충분",
+          "성장 방향성은 명확하나 주가 재평가를 위해선 원가 부담을 이겨낼 이익체력 확인이 필요. 1) 불산계 식각액 원재료 내재화, 2) HSN 신규 공급 기대감, 3) 미국 법인 흑자 전환(2H27)에 따른 이익 개선 모멘텀은 유효"
+        ],
+        "current_price": 39100.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "성일하이텍",
+        "stock_code": "365340",
+        "title": "가동률 정상화, 이제는 원가의 차례",
+        "target_price": "27,000",
+        "target_change": "하향",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98325",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261118_company_291782000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98325",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "26년 3분기, 판매량 확대에도 원가 부담으로 적자전환",
+          "성일하이텍의 3Q26 매출액은 753억원(YoY +72.0%, QoQ -1.9%), 영업이익은 -93억원(YoY 적자축소, QoQ 적자전환), OPM은 -12.3%(QoQ -20.5%p)를 기록했다. 주요 금속 판매량 확대에도 불구하고 환율 및 금속 가격 하락, 원재료 매입가격과 제품 판매가격 간 시차가 수익성 악화의 주요 원인으로 작용했다. 니켈 판매량은 1,300톤(QoQ +24.3..."
+        ],
+        "current_price": 23950.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "티앤엘",
+        "stock_code": "340570",
+        "title": "아마존에서 살아남기",
+        "target_price": "48,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98324",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261118_company_695186000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98324",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3개분기 연속 높아진 이익률 유지, 미국 현지 수요 견고함",
+          "3Q26 실적은 매출액 525억(YoY +29.2%, QoQ -6.2%; 컨센서스 +9.8% 상회, 당사 추정치 +10.8% 상회), 영업이익 217억(YoY +78.9%, QoQ -13.0%, 영업이익률 41.3%; 컨센서스 +23.3% 상회, 추정치 +14.8% 상회)을 기록했다.",
+          "매출총이익률: 3Q26 51.4%(YoY +5.5%p, QoQ -2.0%p)를 기록했다. 원재료 생산 효율성 제고라는 경상적인 이유로 꾸준히 분기 매출총이익률 50%를 ‘26년 들어서 넘기고 있다. 앞으로도 이러한 수준이 이어질 것으로 전망한다.",
+          "하이드로콜로이드: 3Q26 매출액 409억(YoY +38.8%, QoQ -7.4%)을 기록했다. 꾸준히 Amazon 피부미용 및 퍼스널 케어 카테고리에서 상위권을 유지하며 수요가 잘 늘어나고 있음을 입증하고 있다. 통상적으로 동사의 미국 현지 파트너사가 4분기에 진행하는 이벤트 물량을 2분기에 가져간다. 이에 3분기 매출액은 QoQ 감소하는 계절성을 띠지만, 1분기 대비 성장하는 모습을..."
+        ],
+        "current_price": 25450.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "인터로조",
+        "stock_code": "119610",
+        "title": "지금부터 렌즈 탱",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98323",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261118_company_693193000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98323",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "지연된 물량 인식, 수율은 다소 아쉬웠던 3분기",
+          "3Q26 실적은 매출액 362억(YoY +12.0%, QoQ +23.0%; 컨센서스 대비 -1.9% 하회, 당사 추정치 대비 -4.2% 하회), 영업이익 58억(YoY +23.1%, QoQ -2.9%, 영업이익률 16.0%; 컨센서스 -19.4% 하회, 추정치 -26.6% 하회)을 기록했다.",
+          "일부 매출액이 2분기에서 3분기로 넘어오면서 매출액 규모가 300억 중반대로 성장했다. 이를 제외하면 2Q26 매출액 330억(QoQ +7.5%) ▶ 3Q26 매출액 326억(QoQ -1.2%)로 추정해볼 수 있다.",
+          "3Q26 매출총이익률은 32.5%(YoY -1.4%p, QoQ -13.7%p)를 기록했다. 이는 신제품인 축 고정 렌즈 생산 안정화 작업에 따른 종합 수율 하락, 재고를 줄이기 위한 공장 출하량 감소 등으로 나타난 현상이다. 좋았던 기존 제품의 수율에 더해 10월부터 신제품 생산 효율성 증대로 원가율 하락으로 마진 개선이 4분기에 나타날 전망이다."
+        ],
+        "current_price": 12690.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "LS",
+        "stock_code": "006260",
+        "title": "견조한 실적으로 예상치 부합",
+        "target_price": "300,000",
+        "target_change": "유지",
+        "opinion": "Buy",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98322",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261118_company_995083000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98322",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3분기 실적은 MnM 부진에도 Electric 호조로 예상치 부합",
+          "3분기 영업이익은 4,883억원(-18%QoQ, +90%YoY)으로 컨센서스 4,933억원과 키움증권 추정치 4,900억원에 부합했다.",
+          "자회사별로 ①LS Electric은 북미 AIDC용 전력 설비 및 초고압 변압기 수요의 폭발적 성장과 공급자 우위 시장 지속되며 영업이익이 2,335억원(+31% QoQ, +132%YoY)으로 역대 최대 실적 행진을 이어갔고, ②LS전선도 4분기 테넷(Tennet)향 해저케이블 공급 준비을 앞두고 일부 일회성 비용이 있었지만 수익성이 우수한 부스덕트(Busduct) 판매 확대(매출액 2..."
+        ],
+        "current_price": 173500.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "HS애드",
+        "stock_code": "035000",
+        "title": "주주환원 이행과 확장되는 AI 솔루션",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "한국IR협의회",
+        "report_idx": "naver_98320",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261118_company_9591000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98320",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "HS애드는 1984년 설립된 LG그룹 계열의 종합 광고회사로, 2025년 기준 매출 비중은 제작매출액 83.6%, 수입광고대행료 16.4%로 구성됨",
+          "동사의 투자포인트는 1) 기업가치 제고 계획에 따른 주주환원 확대 지속, 2) AI 솔루션 기반 사업 확대와 생산성 개선",
+          "동사 주가는 2022년 이후 PER Band 4.5x~8.9x, PBR Band 0.43x~0.77x 수준에서 형성. 현재 주가는 2026년 추정 실적 기준 PER 6.1x, PBR 0.47x로 PER은 Band 중단, PBR은 Band 하단에 위치함"
+        ]
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "에이치브이엠",
+        "stock_code": "295310",
+        "title": "성장하는 외형, 더딘 이익 개선",
+        "target_price": "49,000",
+        "target_change": "하향",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98319",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261118_company_425742000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98319",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "높은 외형 성장에도 환율 부담으로 수익성 부진",
+          "3분기(별도) 매출액은 263억원(+96.1% yoy), 영업이익은 8억원 적자(적자지속 yoy, 3Q25: 3억원 적자)를 기록했다. 컨센서스(267억원/38억원) 대비 매출은 부합했으나 영업이익은 크게 하회했다. 우주 소재 매출은 164억원(+77.5% yoy), 반도체와 항공·방위 소재 매출은 각각 48억원(+152.8% yoy), 36억원(+428.9% yoy)으로 증가했다. 고...",
+          "다만 과거 높은 환율로 매입한 원재료가 원가에 반영되고, 매출은 하락한 환율로 인식되면서 수익성이 저하됐다. 매입부터 매출 인식까지 약 4개월이 소요돼 환율 부담이 이어질 수 있어, 4분기 수익성 개선 폭도 제한적일 전망이다. 수주잔고는 594억원(+67.9% yoy, -5.8% qoq)이며, 반도체 소재가 80억원(+220.0% yoy, +94.2% qoq)으로 가장 높은 증가율을 보였다."
+        ],
+        "current_price": 40200.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "대한조선",
+        "stock_code": "439260",
+        "title": "선주들이 수에즈막스를 사러 해남 간다",
+        "target_price": "48,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "IBK투자증권",
+        "report_idx": "naver_98318",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261118_company_827731000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98318",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "수에즈막스 중심으로 20%대 영업이익률 달성",
+          "대한조선에 대하여 투자의견 매수, 목표주가 48,000원으로 커버리지를 개시한다. 투자의견 매수를 제시하는 이유는 유조선 운임 강세가 수에즈막스급까지 확대된 가운데 동사는 수에즈막스급의 반복건조를 통해 20%대 영업이익률을 달성하고 있기 때문이다. 최근 5년간 아프라막스~수에즈막스급을 집중 건조하며 탱커 건조에 특화된 생산체계를 구축한 것으로 판단된다. 이에 따라 수에즈막스급의 교체 발..."
+        ],
+        "current_price": 33800.0
+      },
+      {
+        "date": "2026-11-18",
+        "stock_name": "로보티즈",
+        "stock_code": "108490",
+        "title": "수요는 견조, 공급 병목 해소가 관건",
+        "target_price": "320,000",
+        "target_change": "유지",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98317",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261118_company_169489000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98317",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3Q26 Review: 유럽·일본 확대에도 제품믹스 악화·비용 확대로 적전",
+          "3Q26 매출액은 135억원(+45.8% YoY, -12.4% QoQ)으로, 액추에이터 매출 132억원(+47.0% YoY), 자율주행로봇 매출 2억원(-3.3% YoY)을 기록했다. 지역별로는 폴렌로보틱스향 공급 및 연구 수요 확대로 유럽 24억원(+172.0% YoY), 일본 12억원(+89.1% YoY)으로 고성장한 반면, 북미는 30억원(-2.1% YoY)으로 역성장했다.",
+          "저ASP·저마진의 다이나믹셀 X 시리즈 비중 확대, 희토류 수급 차질로 고부가 P·Y 시리즈 공급 제한으로 제품 믹스가 악화된 가운데, 원재료 사용액 및 외주가공비가 각각 매출증가율의 1.6배, 3.6배로 증가하며, GPM은 52.6% (-12.2%p YoY)로 하락했다. 영업손실은 26억원(OPM -19.4%)으로 적자전환했다. 연구개발비 42억원(+64% YoY), 인건비 25억원(..."
+        ],
+        "current_price": 231500.0
       }
     ]
   },
@@ -1454,7 +4398,8 @@
         "12개월 선행 EPS에 최근 1년 평균 PER 9.4배 적용, 투자의견 매수·목표주가 43만원으로 커버리지 개시(상승여력 +19.8%)."
       ],
       "current_price": 359000,
-      "upside_pct": 19.8
+      "upside_pct": 19.8,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1476,7 +4421,8 @@
         "투자의견 매수·목표주가 12만원으로 커버리지 개시(상승여력 +25.5%)."
       ],
       "current_price": 95600,
-      "upside_pct": 25.5
+      "upside_pct": 25.5,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1495,7 +4441,8 @@
         "SK증권 모빌리티 커버리지 신규 개시 종목으로 투자의견 매수, 목표주가 370,000원 제시.",
         "완성차 공급 정상화와 글로벌 신차 사이클 진입에 따른 출하량 회복 및 믹스 개선 모멘텀에 주목.",
         "※ 참고: 한경 컨센서스 서버의 해당 PDF 링크(654543)에 동일 작성자의 기아 리포트 파일이 중복 첨부되어 있어, 현대차 상세 재무 수치는 증권사 원문 확인이 필요합니다."
-      ]
+      ],
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1516,7 +4463,8 @@
         "내년 예상 PER 2.0배, PBR 0.2배의 지나친 저평가 구간. 주당 400원 배당 시 배당수익률 6.5% 및 연내 기업가치 제고 계획 공시 기대감(목표주가 9,500원 유지, 상승여력 +51.0%)."
       ],
       "current_price": 6290,
-      "upside_pct": 51.0
+      "upside_pct": 51.0,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1537,7 +4485,8 @@
         "2027년 상반기 데뷔 목표 미국 신인 보이·걸그룹 흥행 시 중장기 이익 성장 가시성 확대(단기 4Q는 서구권 공연 축소·남미 투어로 QoQ 둔화 예상, 목표주가 29만원 유지)."
       ],
       "current_price": 172800,
-      "upside_pct": 67.8
+      "upside_pct": 67.8,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1558,7 +4507,8 @@
         "3Q MD/라이선싱 매출 621억원(+24% YoY) 서프라이즈로 수익화 역량 입증. 할인율 축소를 반영해 목표주가를 130,000원으로 +18% 상향(중국 본토 공연 재개 시 최대 수혜)."
       ],
       "current_price": 95900,
-      "upside_pct": 35.6
+      "upside_pct": 35.6,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1580,7 +4530,8 @@
         "환율·플랫폼 영구성장률 조정으로 목표주가는 22만원→18만원 하향했으나 주가 낙폭 과대 및 12월 학회 이벤트 기대로 업종 Top Pick 유지."
       ],
       "current_price": 52600,
-      "upside_pct": 242.2
+      "upside_pct": 242.2,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1602,7 +4553,8 @@
         "현재 판매 중인 엑스코프리 가치만 반영해 목표주가 15만원으로 상향, 향후 오파칼림·RISE3 데이터 확인 시 추가 리레이팅 기대."
       ],
       "current_price": 84100,
-      "upside_pct": 78.4
+      "upside_pct": 78.4,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1623,7 +4575,8 @@
         "고농도 SCIG 제형 변화의 장기 업사이드 및 2027년 별도 EBITDA 기준 SOTP 기업가치 2.4조원을 반영해 목표주가 18만원 → 21만원으로 상향."
       ],
       "current_price": 122300,
-      "upside_pct": 71.7
+      "upside_pct": 71.7,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1644,7 +4597,8 @@
         "주1회 GLP-1 비만치료제 '에크노글루타이드' 국내 3상 연내 투약 종료·내년 출시 예정. 2027E 영업이익 1,810억원(+41.4% YoY) 전망 및 목표주가 6만원 → 7만원 상향."
       ],
       "current_price": 38900,
-      "upside_pct": 79.9
+      "upside_pct": 79.9,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1664,7 +4618,8 @@
         "주력 삼중 기능성 면역항암제 'AR170'이 전임상에서 완전관해(CR) 50%(3/6)·면역기억 형성·영장류 초기 안전성을 확보, 2027년 미국 IND 제출 및 조기 글로벌 L/O 추진.",
         "공동개발 OXTIMA(글로벌 임상 2a상) 마일스톤 및 인투셀 'ITC-6146RO' 2027년 조기 L/O 모멘텀 보유. 다만 2026년 매출 25억원(-14.2%)·영업손실 178억원 적자 지속 전망."
       ],
-      "current_price": 7590
+      "current_price": 7590,
+      "source": "한경"
     },
     {
       "date": "2026-11-25",
@@ -1685,7 +4640,720 @@
         "실적 추정치 조정으로 목표주가 12만원 → 10만원 하향했으나, 배당성향 25%→30% 상향 및 자사주 500억원 추가 매입으로 예상 배당수익률 5.8% 주주환원 매력 부각."
       ],
       "current_price": 69100,
-      "upside_pct": 44.7
+      "upside_pct": 44.7,
+      "source": "한경"
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "한세실업",
+      "stock_code": "105630",
+      "title": "3Q26 Review: 외부 환경도 힘들다",
+      "target_price": "9,000",
+      "target_change": "하향",
+      "opinion": "Hold",
+      "analyst": "",
+      "broker": "유진투자증권",
+      "report_idx": "naver_98488",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_972806000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98488",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 매출액은 5,887억원(+8.3%yoy, 달러 기준 약 +5.9%)으로 외형은 성장했다. 다만 영업이익은 2억원(-99.3%yoy)으로 어닝 쇼크를 기록했다.",
+        "OEM(별도 기준) 달러 기준 매출이 로우싱글 성장하며 대체로 부합했다. 주요 고객사별 매출 비중으로는 중저가 고객사 33%, 중고가 고객사 24%, 마트 고객사 20% 초반을 기록했다. 고객 비중은 전년과 비슷한 수준이다. 마트 주문의 수량이 늘어나며 전체 매출을 끌어올렸으나 단가가 하락하며 매출 상승폭을 제한했다.",
+        "별도 손익에는 일회성 요인과 환율 요인이 겹쳤다. 미국 유아동복 유통 고객사 칠드런스플레이스가 11월 파산하면서 관련 매출채권에 대손상각비 약 170억원이 반영됐다. 이를 제외하면 영업이익은 약 175억원 수준이며, 이역시 기존 예상과는 동떨어진 수준이다. 다른 원인은 원달러 환율 하락이다. 회사는 1~2분기(약 2개월 선행) 환율로 원자재를 사고 당분기 환율로 매출을 잡는 구조여서,...",
+        "원단 자회사 칼라앤터치 매출액은 전년대비 50% 성장했다. 내부 거래 비중은 줄어들고 외부 고객 비중이 늘어났다. 과테말라 생산 기지 관련 비용은 부담이다. 과테말라 공장은 2022년부터 2026년까지 약 1.7억불을 투자했다. 고기능성 원단 제작 및 수직계열화에 필요한 작업을 메인으로 하고 있으며 고객사들이 고기능성 원단부터 당사를 선택해 제조까지 이어질 수 있도록 하는 것이 목표이다..."
+      ],
+      "current_price": 7230.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "디어유",
+      "stock_code": "376300",
+      "title": "K-Trend를 지렛대로 K-Fandom Monetization 확장",
+      "target_price": "30,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "한화투자증권",
+      "report_idx": "naver_98487",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/16/20261125_company_594234000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98487",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "버블하우스: K-Trend를 지렛대 삼아…",
+        "11월 14일 뉴욕 맨해튼 유니언 스퀘어에 약 400평 규모의 상설 매장 Bubble House가 오픈했다. Bubble의 팬 경험을 오프라인으로 옮긴 플래그쉽 스토어다. 입장시 $15의 입장료가 발생되나 버블 구독 1년 이상 회원의 경우 무료 입장이 가능하다. 초기 수익원은 K-Pop 관련 굿즈 및 한국 F&B 브랜드를 활용한 굿즈 판매/자체 Beauty 상품 판매 매출로 대부분 구성...",
+        "한편 K-Food 및 K-Beauty에 관심 있는 (서구권)외국인의 관심을 유도해 Bubble 서비스를 홍보할 수 있다는 점에서 초기 상품 판매 매출 이상의 효과를 기대할 수 있다는 점에서 긍정적이다. 중국 및 일본을 비롯한 아시아 시장에서는 Bubble이라는 아티스트-팬덤 간 채팅 서비스가 익숙한 반면, 서구권 시장에서는 여전히 생소한 면이 있다. 금번 Bubble House 오픈을..."
+      ],
+      "current_price": 20100.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "종근당",
+      "stock_code": "185750",
+      "title": "기다려야 할 구간",
+      "target_price": "80,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98486",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_514721000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98486",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 기다려야 할 구간",
+        "종근당은 2026년 3분기 별도기준 매출액 약 4,307억원(+0.8% YoY) 및 영업이익 약 237억원(+15.4% YoY, OPM 약 5.5%)로 컨센서스 대비 매출액 약 4,812억원은 10.5% 하회하였으나 영업이익 약 217억원은 9.2% 상회하였다. 이는 위탁연구비 및 임상시험비 감소 등으로 경상연구개발비 축소에 기인한다.",
+        "기존 상위 매출 품목인 프롤리아주, 글리아티린 등의 매출 감소를 위고비, 아일리아 등의 상품으로 상쇄하고자 하여 OPM은 지속적으로 감소하고 있다. 올해 6월부터 HK이노엔, 대원제약의 프롤리아 시밀러가 추가로 급여 등재됨에 따라 프롤리아 약가는 기존 12만 3,760원에서 10만 8,290원으로 약 -12.5% 인하되었으며 이에 따라 프롤리아주 매출액은 약 255억원(-22.6% Yo..."
+      ],
+      "current_price": 59900.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "덴티움",
+      "stock_code": "145720",
+      "title": "기다림의 시간",
+      "target_price": "60,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98485",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_668086000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98485",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 기다림의 시간",
+        "덴티움은 2026년 3분기 매출액 약 783억원(+0.1% YoY, -12.4% QoQ) 및 영업이익 약 159억원(+27.6% YoY, +8.4% QoQ, OPM 약 20.3%)로 컨센서스 대비 매출액은 약 12% 하회하였으나 영업이익은 약 14% 상회하였다. 이는 덴티움 매출 믹스의 변화에 따른다. 임플란트 매출이 약 631억원으로 견조한 가운데 디지털 장비 매출이 약 65억원(-2...",
+        "중국은 매출액 약 396억원(+38.7% YoY, -0.4% QoQ)로 3분기가 전통적으로 비수기임에도 불구하고 전분기 수준을 유지하며 견조한 성장을 보였다. 반면 내수 시장 및 아시아 지역은 각각 약 129억원(-17.1% YoY, -13.7% QoQ) 및 약 133억원(-14.0% YoY, -10.8% QoQ)로 부진하였다. 유럽은 2분기 러시아 지역 선적 집중에 따른 기저효과로 약..."
+      ],
+      "current_price": 39800.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "대원제약",
+      "stock_code": "003220",
+      "title": "기다리며 회복을 준비",
+      "target_price": "10,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98484",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_893156000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98484",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 기다리며 회복을 준비",
+        "대원제약은 2026년 3분기 별도기준 매출액 약 1,393억원(-3.2% YoY) 및 영업손실 약 41억원(적자 축소)을 달성하였다. 매출원가율은 약 52.6%로 전년 동기 대비 약 2.6% 개선되었다. 매출 감소는 정부 약가 인하 및 호흡기 수요 둔화에 기인한다.",
+        "기존 핵심 매출 품목이었던 펠루비정이 올해 5월 1일부터 180원에서 96원으로 약 46%, 펠루비서방정이 304원에서 234원으로 약 23% 약가가 인하되었다. 3분기부터 이러한 약가 인하 영향이 온기 반영됨에 따라 펠루비 매출액은 2분기 약 116억원(-19.3% YoY), 3분기 약 96억원(-32.9% YoY)으로 감소하였다.",
+        "대원제약은 이러한 호흡기 매출액 감소를 만성질환 처방 확대 및 건강기능식품 신제품 출시로 만회하고 있다. 만성질환에서는 이상지질혈증 치료제 타바로젯 약 59억원(+20.2% YoY), 고혈압 치료제 이달비 제품군 약 43억원(1Q26 판매계약 체결, +5.7% QoQ) 등으로 견조한 성장세를 이었다."
+      ],
+      "current_price": 7520.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "LS머트리얼즈",
+      "stock_code": "417200",
+      "title": "27년 주목할 턴어라운드 기업",
+      "target_price": "14,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98483",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_464462000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98483",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "투자의견 매수, 목표주가 14,000원 제시",
+        "LS머트리얼즈에 대해 투자의견 매수와 목표주가 14,000원을 제시한다. 목표주가는 PSR 방식을 활용했으며 27년 이익 회복 초기 국면인 점을 고려했다. 27년 실적 회복의 핵심은 연료전지 향으로의 매출확대와 주요 자회사의 적자 폭 축소에 기인한다. 올해 AIDC 연료전지용 UC 물량 689억원(초도물량 제외)을 확보했으며 연내 추가 수주도 기대된다. 기존 풍력발전과 UPS용 외 새롭..."
+      ],
+      "current_price": 9150.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "이수페타시스",
+      "stock_code": "007660",
+      "title": "3Q26 Re: 놀라운 수익성의 연속",
+      "target_price": "120,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98482",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_228183000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98482",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Re: 환부담에도 높은 수익성 기록",
+        "3Q26 연결 기준 매출액 3,892억원(+2% QoQ), 영업이익 949억원(+23% QoQ, OPM 24%)으로 컨센서스에 부합하는 실적을 기록하였다. 원달러 환율 하락이 매출액 성장에 부담으로 작용했으나 수익성은 견조했다. 1) 페타시스는 전분기 대비 수익성이 +5%p 개선되었다. 다중적층 매출 비중 증가, 판가 인상 효과, 원재료 래깅효과가 복합적으로 작용했다는 판단이다. 생산..."
+      ],
+      "current_price": 73600.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "코오롱인더",
+      "stock_code": "120110",
+      "title": "3Q26 Re: 유가 안정을 기다릴 때",
+      "target_price": "70,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98481",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_530349000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98481",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Re: 본업은 원가·환율 부담, IT 소재는 성장 지속",
+        "3Q26 실적은 매출액 1조 2,747억원(-4% QoQ), 영업이익 402억원(-58% QoQ, OPM 3%)으로 컨센서스를 하회하였다. 실적 부진의 핵심 원인은 환율하락과 역래깅 효과(고가 원료의 후행적 투입에 따른 스프레드 축소가 수익성을 제약)다. 산업자재는 아라미드 원가 상승과 타이어코드 수익성 저하, POM 스프레드 축소로 영업손실 -48억원을 기록하였다. 화학은 석유수지 원..."
+      ],
+      "current_price": 34550.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "롯데관광개발",
+      "stock_code": "032350",
+      "title": "결국 좋은 업황을 따라갈 주가",
+      "target_price": "15,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98480",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_709258000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98480",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "홀드율에 따른 단기 실적 부진만 반영된 주가 수준",
+        "3Q26 실적이 표면상으로는 기대치에 미치지 못한 것처럼 비춰지며 실적 발표 이후 긍정적 뉴스 플로우에도 주가는 단기 소폭 반등 이후 큰 반전을 보여주지 못하고 있다. 3Q26 카지노 매출액은 1,273억원(-8.6% YoY)를 기록하며 역성장한 것처럼 보일 수 있으나 단기 실적은 홀드율에 의해 변동이 있을 수 있는 점을 감안하면 연간 성장 흐름에 초점을 맞춰야 한다는 판단이다. 그리고...",
+        "카지노 월 순매출액 300억원을 전후로 이익 레버리지 효과가 극대화되는 것으로 추정되는 점을 감안하면 아직 레버리지 효과가 본격화되는 구간에는 진입하지 않았다고 판단된다. 롤링프로그램 강화에 의한 일시적 홀드율 하락에 따른 부진은 안정적인 고객 데이터베이스 증가로 이어져 결국은 27년 더 큰 성장으로 돌아올 전망이다."
+      ],
+      "current_price": 10060.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "SBS",
+      "stock_code": "034120",
+      "title": "27년 본격 턴어라운드 전망",
+      "target_price": "20,000",
+      "target_change": "유지",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "DS투자증권",
+      "report_idx": "naver_98479",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/66/20261125_company_619430000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98479",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26Re: 광고 수익 방어됐으나 제작 비용 증가로 수익성 둔화",
+        "SBS의 26년 3분기 실적은 연결 매출액 2,549억원(+7% YoY), 영업이익 101억원(-22% YoY, OPM 4%)을 기록했다. 별도 총광고수익은 693억원(+9% YoY)으로 아시안게임 중계 효과와 드라마 <재벌X형사2> 시청 성과가 맞물리며 호조를 보였다. 사업수익은 1,037억원(-1% YoY) 온라인수익 392억원(-7% YoY)으로 넷플릭스와 전략적 파트너십(25~3..."
+      ],
+      "current_price": 13050.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "HL D&I",
+      "stock_code": "014790",
+      "title": "3Q26 Review: 대손 반영에도 수익성 개선 지속",
+      "target_price": "5,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98478",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_508548000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98478",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 대손 반영에도 수익성 개선 지속",
+        "HL D&I의 2026년 3분기 연결 매출액 4,717억원(YoY -1.1%)과 영업이익 301억원(YoY +18.1%)을 기록. 매출액과 영업이익 모두 시장 컨센서스 부합. 개발·건축 GPM은 18.3%로 전분기 대비 4.9%p 개선. 일부 도급 현장의 원가 절감과 공사비 증액에 따른 누계 이익반영 영향. 2분기 자체사업의 일시적 원가 부담 해소도 기여. 인프라도 저수익 현장 종료로..."
+      ],
+      "current_price": 2295.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "에이디테크놀로지",
+      "stock_code": "200710",
+      "title": "변하지 않은 방향성, 늦어지는 증명",
+      "target_price": "28,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98477",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_430584000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98477",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 매출액 252억원, 영업적자 14억원",
+        "에이디테크놀로지의 연결 실적은 매출액 252억원(YoY -31.5%), 영업적자 14억원(YoY 적자전환, OPM -5.7%)을 기록. 예상치를 크게 하회한 실적을 기록한 핵심은 고객사 설계지연 및 메모리 확보 난항에 따른 프로젝트 매출 인식 이연. 인식되어야할 프로젝트들이 4분기, 또는 내년까지도 매출 인식이 이연될 것으로 예상. 특히, HBM이 사용되는 개발 프로젝트는 HBM 확보..."
+      ],
+      "current_price": 15470.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "솔브레인",
+      "stock_code": "357780",
+      "title": "사이클 속에서 안정적인 선택지",
+      "target_price": "420,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98476",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_273720000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98476",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 매출액 3,449억원, 영업이익 506억원",
+        "솔브레인의 3Q26 연결 실적은 매출액 3,449억원(YoY +43.0%), 영업이익 506억원(YoY +47.2%, OPM 14.7%)을 기록. 고객사 신규 라인의 적극적인 램프업 수요 대응과 연결 자회사 편입 효과 등으로 호실적 추이를 유지. 편입효과를 제외하더라도 동사는 올해 반도체 출하량 증대에 발맞춰 QoQ 두자릿수 성장세를 시현. 동사는 고객사들의 웨이퍼 투입량 증가와 비례한..."
+      ],
+      "current_price": 250000.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "네패스",
+      "stock_code": "033640",
+      "title": "NDR 후기: 선도 OSAT를 향한 방향성",
+      "target_price": "40,000",
+      "target_change": "유지",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98475",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_228619000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98475",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 매출액 1,648억 원, 영업이익 168억 원",
+        "네패스의 3Q26 연결 실적은 매출액 1,648억원(YoY +19.9%), 영업이익 168억원(YoY +29.9%, OPM 10.2%)을 기록. 비우호적인 환율 환경에도 불구하고 단가 인상 및 신규 물량 및 전자재료 대응 증가에 따라 긍정적인 실적 추이 유지. 8인치 Bumping에 대한 단가가 꾸준히 상승하는 추세, 8인치의 수익성이 개선되며 긍정적인 이익률에 기여. 당 분기 특징은..."
+      ],
+      "current_price": 17460.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "에이비엘바이오",
+      "stock_code": "298380",
+      "title": "많이 빠지기도 했다",
+      "target_price": "120,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98474",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_767257000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98474",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "1) 토베시미그; COMPANION-002 임상 내 ORR은 위약군 대비 유효성 입증했으나(18.0%vs5.3%) OS는 통계적 유의성 미확보. 이는 교차 투약에 기인. 다만 FDA는 BLA 제출 전 생존이점 입증하는 추가 연구 권고. 기술 도입한 컴패스 테라퓨틱스의 경우 3분기 실적발표까지 FDA 협의와 함께 추가 임상 없이 BLA 제출 준비 진행 중임을 언급. 사전 상업화 비용 및...",
+        "2) Grabody-B; 25년 BBB 셔틀에 대한 딜 러쉬 이후 해당 영역에 대한 시장의 관심은 소강 상태. 로슈는 최근 알렉터의 파킨슨병 효소대체요법 후보물질 AL050을 12억 7천만 달러 규모로 라이선스 아웃 계약 추가 진행. 여전히 BBB 셔틀에 대한 높은 기대감 반영 딜은 다수 체결 중. 2028년 내 BBB 셔틀에 대한 관심을 환기시켰던 로슈의 트론티네맙 임상 3상 완료되어...",
+        "3) 지바스토미그; 노바브릿지와 공동 개발 중인 파이프라인으로 ESMO 내 1b상 8mg/kg 투여 환자군에 대한 추가 분석 결과 공개. ORR 79% 및 DCR 97% 수준. 현재 FDA와의 3상 주요 설계 합의 완료되어 후속 임상 진입 예정"
+      ],
+      "current_price": 34350.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "알테오젠",
+      "stock_code": "196170",
+      "title": "잘하고 있는데 왜 그래요",
+      "target_price": "400,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98473",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_266346000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98473",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "특허 이슈 해소, 키트루다 Qlex 전환 가속화",
+        "키트루다 Qlex 전환율 꾸준히 상승. 3Q26 해당 매출은 약 1.1조원 수준으로 QoQ 79.3% 성장. MSD는 출시 2년 내 전환율 30~40% 달성을 목표로 진행 중이며, 해당 전망에 on track으로 성장하고 있는 모습 확인. 이에 따라 28년까지 총 10억 달러의 판매 마일스톤 무리 없이 수령 가능할 것으로 추정",
+        "11월 5일 CMS의 약가 협상 최종규칙 발표되었는데, 키트루다 SC제형 또한 약가 협상 대상에 포함되며 시장의 우려 존재. 다만 이는 초안 발표 시 짐작 가능했던 내용. 협상된 약가는 29년부터 적용될 예정. 또한 제형 변경에 대한 니즈는 IRA 약가 방어에만 존재했던 것이 아닌, 투약 편의성 개선에도 존재한다고 판단. 키트루다 Qlex의 전환율이 출시 직후 빠른 속도로 상승하고 있는...",
+        "할로자임-MSD의 특허 분쟁 또한 승기를 잡으며 마무리되는 방향으로 진행 중. 독일의 경우 키트루다SC 판매금지 가처분은 취소되었으며, 미국 내 PGR 또한 14건에서 모두 승리. 뉴저지 연방법원에 제기된 특허침해 소송은 본안 판단 앞두고 있으나 특허 침해의 근거가되는 청구항들이 PGR 내 특허성 부정되어 해당 소송 또한 큰 이슈 없을 것으로 추정"
+      ],
+      "current_price": 159700.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "유한양행",
+      "stock_code": "000100",
+      "title": "3Q26 Review; 다져가는 시간",
+      "target_price": "130,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98472",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_671669000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98472",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3분기 매출액 6,043억원, 영업이익 332억원 기록",
+        "유한양행 3분기 연결 매출액 6,043억원 (YoY +6.0%), 영업이익 332억원 (YoY +50.8%, OPM 5.5%) 기록. 약품사업부의 매출은 3,738억원 기록하며 전년동기대비 4.5% 성장. 안티푸라민 및 마그비 등 주요 품목이 매출 성장 견인. 래피콜 파워 연질캡슐 출시하며 호흡기 질환 시즌에 대응 중. 헬스케어 사업부의 경우 692억원 기록하며 전년동기대비 32.7%...",
+        "연결 기준 영업이익은 332억원(YoY +50.8%, OPM 5.5%) 기록. 연초 제시했던 가이던스 대비 이익은 소폭 상회 가능할 것으로 추정. 유한화학의 실적 개선이 이익 성장의 주요 동력이 되는 것으로 판단. 해외사업부의 경우 분기 편차로 인한 일부 역성장 존재했으나 수주 증가의 흐름은 유지되고 있다고 추정",
+        "3분기 라이선스 수익은 78억원 기록. 로열티 수익의 연초 가이던스는 하향. 아미반타맙 SC 제형의 J-Code 발효됨에 따라 향후 처방 확대가 기대. MARIPOSA 임상의 mOS 데이터 공개가 처방 확대의 마지막 키라고 판단되는 만큼 추가 매출 확대의 기대감 유효"
+      ],
+      "current_price": 77300.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "달바글로벌",
+      "stock_code": "483650",
+      "title": "NDR 후기: 과도한 시장 우려, 사업은 순항 중",
+      "target_price": "310,000",
+      "target_change": "유지",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98471",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_353577000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98471",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 Review: 환율 우려에도 수익성 선방",
+        "3분기 연결 매출액 및 영업이익은 각각 1,556억원(YoY 36%), 334억원(YoY 101%) 시현. OPM은 21.5%(YoY +6.9%p)로 비우호적 환율에도 견조한 수익성 시현. 마케팅 효율화, 해운 운송 비중 확대 등으로 비용 방어. 북미 232억원(YoY 31%, QoQ -33%) 시현. 행사 부재 및 부정적 환율에도 틱톡샵 호조로 상쇄. 오프라인도 순항 중, 최근 ULT..."
+      ],
+      "current_price": 128900.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "에이프릴바이오",
+      "stock_code": "397030",
+      "title": "보유 현금보다 싼 시가총액",
+      "target_price": "45,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "교보증권",
+      "report_idx": "naver_98470",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/62/20261125_company_185233000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98470",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "1) APR-R3; 2b상의 경우 글로벌 임상으로 중등도~중증 성인 아토피피부염 환자 200명을 대상으로 진행될 예정. 27년 중반 임상 개시 목표. 2a상에서 IV제형을 통한 투약을 평가했으나, 2b상에서는 SC제형을 통해 500mg 4주 간격 투약군, 500mg 투여 후 250mg 4주 간격 투약군, 500mg 투약 후 250mg 2주 간격 투약군, 위약군 등 4개의 환자군을 평가할...",
+        "또한 궤양성대장염으로도 적응증 확대 예정. 별도의 2a상을 통해 중등도~중증의 궤양성대장염 환자 84명을 평가할 계획. 해당 적응증의 결과는 28년 확인 가능할 것으로 전망. R3를 기술도입한 에보뮨의 경우 자사 파이프라인 EVO756 2b상 유효성 입증 실패 후 R3를 리드에셋으로 변경하며 적응증 확장 전략 진행 중. 27년~28년에 걸친 AD 2b상, UC 2a상 결과 발표에 주목 권고",
+        "2) APR-A1; 룬드벡이 기술도입해 TED 적응증으로서 개발 중이던 파이프라인이었으나, 8월 1b상 결과를 토대로 해당 적응증 개발 중단을 발표. 시장은 현재 해당 파이프라인에 대한 반환 우려 존재하는 상황이나, 3Q26 실적 발표 IR 자료 내에는 여전히 해당 파이프라인이 포함. CD40L 차단 기전을 기반으로 TED 외 타 적응증 개발 확정 시 우려 해소 가능하다고 판단"
+      ],
+      "current_price": 12660.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "알테오젠",
+      "stock_code": "196170",
+      "title": "신뢰와 수급의 회복이 필요하다",
+      "target_price": "410,000",
+      "target_change": "유지",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "하나증권",
+      "report_idx": "naver_98469",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_319916000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98469",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "Enhertu SC 임상1상의 환자 수 감소, 유사한 사례도 있다",
+        "알테오젠의 ALT-B4가 적용된 Enhertu SC 제형의 임상1상 NCT07015697의 현재 임상 현황이 11/19일자로 업데이트 되었다. 여기서 Status가 “Recruiting”에서 “Active, not recruiting”으로 변경된 것과 등록 환자수가 기존 76명(예상)에서 17명(실제)으로 변경되는 것이 문제되었다. 이 중 Status 변경은 현재 모집된 환자로만 우선...",
+        "유사한 사례로 같은 Daiichi Sankyo가 Sponsor인, Valemetostat와 Dxd 계열 ADC와의 병용 1상 NCT06244485를 보면, 2026년7월 “Active, not recruiting”으로 Status가 변경되면서 환자 수가 기존 210명(예상)에서 98명(실제)으로 변경되었다. 이후 해당 임상은 2026년9월 환자 수가 다시 기존 210명(예상)으로 증가했..."
+      ],
+      "current_price": 159700.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "한화생명",
+      "stock_code": "088350",
+      "title": "3Q26 NDR 후기 - 대규모 투자손실은 일회성일 뿐",
+      "target_price": "6,000",
+      "target_change": "하향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "하나증권",
+      "report_idx": "naver_98468",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_297696000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98468",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "신계약 CSM 성장세 지속, 상품 믹스 개선에 따른 수익성 강화",
+        "동사는 신계약 판매량 감소에도 불구하고 상품 포트폴리오 개선을 통한 견조한 신계약 CSM 성장세를 유지하고 있다. 3Q26 누적 신계약 CSM은 2.1조원(YoY +40%)을 기록했으며, 보장성 신계약 CSM 배수는 13.5배로 전년동기대비 6.1배 상승했다. 이는 금리 상승과 중장기납 종신보험 중심의 상품 믹스 개선, 갱신형 건강보험 신상품 출시 효과에 기인하며, 판매량 감소(월평균..."
+      ],
+      "current_price": 3520.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "진에어",
+      "stock_code": "272450",
+      "title": "메가 LCC 출범, 매크로 턴어라운드에 통합 효과까지",
+      "target_price": "10,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "하나증권",
+      "report_idx": "naver_98467",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_782901000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98467",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "2027년 3월 17일 통합 진에어 출범",
+        "2027년 3월 17일부로 진에어를 중심으로 한 진에어/에어부산/에어서울 3사 통합 법인이 출범할 예정이다. 통합 법인의 연간 매출액은 3조원 규모로 추정하며, 보유 기재는 총 60대로 국내 최대 규모의 LCC가 된다. 11월 24일 개최된 주주간담회에서는 통합을 통해 1) 노선/스케줄 효율화를 통한 수익 증대, 2)계약/시설 통합을 통한 비용 절감이라는 두가지 시너지 효과를 기대하고..."
+      ],
+      "current_price": 7530.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "CJ제일제당",
+      "stock_code": "097950",
+      "title": "잃을 것 없는 주가와 올라갈 실적",
+      "target_price": "370,000",
+      "target_change": "상향",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "하나증권",
+      "report_idx": "naver_98466",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/57/20261125_company_903219000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98466",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "2026년 11월 25일 I 기업분석_기업분석(Report) CJ제일제당 (097950) 잃을 것 없는 주가와 올라갈 실적 실적 부진이 기반영된 시가총액 CJ제일제당의 5년 전 물류 제외한 연결 이익 체력은 1.2조원 내외였다.",
+        "올해 물류 제외한 연결 영업이익은 7천원 내외로 추정된다.",
+        "동기간 시가총액은 7조원에서 2.7조원으로 감소했 다."
+      ],
+      "current_price": 180200.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "한솔케미칼",
+      "stock_code": "014680",
+      "title": "과산화수소 증설, High-K로 확장",
+      "target_price": "310,000",
+      "target_change": "신규",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "유안타증권",
+      "report_idx": "naver_98465",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/18/20261125_company_280183000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98465",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "4Q26 예상 영업이익 246억원, 성과급 반영으로 일시 둔화",
+        "4Q26 연결기준 예상 매출액과 영업이익은 각각 2,461억원(QoQ +1.7%, YoY +10.6%), 246억원(QoQ -49.3%, YoY +45.8%, OPM 10.0%)으로, ①과산화수소 판매량는 견조한 수준을 유지하는 가운데 프리커서 점유율이 일부 회복되며 전분기대비 공급 규모가 늘어나겠지만, ②연말 성과급 약 250억원이 일시에 반영되며 전사 영업이익은 단기적으로 감소할 전..."
+      ],
+      "current_price": 165000.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "지에프아이",
+      "stock_code": "493330",
+      "title": "IR 後記: ESS, UPS 부품주로 절대적인 저평가",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "유진투자증권",
+      "report_idx": "naver_98464",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_928339000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98464",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "회사 소개: ESS 및 UPS 등에 탑재되는 스마트 화재안전 솔루션 보유업체.",
+        "‘14년 ㈜지에프아이(GFICo.,Ltd) 설립. ‘26년 1월 14일에 ‘대신밸런스제18호기업인수목적㈜’를 흡수합병으로 코스닥 시장에 상장함. 동사는 스마트 화재안전 솔루션 기업임. 동사는 세계 최초로 소화약제를 마이크로캡슐화에 성공하고, 마이크로캡슐을 ‘AEGIS(이지스)’라고 명명함. 마이크로캡슐화 개발 역량을 바탕으로 '2차전지용 소화안전 Sheet'와 'DI-KIT'를 신규 개...",
+        "주요 제품별 매출비중(2025년 연결기준)은 DI-KIT 41.7%, 공사매출 27.8%, 2차전지 소화시트 20.0%, 멀티탭 4.8%, 소화패치 0.9% 등",
+        "투자포인트 1) ESS 시장 수요 확대와 함께 주요고객 매출 중심 성장 견인."
+      ],
+      "current_price": 8000.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "금양그린파워",
+      "stock_code": "282720",
+      "title": "AIDC 수주로 내년부터 턴어라운드",
+      "target_price": "20,000",
+      "target_change": "유지",
+      "opinion": "Buy",
+      "analyst": "",
+      "broker": "유진투자증권",
+      "report_idx": "naver_98463",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/63/20261125_company_600752000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98463",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "금양그린파워는 원주에 건설되는 AIDC에 대해 2,300억원의 전기공사를 수주. 약 40MW 규모로 국내 업체가 임대할 것으로 추정됨. 사업자인 메가데이타코리아는 현재의 싸이트에 99MW의 전력망 연결 허가를 받은 상태이고, AIDC를 최종적으로 120MW까지 증설할 계획. 따라서 동사의 이번 AIDC 계약은 2년의 단발 실적이 아닌 지속적일 가능성이 높아. 국내 최대의 전기 공사 사업...",
+        "육상 풍력 공급 계약도 최종 단계 진입",
+        "개발 중인 경북 1 육상 풍력(37.2MW)은 최종 지자체 개발 행위 허가 심의를 진행하고 있고, 생산된 전력의 구매처도 확정된 것으로 파악됨. 국내 RE100 기업들의 재생에너지 확보 수요가 큰 상태인데 비해, 규모가 큰 단지가 부족한 상태여서 최종 계약 확정은 무난할 것으로 판단. 금양그린파워는 풍력 터빈 공급업체로 Vestas를 선정한 것으로 파악됨. 계약이 확정되면 20년간 총...",
+        "내년부터 실적 부진에서 탈피할 가시성 높아져"
+      ],
+      "current_price": 10930.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "리노공업",
+      "stock_code": "058470",
+      "title": "반등을 꿈꾸며",
+      "target_price": "78,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "신한투자증권",
+      "report_idx": "naver_98462",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261125_company_565463000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98462",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "실적 정상화와 함께 2027년 반등 포인트 점검",
+        "3분기 실적 추정치 하회. 파업으로 인한 생산 차질 영향. 4Q26 고객사 수요 정상화와 함께 실적 반등 기대. 산업 및 제품 다변화에 따른 고성능 소켓 및 핀 수요는 견고할 것으로 전망. 제품 가격 상승 분위기가 핵심. 2027년 수요>공급 시장을 전망하며 실적 및 밸류에이션 재평가 기대"
+      ],
+      "current_price": 48500.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "티로보틱스",
+      "stock_code": "117730",
+      "title": "AMR에서 휴머노이드까지, 로봇 사업 확장",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "SK증권",
+      "report_idx": "naver_98459",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/64/20261125_company_631732000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98459",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3Q26 별도 실적은 매출액 148 억원(+14.1% YoY)과 영업이익 27 억원(+295.5% YoY, OPM 17.9%)으로 큰 폭 개선됐다. 글로벌 디스플레이 고객사의 설비투자 재개에 따른 진공로봇 출하 회복이 실적 개선을 견인했다. 반면 연결 기준으로는 자회사 모션디바이스(물류로봇), 에이아이로보틱스(스마트팩토리) 등의 적자가 반영되며 매출액 208억원(+58.7% YoY)과...",
+        "진공로봇 출하 회복과 포드 에너지 ESS 공장향 AMR 매출 반영에 힘입어 26 년 별도기준 연간 흑자전환이 전망되며, 연결 기준으로는 매출액 621 억원(+41.7% YoY)과 영업손실 38 억원(적자축소)이 예상된다. 내년부터는 ①포드에너지향 AMR 공급 확대 ② 다크팩토리 실증 플랫폼 'KAIROS'향 휴머노이드 공급 ③에이아이로보틱스의 고객사 확대 등이 더해지며 27 년 연결 매..."
+      ],
+      "current_price": 11870.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "파두",
+      "stock_code": "440110",
+      "title": "주가 빠진다고 업황 빠지진 않는다",
+      "target_price": "50,000",
+      "target_change": "하향",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "신한투자증권",
+      "report_idx": "naver_98458",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261125_company_399326000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98458",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "낸드 업황은 견조, 28년 성장 동력은 세 가지",
+        "3Q26 영업이익 361억원으로 분기 최대. 낸드 우려에 주가는 10/15부터 50% 하락. 27년 주문 유지로 우려 해소 구간. 심리적 하락이란 판단"
+      ],
+      "current_price": 28800.0
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "GS글로벌",
+      "stock_code": "001250",
+      "title": "상사업의 회복을 기다리며, 해상풍력 독점력에 주목",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "한국IR협의회",
+      "report_idx": "naver_98456",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_867216000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98456",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "GS엔텍 모노파일 생산능력 연간 15만톤으로 확대, 국내 대형 모노파일 시장에서 사실상 독점적 공급 지위 확보. 정부의 2035년까지 55GW 해상풍력 입찰 추진에 따른 중장기 수주 확대 기대. 2027년 하반기 생산 정상화 및 2028년 흑자전환 여부 확인 필요",
+        "2026년 이란 전쟁에 따른 호르무즈해협 통항 차질로 중동향 고마진 철강 거래 수익성 악화. 3Q26 무역/유통 영업이익 82억원(-14.2% YoY)으로 감소. 2027년 지정학적 긴장 완화 시 프로젝트 발주 재개와 운임 부담 축소 기대. 통항 정상화 시점 및 거래 마진 회복 여부 확인 필요",
+        "2026년 연결 매출액 4조 4,128억원(+7.4% YoY), 영업이익 331억원(-36.7%), OPM 0.7%(-0.52%p) 전망. 무역/유통 부문의 외형 성장에도 GS엔텍 설비전환에 따른 매출 공백과 고정비 부담으로 연결 이익 감소 예상. 2027년 영업이익 406억원(+22.7%YoY)으로 반등 전망"
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "지투파워",
+      "stock_code": "388050",
+      "title": "2027년 실적 퀀텀점프, 본격적인 밸류업 원년",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "한국IR협의회",
+      "report_idx": "naver_98455",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_181282000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98455",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "투자포인트: 1)원전시장 고압배전반 수주 모멘텀 지속, 2)정부의 태양광 보급 확대 정책 수혜와 태양광 IPP 사업 확대 본격화, 3)차세대 성장동력은 액침냉각형 에너지저장장치(I-ESS), 4)기업가치제고 계획 발표: 2030 중장기 성장 로드맵과 주주환원",
+        "2027년 매출액 1,162억 원(YoY +53.7%), 영업이익 143억 원(YoY +60.3%) 전망, 창립이후 처음으로 매출액 1,000억 원, 영업이익 100억 원대 개막, 2025년 수주한 신한율 3·4호기 원전용 고압배전반 매출 본격화, 정부의 태양광 확대 정책에 따른 태양광/ESS 부문 외형 성장"
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "디와이에이",
+      "stock_code": "002880",
+      "title": "눈에 확 띄는 실적 개선",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "한국IR협의회",
+      "report_idx": "naver_98453",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/74/20261125_company_765798000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98453",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "2026년 기업가치 제고계획을 통해 중장기 재무구조 개선 목표와 2027년 결산배당 재개 계획 제시",
+        "기아 광주공장 완성 시트 전량 공급 지위를 기반으로 공급 차종 확대와 인주/울산공장 신설을 통한 중장기 성장 기대",
+        "신형 셀토스와 EV5/PV5의 양산 물량 확대에 힘입어 2026년 영업이익 481억원(+59.1% YoY)으로 큰 폭 개선 전망"
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "stock_name": "LIG아큐버",
+      "stock_code": "073490",
+      "title": "정상화를 넘어선 도약의 시작",
+      "target_price": "44,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "IBK투자증권",
+      "report_idx": "naver_98452",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/40/20261125_company_269255000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98452",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "서서히 돌아서는 통신 업황, 실적은 2연속 서프라이즈",
+        "2023년 이후 글로벌 5G 투자가 감소하면서 통신장비 업황도 급격히 악화되었고, 동사의 실적도 급격한 하락세를 보였다. 그러나 2Q26, 3Q26 2개 분기 연속 어닝서프라이즈를 기록하며 통신 장비 업황이 회복되고 있다는 소식을 알렸다. 업황이 돌아서는 초입부터 실적 급등세가 나타나고 있어 5G SA(단독망) 및 글로벌 통신 주파수 경매로 인한 인프라 투자 본격화 시 본격적인 성장이..."
+      ],
+      "current_price": 35050.0
     }
   ]
 }

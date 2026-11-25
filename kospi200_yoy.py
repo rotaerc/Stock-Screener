@@ -1748,12 +1748,207 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                     it["upside_pct"] = up_p
                 it["target_change"] = _detect_target_change(pdf_text, it.get("target_price"))
                 it["summary"] = _summarize_pdf_text(pdf_text, it.get("title", ""))
+                it["source"] = "한경"
                 it["curated"] = False
                 dt_final.append(it)
                 existing_by_idx[idx] = it
                 time.sleep(0.15)
-            by_date[dt_key] = dt_final
-            print(f"  - [{dt_key}] 리포트 {len(dt_final)}건 정리 완료")
+            # 기존에 병합되어 있던 네이버 리포트 유지 후, 아래에서 중복 제거하며 재병합
+            prev_naver_for_dt = [r for r in by_date.get(dt_key, []) if str(r.get("report_idx", "")).startswith("naver_")]
+            by_date[dt_key] = dt_final + prev_naver_for_dt
+            print(f"  - [{dt_key}] 한경 리포트 {len(dt_final)}건 정리 완료")
+
+        # ---------------------------------------------------------------------
+        # ★ 네이버 증권(stock.naver.com/research/company) 비겹침 리포트 추가 병합
+        # ---------------------------------------------------------------------
+        def _norm_broker(b):
+            s = re.sub(r"\s+", "", str(b or "")).lower()
+            s = re.sub(r"(투자증권|증권|투자|리서치센터|리서치)$", "", s)
+            return s
+
+        def _norm_title(t):
+            return re.sub(r"[^0-9a-z가-힣]+", "", str(t or "").lower())
+
+        def _summarize_naver_html(raw_html, fallback_title=""):
+            if not raw_html:
+                return []
+            txt = re.sub(r"<br\s*/?>", "\n", str(raw_html), flags=re.I)
+            txt = re.sub(r"</p\s*>", "\n", txt, flags=re.I)
+            txt = html_lib.unescape(re.sub(r"<[^>]+>", " ", txt))
+            lines = []
+            for ln in txt.splitlines():
+                ln = re.sub(r'^[\s"“”\'■•●◆▶\-–]+', "", ln).strip()
+                ln = re.sub(r"\s+", " ", ln)
+                if len(ln) >= 20:
+                    if len(ln) > 220:
+                        ln = ln[:217].rstrip() + "..."
+                    lines.append(ln)
+                if len(lines) >= 4:
+                    break
+            return lines if lines else ([fallback_title] if fallback_title else [])
+
+        def _detect_target_change_strict(txt, tp):
+            if not tp or str(tp).strip() in ("0", "", "-"):
+                return "없음"
+            if not txt:
+                return ""
+            head = txt[:2200]
+            if re.search(r"목표주가[^\n]{0,30}(신규|개시|편입)", head) or "커버리지 개시" in head or "커버리지를 개시" in head:
+                return "신규"
+            if re.search(r"목표주가[^\n]{0,30}(상향|↑|▲)", head) or ("목표주가" in head and "상향" in head[:1400]):
+                return "상향"
+            if re.search(r"목표주가[^\n]{0,30}(하향|↓|▼)", head) or ("목표주가" in head and "하향" in head[:1400]):
+                return "하향"
+            if re.search(r"목표주가[^\n]{0,30}유지", head):
+                return "유지"
+            return ""
+
+        try:
+            naver_min_date = start_str if lookback_days > 0 else (min(grouped_new.keys()) if grouped_new else today_str)
+            naver_max_date = today_str
+            naver_raw_list = []
+            for pg in range(1, 7):
+                r_nv = requests.get(
+                    f"https://m.stock.naver.com/api/research/company?page={pg}&pageSize=50",
+                    headers=hdr,
+                    timeout=15,
+                )
+                if r_nv.status_code != 200:
+                    break
+                arr = r_nv.json()
+                if not isinstance(arr, list) or not arr:
+                    break
+                oldest_on_page = ""
+                for item in arr:
+                    wdt = str(item.get("writeDate") or "").strip()
+                    if not re.match(r"^\d{4}-\d{2}-\d{2}$", wdt):
+                        continue
+                    oldest_on_page = wdt
+                    if naver_min_date <= wdt <= naver_max_date:
+                        naver_raw_list.append(item)
+                if oldest_on_page and oldest_on_page < naver_min_date:
+                    break
+                time.sleep(0.1)
+
+            if naver_raw_list:
+                nv_by_dt = {}
+                for item in naver_raw_list:
+                    nv_by_dt.setdefault(item["writeDate"], []).append(item)
+
+                for dt_key, nv_items in sorted(nv_by_dt.items(), reverse=True):
+                    # 해당 날짜의 기존 한경 리포트 목록만 기준(네이버 항목은 최신 목록으로 갱신)
+                    hk_list = [r for r in by_date.get(dt_key, []) if not str(r.get("report_idx", "")).startswith("naver_")]
+                    for r in hk_list:
+                        if not r.get("source"):
+                            r["source"] = "한경"
+
+                    seen_broker_keys = {
+                        (str(r.get("stock_code") or "").zfill(6), _norm_broker(r.get("broker")))
+                        for r in hk_list
+                    }
+                    seen_titles = [
+                        (str(r.get("stock_code") or "").zfill(6), _norm_title(r.get("title")))
+                        for r in hk_list
+                    ]
+
+                    nv_added = []
+                    for nv in nv_items:
+                        rid = str(nv.get("researchId") or "").strip()
+                        st_code = str(nv.get("itemCode") or "").strip().zfill(6)
+                        st_name = str(nv.get("itemName") or "").strip()
+                        broker = str(nv.get("brokerName") or "").strip()
+                        title = str(nv.get("title") or "").strip()
+                        if not rid or not st_code:
+                            continue
+
+                        nb = _norm_broker(broker)
+                        nt = _norm_title(title)
+                        # 한경(또는 이미 추가된 네이버 리포트)과 종목+증권사 또는 종목+제목이 겹치면 제외
+                        if (st_code, nb) in seen_broker_keys:
+                            continue
+                        if nt and any(sc == st_code and st and (nt in st or st in nt) for sc, st in seen_titles):
+                            continue
+
+                        nv_idx = f"naver_{rid}"
+                        cached_nv = existing_by_idx.get(nv_idx)
+                        if cached_nv and cached_nv.get("summary"):
+                            cached_nv["source"] = "네이버"
+                            nv_added.append(cached_nv)
+                            seen_broker_keys.add((st_code, nb))
+                            seen_titles.append((st_code, nt))
+                            continue
+
+                        # 네이버 상세 API 호출 (목표가, 투자의견, 작성일 현재가, 본문요약, 원문 PDF 링크)
+                        rc = {}
+                        try:
+                            r_det = requests.get(
+                                f"https://m.stock.naver.com/api/research/company/{rid}",
+                                headers=hdr,
+                                timeout=15,
+                            )
+                            if r_det.status_code == 200:
+                                rc = (r_det.json() or {}).get("researchContent") or {}
+                        except Exception:
+                            rc = {}
+
+                        gp_num = _num(rc.get("goalPrice"))
+                        tp_str = f"{int(round(gp_num)):,}" if (gp_num is not None and gp_num > 0) else "0"
+                        opinion = str(rc.get("opinion") or "").strip() or "투자의견없음"
+                        cur_p = _num(rc.get("priceAtWriteDate"))
+                        attach_url = str(rc.get("attachUrl") or "").strip()
+                        raw_content = str(rc.get("content") or "")
+
+                        summary_lines = _summarize_naver_html(raw_content, title)
+                        plain_content = html_lib.unescape(re.sub(r"<[^>]+>", " ", raw_content))
+                        chg = _detect_target_change_strict(plain_content, tp_str)
+
+                        # 본문에 목표가 변동(상향/하향/신규/유지)이나 요약이 부족하면 PDF 1페이지를 메모리에서 확인
+                        pdf_text = ""
+                        if (not chg or len(summary_lines) < 2) and attach_url.lower().endswith(".pdf") and PdfReader is not None:
+                            try:
+                                rp = requests.get(attach_url, headers=hdr, timeout=15)
+                                if rp.status_code == 200 and rp.content.startswith(b"%PDF"):
+                                    reader = PdfReader(io.BytesIO(rp.content))
+                                    pdf_text = "\n".join((p.extract_text() or "") for p in reader.pages[:1])
+                            except Exception:
+                                pdf_text = ""
+
+                        if not chg:
+                            chg = _detect_target_change_strict(pdf_text, tp_str) or ("없음" if tp_str == "0" else "유지")
+                        if len(summary_lines) < 2 and pdf_text:
+                            summary_lines = _summarize_pdf_text(pdf_text, title)
+                        if not summary_lines:
+                            summary_lines = [title]
+
+                        rep_obj = {
+                            "date": dt_key,
+                            "stock_name": st_name,
+                            "stock_code": st_code,
+                            "title": title,
+                            "target_price": tp_str,
+                            "target_change": chg,
+                            "opinion": opinion,
+                            "analyst": "",
+                            "broker": broker,
+                            "report_idx": nv_idx,
+                            "pdf_url": attach_url,
+                            "naver_url": f"https://stock.naver.com/research/company/{rid}",
+                            "source": "네이버",
+                            "curated": False,
+                            "summary": summary_lines,
+                        }
+                        if cur_p is not None and cur_p > 0:
+                            rep_obj["current_price"] = cur_p
+                        nv_added.append(rep_obj)
+                        existing_by_idx[nv_idx] = rep_obj
+                        seen_broker_keys.add((st_code, nb))
+                        seen_titles.append((st_code, nt))
+                        time.sleep(0.08)
+
+                    by_date[dt_key] = hk_list + nv_added
+                    print(f"  - [{dt_key}] 네이버 비겹침 리포트 +{len(nv_added)}건 병합 (총 {len(by_date[dt_key])}건)")
+        except Exception as e_nv:
+            print(f"  [경고] 네이버 리포트 병합 중 오류(한경 데이터는 정상 유지): {e_nv}")
 
         # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리)
         cutoff_str = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
@@ -1777,7 +1972,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
         total_saved = sum(len(v) for v in pruned_by_date.values())
-        print(f" ★ 한경 기업 리포트 누적 저장 완료: 최신일 {latest_date}({len(latest_reports)}건) / 총 {len(sorted_dates)}일 · {total_saved}건 (최대 60일 보관)")
+        print(f" ★ 한경·네이버 통합 기업 리포트 저장 완료: 최신일 {latest_date}({len(latest_reports)}건) / 총 {len(sorted_dates)}일 · {total_saved}건 (최대 60일 보관)")
         print(f"{'='*80}")
         return payload
     except Exception as e:
@@ -2854,6 +3049,7 @@ def build_web_dashboard(here):
         <div class="group-right">
           <span style="font-size:11px; color:#64748b; font-weight:600;">🗓️ 최대 60일 보관</span>
           <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 원문</a>
+          <a class="rep-btn" href="https://stock.naver.com/research/company" target="_blank">💚 네이버 리서치</a>
         </div>
       </div>
       <div class="reports-grid-wrap" id="reportsGridWrap">
@@ -3195,6 +3391,9 @@ def build_web_dashboard(here):
           <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
             <span class="nav-item-left"><span>🌐</span><span>한경 컨센서스</span></span>
           </a>
+          <a class="nav-item" href="https://stock.naver.com/research/company" target="_blank">
+            <span class="nav-item-left"><span>💚</span><span>네이버 리서치</span></span>
+          </a>
         </div>
       `;
     }}
@@ -3219,7 +3418,7 @@ def build_web_dashboard(here):
         ? `전체 보관기간 (최근 ${{REPORT_DATES.length}}일)`
         : `${{currentReportDate || REPORTS_DATA.date || '-'}} 기준`;
       document.getElementById('pageTitle').textContent = '기업 리포트 요약';
-      document.getElementById('pageSubtitle').textContent = `한경 컨센서스 · ${{dateLabel}} · 목표가상향 → 예상이익상향 → 괴리율순`;
+      document.getElementById('pageSubtitle').textContent = `한경 · 네이버 증권 통합 · ${{dateLabel}} · 목표가상향 → 예상이익상향 → 괴리율순`;
 
       const upCnt = reps.filter(r => r.target_change === '상향').length;
       const newCnt = reps.filter(r => r.target_change === '신규').length;
@@ -3396,13 +3595,15 @@ def build_web_dashboard(here):
           <div class="rep-headline">${{escapeHtml(r.title || '')}}</div>
           <div class="rep-meta-row">
             <span>🏢 <strong>${{escapeHtml(r.broker || '-')}}</strong></span>
-            <span>✍️ ${{escapeHtml(r.analyst || '-')}}</span>
+            ${{r.analyst ? `<span>✍️ ${{escapeHtml(r.analyst)}}</span>` : ''}}
             <span>📅 ${{escapeHtml(r.date || '-')}}</span>
+            <span style="margin-left:auto; padding:1px 6px; border-radius:4px; font-weight:800; font-size:10.5px; ${{r.source === '네이버' ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}}">${{r.source === '네이버' ? '네이버' : '한경'}}</span>
           </div>
           <ul class="rep-summary-list">${{summaryLis}}</ul>
           <div class="rep-card-foot">
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
               ${{r.pdf_url ? `<a class="rep-btn pdf" href="${{r.pdf_url}}" target="_blank">📄 원문 PDF 보기</a>` : ''}}
+              ${{r.naver_url ? `<a class="rep-btn" href="${{r.naver_url}}" target="_blank">💚 네이버 원문</a>` : ''}}
               <a class="rep-btn" href="${{naverUrl}}" target="_blank">네이버 금융</a>
               <a class="rep-btn" href="${{fnUrl}}" target="_blank">에프앤가이드</a>
             </div>
