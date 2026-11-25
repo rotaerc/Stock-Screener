@@ -805,9 +805,17 @@ def _recompute_op_history_entry(entry, quarter_label):
     if first_v is not None and last_v is not None and first_v != 0:
         total_pct = round((last_v - first_v) / abs(first_v) * 100.0, 2)
 
+    prev_y_v = entry.get("prevYearVal")
+    # 전년 동기 대비 이익이 현저히 적거나(전년동기의 50% 미만) 최초 기준 이익이 20억 미만이면 % 왜곡 방지를 위해 강조 제외
+    low_base_excluded = False
+    if first_v is None or last_v is None or last_v <= 0 or abs(first_v) < 20.0:
+        low_base_excluded = True
+    elif prev_y_v is not None and prev_y_v > 0 and last_v < prev_y_v * 0.5:
+        low_base_excluded = True
+
     net_up = bool(first_v is not None and last_v is not None and round(last_v, 2) > round(first_v, 2))
     level = 0
-    if net_up and total_pct is not None:
+    if net_up and not low_base_excluded and total_pct is not None:
         if total_pct >= 20.0:
             level = 4
         elif total_pct >= 15.0:
@@ -829,6 +837,8 @@ def _recompute_op_history_entry(entry, quarter_label):
         pct_txt = f"{total_pct:+.2f}%" if total_pct is not None else "-"
         lvl_txt = f" · {lvl_labels[level]}" if level in lvl_labels else ""
         lines.append(f"• 누적 변동률: {pct_txt}{lvl_txt} (상향 {up_cnt}회 ▲ / 하향 {down_cnt}회 ▼)")
+        if prev_y_v is not None:
+            lines.append(f"• 전년동기({prev_year(quarter_label)}) 실적: {prev_y_v:,.2f}억" + (" (※ 저기저/전년비 급감으로 강조 제외)" if (low_base_excluded and net_up) else ""))
         lines.append("────────────────────────")
         for idx_h, pt in enumerate(hist[-10:]):
             dt_s, v_s = pt.get("d", ""), pt.get("v")
@@ -879,14 +889,19 @@ def _save_op_estimate_history(here, data):
 
 
 def _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, quarter_ym, op_col):
-    """(code, name, val) 목록을 현재 분기 예상 영업이익 추적 이력에 반영합니다."""
+    """(code, name, val[, prev_year_val]) 목록을 현재 분기 예상 영업이익 추적 이력에 반영합니다."""
     if hist_data.get("quarter") != quarter_ym:
         hist_data["quarter"] = quarter_ym
         hist_data["col"] = op_col
         hist_data["stocks"] = {}
 
     stocks = hist_data["stocks"]
-    for cd, nm, val in rows_iter:
+    for item in rows_iter:
+        if len(item) >= 4:
+            cd, nm, val, prev_y_val = item[0], item[1], item[2], item[3]
+        else:
+            cd, nm, val = item[0], item[1], item[2]
+            prev_y_val = None
         if not cd or val is None:
             continue
         v_r = round(float(val), 2)
@@ -908,6 +923,8 @@ def _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, quarter_ym,
                     else:
                         h.append({"d": snap_label, "v": v_r})
             ent["history"] = h
+        if prev_y_val is not None:
+            ent["prevYearVal"] = round(float(prev_y_val), 2)
         _recompute_op_history_entry(ent, quarter_ym)
     hist_data["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     return hist_data
@@ -922,6 +939,9 @@ def update_op_estimate_history_from_df(here, df_all, snap_dt=None):
     if not op_col:
         return _load_op_estimate_history(here)
 
+    py_ym = prev_year(q_ym)
+    prev_y_col = next((c for c in (f"OP_{py_ym}", f"OP_{py_ym}(전년)", f"OP_{py_ym}(E)") if c in cols), None)
+
     hist_data = _load_op_estimate_history(here)
     snap_label = (snap_dt or datetime.now()).strftime("%Y-%m-%d %H:%M")
     rows_iter = []
@@ -932,8 +952,9 @@ def update_op_estimate_history_from_df(here, df_all, snap_dt=None):
         cd = raw_cd.split(".")[0].zfill(6)
         nm = str(row.get("종목명", "") or "").strip()
         v = _num(row.get(op_col))
+        pv = _num(row.get(prev_y_col)) if prev_y_col else None
         if v is not None:
-            rows_iter.append((cd, nm, v))
+            rows_iter.append((cd, nm, v, pv))
 
     _ingest_snapshot_to_op_history(hist_data, rows_iter, snap_label, q_ym, op_col)
     _save_op_estimate_history(here, hist_data)
@@ -947,6 +968,7 @@ def sync_op_history_from_excels(here):
     """
     cur_q = _current_quarter_ym()
     op_col = f"OP_{cur_q}(E)"
+    py_ym = prev_year(cur_q)
     hist_data = _load_op_estimate_history(here)
     if hist_data.get("quarter") != cur_q:
         hist_data = {"quarter": cur_q, "col": op_col, "updatedAt": "", "stocks": {}}
@@ -969,9 +991,7 @@ def sync_op_history_from_excels(here):
     if not excel_files:
         return hist_data
 
-    # 이미 추적 기록이 충분하고 더 새 파일이 없는 경우 중복 스캔 방지 (항상 날짜 오름차순으로 병합)
     excel_files.sort(key=lambda x: x[0])
-    # 과거 전체 파일에서 재구축할 때 기존 history의 더 오래된 기록은 보존
     for ts_label, fpath in excel_files:
         try:
             wb = openpyxl.load_workbook(fpath, read_only=True, data_only=True)
@@ -984,6 +1004,8 @@ def sync_op_history_from_excels(here):
             c_idx = header.index("종목코드")
             n_idx = header.index("종목명") if "종목명" in header else -1
             o_idx = header.index(op_col)
+            py_col = next((c for c in (f"OP_{py_ym}", f"OP_{py_ym}(전년)", f"OP_{py_ym}(E)") if c in header), None)
+            py_idx = header.index(py_col) if py_col else -1
             rows_iter = []
             for row in it_rows:
                 if len(row) <= max(c_idx, o_idx):
@@ -994,8 +1016,9 @@ def sync_op_history_from_excels(here):
                 cd = raw_cd.split(".")[0].zfill(6)
                 nm = str(row[n_idx] or "").strip() if (n_idx >= 0 and len(row) > n_idx) else ""
                 v = _num(row[o_idx])
+                pv = _num(row[py_idx]) if (py_idx >= 0 and len(row) > py_idx) else None
                 if v is not None:
-                    rows_iter.append((cd, nm, v))
+                    rows_iter.append((cd, nm, v, pv))
             wb.close()
             _ingest_snapshot_to_op_history(hist_data, rows_iter, ts_label, cur_q, op_col)
         except Exception:
@@ -4300,14 +4323,8 @@ def build_web_dashboard(here):
           repBtn = `<span class="rep-badge-link" onclick="selectReportsView('${{code}}')" data-tip="${{escapeHtml(repTip)}}">📄</span>`;
         }}
         const oh = OP_HIST_STOCKS[code];
-        let cntBadge = '';
-        if (oh && oh.lv >= 1) {{
-          const bIcon = oh.lv >= 4 ? '🔥' : '▲';
-          const pctLabel = (oh.p !== null && oh.p !== undefined) ? `+${{Math.round(oh.p)}}%` : `${{oh.lv}}`;
-          cntBadge = `<span class="op-cnt-badge op-cnt-${{oh.lv}}">${{bIcon}}${{pctLabel}}</span>`;
-        }}
         const titleAttr = (oh && oh.m) ? '' : `title="${{escapeHtml(String(val))}}"`;
-        return `<strong ${{titleAttr}}>${{escapeHtml(String(val))}}</strong>${{cntBadge}}
+        return `<strong ${{titleAttr}}>${{escapeHtml(String(val))}}</strong>
           <a class="ext-link" href="${{naverUrl}}" target="_blank" title="네이버 금융 열기">N</a>
           <a class="ext-link" href="${{fnUrl}}" target="_blank" title="에프앤가이드 열기">Fn</a>${{repBtn}}`;
       }}
