@@ -1123,6 +1123,85 @@
     }
     .flow-streak-mid.buy { background: #fee2e2; color: #991b1b; }
     .flow-streak-mid.sell { background: #dbeafe; color: #1e40af; }
+    .flow-insight-box {
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .flow-insight-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .flow-insight-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-regime-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+    .flow-regime-badge.bull { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .flow-regime-badge.mix { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .flow-regime-badge.bear { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+    .flow-insight-lead {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      padding: 8px 11px;
+    }
+    .flow-insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .flow-insight-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .flow-insight-item-hd {
+      font-weight: 800;
+      font-size: 12px;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .flow-ins-link {
+      font-weight: 800;
+      color: #0f172a;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: #cbd5e1;
+      text-underline-offset: 2px;
+    }
+    .flow-ins-link:hover { color: #2563eb; text-decoration-color: #2563eb; }
+    @media (max-width: 960px) {
+      .flow-insight-grid { grid-template-columns: 1fr; }
+    }
     .flow-mkt-tag {
       display: inline-block;
       font-size: 9.5px;
@@ -1385,6 +1464,7 @@
         </div>
       </div>
       <div class="flow-body-wrap" id="flowBodyWrap">
+        <div id="flowInsightBox"></div>
         <div id="flowOverlapBox"></div>
         <div class="flow-cols-grid" id="flowGrid"></div>
       </div>
@@ -1862,6 +1942,7 @@
     }
 
     function renderFlowView() {
+      const insightBox = document.getElementById('flowInsightBox');
       const overlapBox = document.getElementById('flowOverlapBox');
       const grid = document.getElementById('flowGrid');
       const bucket = currentFlowMode === 'WEEKLY' ? ((FLOW_DATA && FLOW_DATA.byWeek) || {}) : ((FLOW_DATA && FLOW_DATA.byDate) || {});
@@ -1881,6 +1962,7 @@
       `;
 
       if (!snap || !snap.investors) {
+        if (insightBox) insightBox.innerHTML = '';
         overlapBox.innerHTML = '';
         grid.style.display = 'block';
         grid.innerHTML = `
@@ -1972,6 +2054,181 @@
       });
       const coBuys = Object.values(buyMap).filter(x => x.who.length >= 2).sort((a, b) => (b.who.length - a.who.length) || (b.total - a.total));
       const coSells = Object.values(sellMap).filter(x => x.who.length >= 2).sort((a, b) => (b.who.length - a.who.length) || (a.total - b.total));
+
+      // 상단 수급 종합 해석 (금액 · 주체 성격 · 연속매수 · 실적 연계)
+      if (insightBox) {
+        const unit = currentFlowMode === 'DAILY' ? '일' : '주';
+        const mktLbl = mktF || 'KOSPI+KOSDAQ';
+        const fmtEok = (v) => `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString('ko-KR')}억`;
+        const stockJumpAttr = (cd) => {
+          const info = STOCK_LOOKUP[cd];
+          return info ? `onclick="jumpToStockInScreener('${cd}', '${info.market}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${cd}','_blank')"`;
+        };
+
+        // 1) 3주체별 순유입/순유출 계산 (상위 매수합 - 상위 매도합)
+        const netByInv = {};
+        const buyByInv = {};
+        const sellByInv = {};
+        invMeta.forEach(im => {
+          const invObj = snap.investors[im.key] || {};
+          const bRows = filterRows(invObj.buy);
+          const sRows = filterRows(invObj.sell);
+          const bSum = bRows.reduce((acc, r) => acc + (Number(r.netAmt) || 0), 0);
+          const sSum = sRows.reduce((acc, r) => acc + (Number(r.netAmt) || 0), 0);
+          buyByInv[im.key] = bRows;
+          sellByInv[im.key] = sRows;
+          netByInv[im.key] = { buy: bSum, sell: sSum, net: bSum + sSum };
+        });
+
+        const nf = netByInv.foreign.net, np = netByInv.pension.net, npr = netByInv.private.net;
+        const posCnt = [nf > 0, np > 0, npr > 0].filter(Boolean).length;
+        let regimeBadge = '혼조 · 종목 장세';
+        let regimeCls = 'mix';
+        let regimeDesc = '';
+        if (posCnt === 3) {
+          regimeBadge = '🔥 3주체 동반 매수 우위';
+          regimeCls = 'bull';
+          regimeDesc = `외국인(${fmtEok(nf)}), 연기금(${fmtEok(np)}), 사모펀드(${fmtEok(npr)})가 모두 매수 우위입니다. 글로벌 자금·장기 기관·단기 모멘텀 자금이 한 방향으로 쏠리는 강한 매수 국면으로, 주도주 추세 지속 가능성이 높습니다.`;
+        } else if (nf > 0 && np > 0) {
+          regimeBadge = '📈 외국인·연기금 동반 유입';
+          regimeCls = 'bull';
+          regimeDesc = `대형 자금인 외국인(${fmtEok(nf)})과 중장기 펀더멘털 중심의 연기금(${fmtEok(np)})이 함께 매수 우위를 보입니다(사모펀드 ${fmtEok(npr)}). 변동성이 적은 추세적 상승에 유리한 조합입니다.`;
+        } else if (nf < 0 && (np > 0 || npr > 0)) {
+          const defWho = [np > 0 ? `연기금(${fmtEok(np)})` : '', npr > 0 ? `사모펀드(${fmtEok(npr)})` : ''].filter(Boolean).join('·');
+          regimeBadge = '⚖️ 외인 매도 vs 국내 기관 방어';
+          regimeCls = 'mix';
+          regimeDesc = `외국인(${fmtEok(nf)})이 대형주 차익실현·비중축소에 나서는 가운데 ${defWho}이 저가 매집으로 받아내는 손바뀜 구간입니다. 지수 추격보다 기관 매집이 집중된 개별 종목 선별이 유효합니다.`;
+        } else if (nf > 0 && np <= 0 && npr <= 0) {
+          regimeBadge = '🌍 외국인 단독 주도';
+          regimeCls = 'mix';
+          regimeDesc = `연기금(${fmtEok(np)})·사모펀드(${fmtEok(npr)})는 차익실현 중이나 외국인(${fmtEok(nf)})이 단독으로 자금을 밀어 올리는 구간입니다. 외국인 순매수 금액 최상위 종목 중심의 탄력 장세가 나타날 수 있습니다.`;
+        } else if (posCnt === 0) {
+          regimeBadge = '❄️ 3주체 동반 매도 우위';
+          regimeCls = 'bear';
+          regimeDesc = `외국인(${fmtEok(nf)}), 연기금(${fmtEok(np)}), 사모펀드(${fmtEok(npr)}) 모두 매도 우위입니다. 전반적인 위험 회피·차익실현 구간이므로 연속 순매수가 확인되는 소수 방어·주도주만 선별 접근하는 것이 안전합니다.`;
+        } else {
+          regimeBadge = '⚖️ 주체별 차별화 장세';
+          regimeCls = 'mix';
+          regimeDesc = `외국인(${fmtEok(nf)}), 연기금(${fmtEok(np)}), 사모펀드(${fmtEok(npr)})의 자금 방향이 엇갈리는 종목 장세입니다. 금액이 집중되면서 2개 이상 주체가 겹치는 종목에 주목할 시점입니다.`;
+        }
+
+        // 2) 금액 + 동시매수 핵심 의미 분석
+        const topCoBuy = coBuys.slice(0, 3);
+        let coBuyHtml = '';
+        if (topCoBuy.length) {
+          const lead = topCoBuy[0];
+          const hasF = lead.who.includes('외인'), hasP = lead.who.includes('연기금'), hasPr = lead.who.includes('사모');
+          let pairMeaning = '복수 기관이 동시에 자금을 집중해 수급 신뢰도가 높습니다.';
+          if (hasF && hasP && hasPr) pairMeaning = '외국인·연기금·사모펀드 3주체 전원 동시 매수로 가장 강력한 수급 합의(컨센서스) 신호입니다.';
+          else if (hasF && hasP) pairMeaning = '글로벌 자금(외국인)과 장기 기관(연기금)이 동시에 담아 중기 추세적 상승 신뢰도가 높습니다.';
+          else if (hasF && hasPr) pairMeaning = '외국인 대형 자금과 단기 알파 성향의 사모펀드가 동시에 붙어 단기 주가 탄력이 강하게 나타나는 패턴입니다.';
+          else if (hasP && hasPr) pairMeaning = '연기금(가치·중장기)과 사모펀드(모멘텀)가 함께 매집해 국내 기관 주도의 반등 기대감이 큽니다.';
+          const itemsTxt = topCoBuy.map(x => `<span class="flow-ins-link" ${stockJumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#dc2626;">${fmtEok(x.total)}</b>(${x.who.join('+')})`).join(', ');
+          coBuyHtml = `${itemsTxt} — ${pairMeaning}`;
+        } else {
+          const allTopBuy = Object.values(buyMap).sort((a, b) => b.total - a.total).slice(0, 3);
+          const itemsTxt = allTopBuy.map(x => `<span class="flow-ins-link" ${stockJumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#dc2626;">${fmtEok(x.total)}</b>(${x.who[0]})`).join(', ');
+          coBuyHtml = allTopBuy.length ? `${itemsTxt} 중심의 개별 주체 매수가 두드러집니다.` : '현재 조건에서 순매수 집중 종목이 없습니다.';
+        }
+
+        // 3) 연속 매수 진행형 분석 (2일/2주 이상 연속 + 금액 가중)
+        const streakBuyList = [];
+        const streakSeen = new Set();
+        invMeta.forEach(im => {
+          (buyByInv[im.key] || []).forEach(r => {
+            const st = getPresenceStats(im.key, true, r.code);
+            if (st.streak >= 2) {
+              const k = `${r.code}_${im.key}`;
+              if (!streakSeen.has(k)) {
+                streakSeen.add(k);
+                streakBuyList.push({ code: r.code, name: r.name, who: im.short, streak: st.streak, total: st.total, amt: Number(r.netAmt) || 0 });
+              }
+            }
+          });
+        });
+        streakBuyList.sort((a, b) => (b.streak - a.streak) || (b.amt - a.amt));
+        const topStreakItems = [];
+        const usedCodes = new Set();
+        for (const item of streakBuyList) {
+          if (usedCodes.has(item.code)) continue;
+          usedCodes.add(item.code);
+          topStreakItems.push(item);
+          if (topStreakItems.length >= 4) break;
+        }
+        let streakHtml = '';
+        if (topStreakItems.length) {
+          const sTxt = topStreakItems.map(x => `<span class="flow-ins-link" ${stockJumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#b91c1c;">${x.who} ${x.streak}${unit}연속</b>(${fmtEok(x.amt)})`).join(', ');
+          streakHtml = `${sTxt} — 단발성 수급이 아니라 <b>연속 매집이 이어지는 구간</b>으로, 기관이 목표 비중을 채우는 동안 하방 경직성과 추세 연장력이 강해지는 특징이 있습니다.`;
+        } else {
+          streakHtml = `현재 조건에서는 2${unit} 이상 연속 순매수 종목이 적어 단기 순환매 성격이 강합니다.`;
+        }
+
+        // 4) 실적 스크리너 교집합 (수급 + 실적 상향/통과 동시 충족)
+        const fundMatches = Object.values(buyMap).map(x => {
+          const info = STOCK_LOOKUP[x.code];
+          const oh = OP_HIST_STOCKS[x.code];
+          const tags = [];
+          if (info && info.passed) tags.push('★통과');
+          if (oh && oh.lv >= 1) tags.push(`분기OP상향`);
+          else if (info && info.hasEstUp) tags.push('예상이익▲');
+          return tags.length ? { ...x, tags } : null;
+        }).filter(Boolean).sort((a, b) => (b.who.length - a.who.length) || (b.total - a.total));
+        let fundHtml = '';
+        if (fundMatches.length) {
+          const fTxt = fundMatches.slice(0, 4).map(x => `<span class="flow-ins-link" ${stockJumpAttr(x.code)}>${escapeHtml(x.name)}</span> <span style="color:#15803d; font-weight:700;">[${x.tags.join('·')}]</span> ${fmtEok(x.total)}`).join(', ');
+          fundHtml = `${fTxt} — <b>실적 개선(스크리너 통과·예상이익 상향)과 기관 순매수가 동시에 겹친</b> 최우선 관심 종목군입니다.`;
+        } else {
+          fundHtml = `상위 순매수 종목 중 스크리너 통과·예상이익 상향과 직접 겹치는 종목이 적어, 수급·테마 중심 흐름이 우세합니다.`;
+        }
+
+        // 5) 대규모 / 연속 순매도 경계
+        const topSellAmt = Object.values(sellMap).sort((a, b) => a.total - b.total).slice(0, 3);
+        let sellHtml = '';
+        if (topSellAmt.length) {
+          const slTxt = topSellAmt.map(x => {
+            let maxSt = 1;
+            invMeta.forEach(im => {
+              if (x.who.includes(im.short)) {
+                const st = getPresenceStats(im.key, false, x.code);
+                if (st.streak > maxSt) maxSt = st.streak;
+              }
+            });
+            const stTag = maxSt >= 2 ? ` · ${maxSt}${unit}연속` : '';
+            return `<span class="flow-ins-link" ${stockJumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#1d4ed8;">${fmtEok(x.total)}</b>(${x.who.join('+')}${stTag})`;
+          }).join(', ');
+          sellHtml = `${slTxt} — 대규모 이탈 또는 연속 매도가 출회 중입니다. 단기 반등 시에도 매물 압력이 클 수 있어 수급 순매수 전환을 확인한 뒤 접근하는 편이 유리합니다.`;
+        } else {
+          sellHtml = `특이할 만한 대규모 집중 순매도 종목은 나타나지 않았습니다.`;
+        }
+
+        insightBox.innerHTML = `
+          <div class="flow-insight-box">
+            <div class="flow-insight-head">
+              <div class="flow-insight-title">🧠 ${mktLbl} 수급 종합 해석 · ${periodTxt}</div>
+              <span class="flow-regime-badge ${regimeCls}">${regimeBadge}</span>
+            </div>
+            <div class="flow-insight-lead">${regimeDesc}</div>
+            <div class="flow-insight-grid">
+              <div class="flow-insight-item">
+                <div class="flow-insight-item-hd" style="color:#9a3412;">🏆 금액·동시매수 핵심 주도</div>
+                <div>${coBuyHtml}</div>
+              </div>
+              <div class="flow-insight-item">
+                <div class="flow-insight-item-hd" style="color:#b91c1c;">🔥 연속 매집 진행형 (추세 신호)</div>
+                <div>${streakHtml}</div>
+              </div>
+              <div class="flow-insight-item">
+                <div class="flow-insight-item-hd" style="color:#15803d;">💎 실적 + 수급 동시 일치</div>
+                <div>${fundHtml}</div>
+              </div>
+              <div class="flow-insight-item">
+                <div class="flow-insight-item-hd" style="color:#1e40af;">⚠️ 대규모·연속 매도 경계</div>
+                <div>${sellHtml}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
       let ovHtml = '';
       if (coBuys.length || coSells.length) {
