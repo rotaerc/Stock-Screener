@@ -2669,7 +2669,7 @@ def build_web_dashboard(here):
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
     op_hist_payload = json.dumps(op_hist_compact, ensure_ascii=False).replace("</", "<\\/")
-    flow_payload = json.dumps(flow_data, ensure_ascii=False).replace("</", "<\\/")
+    flow_payload = json.dumps(flow_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -3645,6 +3645,14 @@ def build_web_dashboard(here):
       color: #fff;
       box-shadow: 0 1px 2px rgba(37,99,235,0.25);
     }}
+    .flow-mode-btn.mkt-kp.active {{
+      background: var(--kospi);
+      color: #fff;
+    }}
+    .flow-mode-btn.mkt-kq.active {{
+      background: var(--kosdaq);
+      color: #fff;
+    }}
     .flow-overlap-box {{
       background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
       border: 1px solid #fed7aa;
@@ -3986,20 +3994,20 @@ def build_web_dashboard(here):
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
           <div class="flow-mode-group">
-            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (16:20)</button>
-            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (금요일 1주)</button>
+            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (1개월)</button>
+            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (3개월)</button>
+          </div>
+          <div class="flow-mode-group" id="flowMarketTabs">
+            <button class="flow-mode-btn active" id="btnFlowMktAll" onclick="setFlowMarket('')">전체</button>
+            <button class="flow-mode-btn mkt-kp" id="btnFlowMktKP" onclick="setFlowMarket('KOSPI')">📊 KOSPI</button>
+            <button class="flow-mode-btn mkt-kq" id="btnFlowMktKQ" onclick="setFlowMarket('KOSDAQ')">🚀 KOSDAQ</button>
           </div>
           <div style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:3px 6px; border-radius:8px; border:1px solid #bfdbfe;">
             <button class="pg-btn" id="btnPrevFlowPeriod" onclick="stepFlowPeriod(1)" title="이전 날짜/주">◀</button>
             <select id="flowPeriodSelect" class="select-box" style="font-weight:800; color:#1e3a8a; border-color:#93c5fd;" onchange="onFlowPeriodChange()"></select>
             <button class="pg-btn" id="btnNextFlowPeriod" onclick="stepFlowPeriod(-1)" title="다음 날짜/주">▶</button>
           </div>
-          <input type="text" id="flowSearchInput" class="search-input" style="width:185px;" placeholder="🔍 종목명 / 코드 검색..." />
-          <select id="flowMarketSelect" class="select-box">
-            <option value="">전체 시장 (KOSPI+KOSDAQ)</option>
-            <option value="KOSPI">KOSPI만</option>
-            <option value="KOSDAQ">KOSDAQ만</option>
-          </select>
+          <input type="text" id="flowSearchInput" class="search-input" style="width:170px;" placeholder="🔍 종목명 / 코드 검색..." />
           <select id="flowSideSelect" class="select-box">
             <option value="BOTH">순매수 + 순매도</option>
             <option value="BUY">▲ 순매수만 보기</option>
@@ -4116,7 +4124,6 @@ def build_web_dashboard(here):
 
       initFlowControls();
       document.getElementById('flowSearchInput').addEventListener('input', renderFlowView);
-      document.getElementById('flowMarketSelect').addEventListener('change', renderFlowView);
       document.getElementById('flowSideSelect').addEventListener('change', renderFlowView);
 
       document.getElementById('globalSearchInput').addEventListener('keydown', (e) => {{
@@ -4397,6 +4404,18 @@ def build_web_dashboard(here):
 
     let currentFlowMode = 'DAILY';
     let currentFlowKey = '';
+    let currentFlowMarket = '';
+
+    function setFlowMarket(mkt) {{
+      currentFlowMarket = mkt || '';
+      const bAll = document.getElementById('btnFlowMktAll');
+      const bKP = document.getElementById('btnFlowMktKP');
+      const bKQ = document.getElementById('btnFlowMktKQ');
+      if (bAll) bAll.classList.toggle('active', currentFlowMarket === '');
+      if (bKP) bKP.classList.toggle('active', currentFlowMarket === 'KOSPI');
+      if (bKQ) bKQ.classList.toggle('active', currentFlowMarket === 'KOSDAQ');
+      renderFlowView();
+    }}
 
     function getFlowKeys(mode) {{
       if (!FLOW_DATA) return [];
@@ -4481,8 +4500,9 @@ def build_web_dashboard(here):
       const bucket = currentFlowMode === 'WEEKLY' ? ((FLOW_DATA && FLOW_DATA.byWeek) || {{}}) : ((FLOW_DATA && FLOW_DATA.byDate) || {{}});
       const snap = currentFlowKey ? bucket[currentFlowKey] : null;
 
-      const modeTitle = currentFlowMode === 'WEEKLY' ? '주간 수급 동향 (1주 집계)' : '일간 수급 동향 (장마감 16:20)';
-      document.getElementById('pageTitle').textContent = modeTitle;
+      const modeTitle = currentFlowMode === 'WEEKLY' ? '주간 수급 동향 (최근 3개월)' : '일간 수급 동향 (최근 1개월)';
+      const mktTitleTag = currentFlowMarket ? ` · ${{currentFlowMarket}}` : ' · KOSPI+KOSDAQ';
+      document.getElementById('pageTitle').textContent = modeTitle + mktTitleTag;
       const periodTxt = snap
         ? (currentFlowMode === 'WEEKLY' ? (snap.weekLabel || `${{snap.startDate}} ~ ${{snap.endDate}}`) : `${{snap.startDate}} 기준`)
         : '초기 설정 대기중';
@@ -4512,7 +4532,7 @@ def build_web_dashboard(here):
 
       grid.style.display = 'grid';
       const q = (document.getElementById('flowSearchInput').value || '').trim().toLowerCase();
-      const mktF = document.getElementById('flowMarketSelect').value;
+      const mktF = currentFlowMarket;
       const sideF = document.getElementById('flowSideSelect').value || 'BOTH';
 
       const invMeta = [

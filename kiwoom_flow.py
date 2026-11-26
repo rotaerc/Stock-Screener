@@ -39,8 +39,8 @@ MARKETS = [
 ]
 
 RETENTION_DAYS = 60
-RETENTION_WEEKS = 12
-TOP_N_PER_SIDE = 30
+RETENTION_WEEKS = 14
+TOP_N_PER_SIDE = 20
 
 # 국내 상장 ETF / ETN 제외 필터 (개별 종목 수급만 순수 집계)
 ETF_BRAND_PREFIXES = (
@@ -331,25 +331,29 @@ def collect_period_snapshot(token, start_dt, end_dt, env_mode="prod", top_n=TOP_
                 buy_merged.extend(rows_buy[:top_n])
             except Exception as e:
                 print(f"  [경고] {inv_label} {mkt_name} 순매수 조회 실패: {e}")
-            time.sleep(0.35)
+            time.sleep(0.28)
 
             try:
                 rows_sell = fetch_ka10058(token, start_dt, end_dt, inv_code, "1", mkt_code, env_mode=env_mode)
                 sell_merged.extend(rows_sell[:top_n])
             except Exception as e:
                 print(f"  [경고] {inv_label} {mkt_name} 순매도 조회 실패: {e}")
-            time.sleep(0.35)
+            time.sleep(0.28)
 
-        # 종목코드 중복 제거 후 금액순 정렬 (코스피/코스닥 각각 최대 top_n개 유지 가능하도록 합산 최대 top_n*2)
+        # 종목코드 중복 제거 후 시장별 최대 top_n개 유지 + 금액순 정렬
         def _dedup_sort(lst, is_buy):
             by_code = {}
             for it in lst:
                 cd = it["code"]
                 if cd not in by_code or abs(it["netAmt"]) > abs(by_code[cd]["netAmt"]):
                     by_code[cd] = it
-            res = list(by_code.values())
+            kp = [x for x in by_code.values() if x.get("market") == "KOSPI"]
+            kq = [x for x in by_code.values() if x.get("market") != "KOSPI"]
+            kp.sort(key=lambda x: x["netAmt"], reverse=is_buy)
+            kq.sort(key=lambda x: x["netAmt"], reverse=is_buy)
+            res = kp[:top_n] + kq[:top_n]
             res.sort(key=lambda x: x["netAmt"], reverse=is_buy)
-            return res[: top_n * 2]
+            return res
 
         investors_out[inv_key] = {
             "label": inv_label,
@@ -482,14 +486,31 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
             # 같은 주(월요일 시작일 기준) 키로 덮어써서 금요일에 주간 확정치로 완성
             store["byWeek"][mon_dash] = weekly_snap
 
-    # 보관 기간 정리 (일간 최대 60일, 주간 최대 12주)
+    _save_investor_flow(here, store)
+
+    print(
+        f" ★ 키움 수급 저장 완료: 일간 {len(store['dates'])}일 / 주간 {len(store['weeks'])}주 "
+        f"(최신일: {store['latestDate'] or '-'})"
+    )
+    print(f"{'='*80}")
+    return store
+
+
+def _save_investor_flow(here, store):
     cutoff_d = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime("%Y-%m-%d")
     store["byDate"] = {
-        k: v for k, v in sorted(store["byDate"].items(), reverse=True)
+        k: v for k, v in sorted(store.get("byDate", {}).items(), reverse=True)
         if k >= cutoff_d
     }
-    week_keys = sorted(store["byWeek"].keys(), reverse=True)[:RETENTION_WEEKS]
+    week_keys = sorted(store.get("byWeek", {}).keys(), reverse=True)[:RETENTION_WEEKS]
     store["byWeek"] = {k: store["byWeek"][k] for k in week_keys}
+
+    # 과거 기록 ETF/ETN 정리
+    for sec_key in ("byDate", "byWeek"):
+        for _k, _snap in (store.get(sec_key) or {}).items():
+            for _iv in (_snap.get("investors") or {}).values():
+                _iv["buy"] = [r for r in (_iv.get("buy") or []) if not is_etf_or_etn(r.get("name"))]
+                _iv["sell"] = [r for r in (_iv.get("sell") or []) if not is_etf_or_etn(r.get("name"))]
 
     store["dates"] = sorted(store["byDate"].keys(), reverse=True)
     store["weeks"] = sorted(store["byWeek"].keys(), reverse=True)
@@ -498,11 +519,92 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
     store["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     with open(os.path.join(here, "investor_flow.json"), "w", encoding="utf-8") as f:
-        json.dump(store, f, ensure_ascii=False, indent=2)
+        json.dump(store, f, ensure_ascii=False, separators=(",", ":"))
+    return store
 
+
+def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
+    """최근 1개월 일간 수급 + 최근 3개월(13주) 주간 수급을 키움 API로 일괄 소급 수집합니다."""
+    cfg = load_env(os.path.join(here, ".env"))
+    appkey = cfg.get("KIWOOM_APPKEY", "")
+    secretkey = cfg.get("KIWOOM_SECRETKEY", "")
+    env_mode = cfg.get("KIWOOM_ENV", "prod")
+    if not appkey or not secretkey or "여기에_" in appkey:
+        raise RuntimeError(".env 에 키움 REST API 키를 먼저 설정해 주세요.")
+
+    token = get_kiwoom_token(appkey, secretkey, env_mode=env_mode)
+    store = load_investor_flow(here)
+    today = _resolve_trading_date()
+
+    print(f"\n{'='*80}")
+    print(f" ▶ 키움 수급 과거 소급 수집 시작 (최근 {daily_days}일 일간 + 최근 {num_weeks}주 주간)")
+    print(f"{'='*80}")
+
+    # 1) 최근 1개월 평일 일간 수급 수집
+    day_targets = []
+    for delta in range(daily_days + 1):
+        d = today - timedelta(days=delta)
+        if d.weekday() < 5:
+            day_targets.append(d)
+    print(f"[1/2] 일간 수급 점검 대상: {len(day_targets)}영업일 후보")
+    added_days = 0
+    for idx, d in enumerate(day_targets, 1):
+        d_dash = d.strftime("%Y-%m-%d")
+        d_ymd = d.strftime("%Y%m%d")
+        if d_dash in store["byDate"] and any(
+            len(v.get("buy") or []) > 0 for v in (store["byDate"][d_dash].get("investors") or {}).values()
+        ):
+            continue
+        print(f"  ({idx}/{len(day_targets)}) 일간 {d_dash} 조회 중...")
+        snap = collect_period_snapshot(token, d_ymd, d_ymd, env_mode=env_mode)
+        has_any = any(
+            len(v.get("buy") or []) + len(v.get("sell") or []) > 0
+            for v in snap["investors"].values()
+        )
+        if has_any:
+            store["byDate"][d_dash] = snap
+            added_days += 1
+            if added_days % 4 == 0:
+                _save_investor_flow(here, store)
+        else:
+            print(f"    - {d_dash}: 데이터 없음(휴장일 또는 장마감 전) 건너뜀")
+
+    _save_investor_flow(here, store)
+
+    # 2) 최근 3개월(13주) 주간 수급 수집 (각 주의 월~금)
+    cur_mon = today - timedelta(days=today.weekday())
+    print(f"\n[2/2] 주간 수급 점검 대상: 최근 {num_weeks}주")
+    added_weeks = 0
+    for w_idx in range(num_weeks):
+        mon = cur_mon - timedelta(weeks=w_idx)
+        fri = mon + timedelta(days=4)
+        end_d = min(fri, today)
+        mon_dash = mon.strftime("%Y-%m-%d")
+        end_dash = end_d.strftime("%Y-%m-%d")
+        is_final = (w_idx > 0) or (today.weekday() == 4)
+
+        existing_w = store["byWeek"].get(mon_dash)
+        if existing_w and existing_w.get("isFinalWeek") and w_idx > 0:
+            continue
+
+        print(f"  ({w_idx + 1}/{num_weeks}) 주간 {mon_dash} ~ {end_dash} 조회 중...")
+        wsnap = collect_period_snapshot(token, mon.strftime("%Y%m%d"), end_d.strftime("%Y%m%d"), env_mode=env_mode)
+        has_any = any(
+            len(v.get("buy") or []) + len(v.get("sell") or []) > 0
+            for v in wsnap["investors"].values()
+        )
+        if has_any:
+            wsnap["isFinalWeek"] = is_final
+            wsnap["weekLabel"] = f"{mon_dash} ~ {end_dash}" + (" (주간 확정)" if is_final else " (진행중)")
+            store["byWeek"][mon_dash] = wsnap
+            added_weeks += 1
+            if added_weeks % 3 == 0:
+                _save_investor_flow(here, store)
+
+    _save_investor_flow(here, store)
     print(
-        f" ★ 키움 수급 저장 완료: 일간 {len(store['dates'])}일 / 주간 {len(store['weeks'])}주 "
-        f"(최신일: {store['latestDate'] or '-'})"
+        f"\n ★ 과거 소급 수집 완료: 일간 총 {len(store['dates'])}일(+{added_days}) / "
+        f"주간 총 {len(store['weeks'])}주(+{added_weeks})"
     )
     print(f"{'='*80}")
     return store
@@ -548,12 +650,17 @@ def main():
         sys.exit(run_test())
 
     skip_push = any(a.lower() == "--no-push" for a in args)
-    target_date = None
-    for i, a in enumerate(args):
-        if a.lower() == "--date" and i + 1 < len(args):
-            target_date = args[i + 1].replace("-", "")
-
-    update_investor_flow(HERE, target_yyyymmdd=target_date, include_week=True)
+    if any(a.lower() in ("--backfill", "backfill") for a in args):
+        nums = [int(a) for a in args if a.isdigit()]
+        d_days = nums[0] if len(nums) >= 1 else 31
+        n_weeks = nums[1] if len(nums) >= 2 else 13
+        backfill_investor_flow(HERE, daily_days=d_days, num_weeks=n_weeks)
+    else:
+        target_date = None
+        for i, a in enumerate(args):
+            if a.lower() == "--date" and i + 1 < len(args):
+                target_date = args[i + 1].replace("-", "")
+        update_investor_flow(HERE, target_yyyymmdd=target_date, include_week=True)
 
     # 웹 대시보드(index.html) 최신화 + GitHub 자동 업로드
     sys.path.insert(0, HERE)
