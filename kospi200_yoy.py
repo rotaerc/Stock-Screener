@@ -2604,6 +2604,25 @@ def _load_hankyung_reports(here):
     return {"date": "", "updatedAt": "", "retentionDays": 60, "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business", "dates": [], "byDate": {}, "reports": []}
 
 
+def _load_investor_flow(here):
+    json_path = os.path.join(here, "investor_flow.json")
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data.setdefault("byDate", {})
+                data.setdefault("byWeek", {})
+                data["dates"] = sorted(data["byDate"].keys(), reverse=True)
+                data["weeks"] = sorted(data["byWeek"].keys(), reverse=True)
+                data["latestDate"] = data["dates"][0] if data["dates"] else ""
+                data["latestWeek"] = data["weeks"][0] if data["weeks"] else ""
+                return data
+        except Exception:
+            pass
+    return {"updatedAt": "", "latestDate": "", "latestWeek": "", "dates": [], "weeks": [], "byDate": {}, "byWeek": {}}
+
+
 def build_web_dashboard(here):
     """
     최신 KOSPI / KOSDAQ 통합 엑셀(.xlsx) 파일 및 한경 기업 리포트(hankyung_reports.json)를 읽어
@@ -2624,6 +2643,9 @@ def build_web_dashboard(here):
 
     reports_data = _load_hankyung_reports(here)
     print(f"  - [리포트] 한경 기업 리포트 로드 완료: {len(reports_data.get('reports', []))}건 (기준일: {reports_data.get('date', '-')})")
+
+    flow_data = _load_investor_flow(here)
+    print(f"  - [수급동향] 키움 수급 로드 완료: 일간 {len(flow_data.get('dates', []))}일 / 주간 {len(flow_data.get('weeks', []))}주 (최신: {flow_data.get('latestDate') or '-'})")
 
     op_hist_raw = _load_op_estimate_history(here)
     op_hist_compact = {
@@ -2647,6 +2669,7 @@ def build_web_dashboard(here):
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
     op_hist_payload = json.dumps(op_hist_compact, ensure_ascii=False).replace("</", "<\\/")
+    flow_payload = json.dumps(flow_data, ensure_ascii=False).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -3582,6 +3605,197 @@ def build_web_dashboard(here):
       border-color: #bfdbfe;
     }}
     .rep-btn.scr:hover {{ background: #dbeafe; }}
+    .flow-view {{
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }}
+    .flow-view.active {{ display: flex; }}
+    .flow-body-wrap {{
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+    .flow-mode-group {{
+      display: inline-flex;
+      background: #f1f5f9;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }}
+    .flow-mode-btn {{
+      border: none;
+      background: transparent;
+      color: #475569;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }}
+    .flow-mode-btn.active {{
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(37,99,235,0.25);
+    }}
+    .flow-overlap-box {{
+      background: linear-gradient(135deg, #fff7ed 0%, #fef2f2 100%);
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+    .flow-overlap-title {{
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #9a3412;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .flow-overlap-chips {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }}
+    .flow-ov-chip {{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      border: 1px solid #fdba74;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #7c2d12;
+      cursor: pointer;
+    }}
+    .flow-ov-chip:hover {{ background: #ffedd5; }}
+    .flow-ov-chip.sell {{
+      border-color: #93c5fd;
+      color: #1e3a8a;
+    }}
+    .flow-ov-chip.sell:hover {{ background: #dbeafe; }}
+    .flow-cols-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }}
+    .flow-card {{
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+      display: flex;
+      flex-direction: column;
+    }}
+    .flow-card-head {{
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }}
+    .flow-card-title {{
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .flow-subhead {{
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }}
+    .flow-subhead.buy {{ background: #fef2f2; color: #b91c1c; border-bottom: 1px solid #fecaca; }}
+    .flow-subhead.sell {{ background: #eff6ff; color: #1d4ed8; border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; }}
+    .flow-mini-tbl {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }}
+    .flow-mini-tbl th {{
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 5px 6px;
+      border-bottom: 1px solid var(--border-light);
+      text-align: right;
+    }}
+    .flow-mini-tbl th:nth-child(1), .flow-mini-tbl th:nth-child(2) {{ text-align: left; }}
+    .flow-mini-tbl td {{
+      padding: 5px 6px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+      white-space: nowrap;
+    }}
+    .flow-mini-tbl td:nth-child(1) {{ text-align: center; color: #94a3b8; font-weight: 700; width: 26px; }}
+    .flow-mini-tbl td:nth-child(2) {{ text-align: left; white-space: normal; }}
+    .flow-mini-tbl tr:hover td {{ background: #f8fafc; }}
+    .flow-amt-up {{ color: #dc2626; font-weight: 800; }}
+    .flow-amt-down {{ color: #2563eb; font-weight: 800; }}
+    .flow-mkt-tag {{
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 0px 4px;
+      border-radius: 3px;
+      margin-left: 3px;
+      vertical-align: middle;
+    }}
+    .flow-mkt-tag.kp {{ background: #dbeafe; color: #1d4ed8; }}
+    .flow-mkt-tag.kq {{ background: #d1fae5; color: #047857; }}
+    .flow-co-tag {{
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 0px 4px;
+      border-radius: 3px;
+      margin-left: 3px;
+      background: #ffedd5;
+      color: #c2410c;
+    }}
+    .flow-empty-guide {{
+      background: #fff;
+      border: 1px dashed #93c5fd;
+      border-radius: 12px;
+      padding: 26px 24px;
+      max-width: 760px;
+      margin: 18px auto;
+      line-height: 1.7;
+      color: #334155;
+    }}
+    .flow-empty-guide h3 {{ margin: 0 0 10px; color: #1e3a8a; font-size: 16px; }}
+    .flow-empty-guide code {{
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #0f172a;
+    }}
+    @media (max-width: 1180px) {{
+      .flow-cols-grid {{ grid-template-columns: 1fr; }}
+    }}
     @media (max-width: 768px) {{
       body {{ height: auto; overflow: auto; }}
       .app-shell {{ overflow: visible; }}
@@ -3767,6 +3981,40 @@ def build_web_dashboard(here):
         <div class="reports-grid" id="reportsGrid"></div>
       </div>
     </div>
+
+    <div class="flow-view" id="flowView">
+      <div class="controls-panel" style="margin-bottom:10px;">
+        <div class="filter-left">
+          <div class="flow-mode-group">
+            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (16:20)</button>
+            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (금요일 1주)</button>
+          </div>
+          <div style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:3px 6px; border-radius:8px; border:1px solid #bfdbfe;">
+            <button class="pg-btn" id="btnPrevFlowPeriod" onclick="stepFlowPeriod(1)" title="이전 날짜/주">◀</button>
+            <select id="flowPeriodSelect" class="select-box" style="font-weight:800; color:#1e3a8a; border-color:#93c5fd;" onchange="onFlowPeriodChange()"></select>
+            <button class="pg-btn" id="btnNextFlowPeriod" onclick="stepFlowPeriod(-1)" title="다음 날짜/주">▶</button>
+          </div>
+          <input type="text" id="flowSearchInput" class="search-input" style="width:185px;" placeholder="🔍 종목명 / 코드 검색..." />
+          <select id="flowMarketSelect" class="select-box">
+            <option value="">전체 시장 (KOSPI+KOSDAQ)</option>
+            <option value="KOSPI">KOSPI만</option>
+            <option value="KOSDAQ">KOSDAQ만</option>
+          </select>
+          <select id="flowSideSelect" class="select-box">
+            <option value="BOTH">순매수 + 순매도</option>
+            <option value="BUY">▲ 순매수만 보기</option>
+            <option value="SELL">▼ 순매도만 보기</option>
+          </select>
+        </div>
+        <div class="group-right">
+          <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외국인·연기금·사모펀드 · 단위: 억원)</span>
+        </div>
+      </div>
+      <div class="flow-body-wrap" id="flowBodyWrap">
+        <div id="flowOverlapBox"></div>
+        <div class="flow-cols-grid" id="flowGrid"></div>
+      </div>
+    </div>
     </main>
   </div>
 
@@ -3776,6 +4024,7 @@ def build_web_dashboard(here):
     const DB = {json_payload};
     const REPORTS_DATA = {reports_payload};
     const OP_HIST = {op_hist_payload};
+    const FLOW_DATA = {flow_payload};
     const OP_HIST_STOCKS = (OP_HIST && OP_HIST.stocks) ? OP_HIST.stocks : {{}};
     const marketKeys = Object.keys(DB);
     let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
@@ -3864,6 +4113,11 @@ def build_web_dashboard(here):
       document.getElementById('repSearchInput').addEventListener('input', renderReportsGrid);
       document.getElementById('repBrokerSelect').addEventListener('change', renderReportsGrid);
       document.getElementById('repChangeSelect').addEventListener('change', () => {{ renderSidebar(); renderReportsGrid(); }});
+
+      initFlowControls();
+      document.getElementById('flowSearchInput').addEventListener('input', renderFlowView);
+      document.getElementById('flowMarketSelect').addEventListener('change', renderFlowView);
+      document.getElementById('flowSideSelect').addEventListener('change', renderFlowView);
 
       document.getElementById('globalSearchInput').addEventListener('keydown', (e) => {{
         if (e.key === 'Enter') handleGlobalSearch(e.target.value);
@@ -4099,6 +4353,18 @@ def build_web_dashboard(here):
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
+          <div class="nav-section-title">수급 동향 (키움)</div>
+          <button class="nav-item ${{currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' ? 'active' : ''}}" onclick="selectFlowView('DAILY')">
+            <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
+            <span class="nav-badge">${{(FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates.length : 0}}일</span>
+          </button>
+          <button class="nav-item ${{currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}}" onclick="selectFlowView('WEEKLY')">
+            <span class="nav-item-left"><span>📆</span><span>주간 수급 (1주 집계)</span></span>
+            <span class="nav-badge">${{(FLOW_DATA && FLOW_DATA.weeks) ? FLOW_DATA.weeks.length : 0}}주</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
           <div class="nav-section-title">다운로드 · 원문</div>
           ${{dlLinks}}
           <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
@@ -4118,11 +4384,236 @@ def build_web_dashboard(here):
     }}
 
     function setScreenerVisibility(showScreener) {{
+      const showRep = (!showScreener && currentViewMode === 'REPORTS');
+      const showFlow = (!showScreener && currentViewMode === 'FLOW');
       document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
       document.getElementById('paginationBar').style.display = showScreener ? 'flex' : 'none';
-      document.getElementById('reportsView').classList.toggle('active', !showScreener);
+      document.getElementById('reportsView').classList.toggle('active', showRep);
+      const fv = document.getElementById('flowView');
+      if (fv) fv.classList.toggle('active', showFlow);
+    }}
+
+    let currentFlowMode = 'DAILY';
+    let currentFlowKey = '';
+
+    function getFlowKeys(mode) {{
+      if (!FLOW_DATA) return [];
+      return mode === 'WEEKLY' ? (FLOW_DATA.weeks || []) : (FLOW_DATA.dates || []);
+    }}
+
+    function initFlowControls() {{
+      refreshFlowPeriodSelect();
+    }}
+
+    function refreshFlowPeriodSelect() {{
+      const sel = document.getElementById('flowPeriodSelect');
+      if (!sel) return;
+      const keys = getFlowKeys(currentFlowMode);
+      if (!keys.length) {{
+        sel.innerHTML = `<option value="">데이터 없음</option>`;
+        currentFlowKey = '';
+        updateFlowPeriodNavButtons();
+        return;
+      }}
+      if (!currentFlowKey || !keys.includes(currentFlowKey)) {{
+        currentFlowKey = keys[0];
+      }}
+      const bucket = currentFlowMode === 'WEEKLY' ? (FLOW_DATA.byWeek || {{}}) : (FLOW_DATA.byDate || {{}});
+      sel.innerHTML = keys.map((k, idx) => {{
+        const snap = bucket[k] || {{}};
+        let label = k;
+        if (currentFlowMode === 'WEEKLY') {{
+          label = snap.weekLabel || `${{snap.startDate || k}} ~ ${{snap.endDate || ''}}`;
+        }} else {{
+          label = `${{k}}${{idx === 0 ? ' · 최신' : ''}}`;
+        }}
+        return `<option value="${{k}}">${{escapeHtml(label)}}</option>`;
+      }}).join('');
+      sel.value = currentFlowKey;
+      updateFlowPeriodNavButtons();
+    }}
+
+    function updateFlowPeriodNavButtons() {{
+      const btnPrev = document.getElementById('btnPrevFlowPeriod');
+      const btnNext = document.getElementById('btnNextFlowPeriod');
+      if (!btnPrev || !btnNext) return;
+      const keys = getFlowKeys(currentFlowMode);
+      const idx = keys.indexOf(currentFlowKey);
+      btnPrev.disabled = (idx < 0 || idx >= keys.length - 1);
+      btnNext.disabled = (idx <= 0);
+    }}
+
+    function stepFlowPeriod(delta) {{
+      const keys = getFlowKeys(currentFlowMode);
+      const idx = keys.indexOf(currentFlowKey);
+      const nextIdx = idx + delta;
+      if (nextIdx >= 0 && nextIdx < keys.length) {{
+        currentFlowKey = keys[nextIdx];
+        document.getElementById('flowPeriodSelect').value = currentFlowKey;
+        updateFlowPeriodNavButtons();
+        renderFlowView();
+      }}
+    }}
+
+    function onFlowPeriodChange() {{
+      currentFlowKey = document.getElementById('flowPeriodSelect').value || '';
+      updateFlowPeriodNavButtons();
+      renderFlowView();
+    }}
+
+    function selectFlowView(mode = 'DAILY') {{
+      closeMobileNav();
+      currentViewMode = 'FLOW';
+      currentFlowMode = (mode === 'WEEKLY') ? 'WEEKLY' : 'DAILY';
+      setScreenerVisibility(false);
+      document.getElementById('btnFlowDaily').classList.toggle('active', currentFlowMode === 'DAILY');
+      document.getElementById('btnFlowWeekly').classList.toggle('active', currentFlowMode === 'WEEKLY');
+      refreshFlowPeriodSelect();
+      renderSidebar();
+      renderFlowView();
+    }}
+
+    function renderFlowView() {{
+      const overlapBox = document.getElementById('flowOverlapBox');
+      const grid = document.getElementById('flowGrid');
+      const bucket = currentFlowMode === 'WEEKLY' ? ((FLOW_DATA && FLOW_DATA.byWeek) || {{}}) : ((FLOW_DATA && FLOW_DATA.byDate) || {{}});
+      const snap = currentFlowKey ? bucket[currentFlowKey] : null;
+
+      const modeTitle = currentFlowMode === 'WEEKLY' ? '주간 수급 동향 (1주 집계)' : '일간 수급 동향 (장마감 16:20)';
+      document.getElementById('pageTitle').textContent = modeTitle;
+      const periodTxt = snap
+        ? (currentFlowMode === 'WEEKLY' ? (snap.weekLabel || `${{snap.startDate}} ~ ${{snap.endDate}}`) : `${{snap.startDate}} 기준`)
+        : '초기 설정 대기중';
+      document.getElementById('pageSubtitle').textContent = `키움 REST API · 외국인 · 연기금 · 사모펀드 순매수/순매도 · ${{periodTxt}}`;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">🏦 ${{periodTxt}}</span>
+        <span class="meta-pill">🕒 수급 업데이트: ${{(snap && snap.updatedAt) || (FLOW_DATA && FLOW_DATA.updatedAt) || '-'}}</span>
+        <span class="meta-pill">📅 일간 ${{(FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates.length : 0}}일 · 주간 ${{(FLOW_DATA && FLOW_DATA.weeks) ? FLOW_DATA.weeks.length : 0}}주 보관</span>
+      `;
+
+      if (!snap || !snap.investors) {{
+        overlapBox.innerHTML = '';
+        grid.style.display = 'block';
+        grid.innerHTML = `
+          <div class="flow-empty-guide">
+            <h3>🏦 키움 REST API 수급 자동 업데이트 설정 안내</h3>
+            <p style="margin:0 0 10px;">아직 수집된 수급 데이터가 없습니다. 내 PC에서 아래 3단계만 한 번 설정하면 매일 오후 <b>16:20</b>에 외국인·연기금·사모펀드 일간 수급과 매주 금요일 <b>1주간 집계</b>가 이 웹페이지에 자동 반영됩니다.</p>
+            <ol style="margin:0; padding-left:20px;">
+              <li><code>python kiwoom_flow.py --myip</code> 로 현재 PC 공인 IP를 확인해 <a href="https://openapi.kiwoom.com" target="_blank" style="color:#2563eb; font-weight:700;">키움 REST API 포털</a>에 등록</li>
+              <li>폴더의 <code>.env.example</code> 을 복사해 <code>.env</code> 로 저장 후 <code>KIWOOM_APPKEY</code> / <code>KIWOOM_SECRETKEY</code> 입력</li>
+              <li><code>키움수급_수동실행.bat</code> 으로 첫 수집 확인 후, <code>수급_자동실행_등록.bat</code> 을 실행해 월~금 16:20 자동 실행 등록</li>
+            </ol>
+          </div>
+        `;
+        return;
+      }}
+
+      grid.style.display = 'grid';
+      const q = (document.getElementById('flowSearchInput').value || '').trim().toLowerCase();
+      const mktF = document.getElementById('flowMarketSelect').value;
+      const sideF = document.getElementById('flowSideSelect').value || 'BOTH';
+
+      const invMeta = [
+        {{ key: 'foreign', label: '🌍 외국인', short: '외인' }},
+        {{ key: 'pension', label: '🏛️ 연기금', short: '연기금' }},
+        {{ key: 'private', label: '💼 사모펀드', short: '사모' }},
+      ];
+
+      const filterRows = (arr) => (arr || []).filter(r => {{
+        if (mktF && r.market !== mktF) return false;
+        if (q && !(String(r.name || '').toLowerCase().includes(q) || String(r.code || '').includes(q))) return false;
+        return true;
+      }});
+
+      // 2개 이상 주체 동시 순매수 / 동시 순매도 종목 탐지
+      const buyMap = {{}}, sellMap = {{}};
+      invMeta.forEach(im => {{
+        const invObj = snap.investors[im.key] || {{}};
+        filterRows(invObj.buy).slice(0, 20).forEach(r => {{
+          if (!buyMap[r.code]) buyMap[r.code] = {{ code: r.code, name: r.name, market: r.market, who: [], total: 0 }};
+          buyMap[r.code].who.push(im.short);
+          buyMap[r.code].total += (Number(r.netAmt) || 0);
+        }});
+        filterRows(invObj.sell).slice(0, 20).forEach(r => {{
+          if (!sellMap[r.code]) sellMap[r.code] = {{ code: r.code, name: r.name, market: r.market, who: [], total: 0 }};
+          sellMap[r.code].who.push(im.short);
+          sellMap[r.code].total += (Number(r.netAmt) || 0);
+        }});
+      }});
+      const coBuys = Object.values(buyMap).filter(x => x.who.length >= 2).sort((a, b) => (b.who.length - a.who.length) || (b.total - a.total));
+      const coSells = Object.values(sellMap).filter(x => x.who.length >= 2).sort((a, b) => (b.who.length - a.who.length) || (a.total - b.total));
+
+      let ovHtml = '';
+      if (coBuys.length || coSells.length) {{
+        ovHtml += `<div class="flow-overlap-box">`;
+        if (coBuys.length && sideF !== 'SELL') {{
+          ovHtml += `<div class="flow-overlap-title">🔥 공동 순매수 핵심 종목 (2~3개 주체 동시 매수 · ${{coBuys.length}}종목)</div><div class="flow-overlap-chips">` +
+            coBuys.slice(0, 14).map(x => {{
+              const info = STOCK_LOOKUP[x.code];
+              const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              return `<span class="flow-ov-chip" ${{act}} title="클릭하여 종목 상세 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span> <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
+            }}).join('') + `</div>`;
+        }}
+        if (coSells.length && sideF !== 'BUY') {{
+          ovHtml += `<div class="flow-overlap-title" style="color:#1e40af; margin-top:4px;">❄️ 공동 순매도 주의 종목 (2~3개 주체 동시 매도 · ${{coSells.length}}종목)</div><div class="flow-overlap-chips">` +
+            coSells.slice(0, 10).map(x => {{
+              const info = STOCK_LOOKUP[x.code];
+              const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              return `<span class="flow-ov-chip sell" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span> <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
+            }}).join('') + `</div>`;
+        }}
+        ovHtml += `</div>`;
+      }}
+      overlapBox.innerHTML = ovHtml;
+
+      const buildTable = (rows, isBuy) => {{
+        const limit = (sideF === 'BOTH') ? 15 : 30;
+        const list = rows.slice(0, limit);
+        if (!list.length) {{
+          return `<div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px;">해당 조건 데이터 없음</div>`;
+        }}
+        const coSet = isBuy ? buyMap : sellMap;
+        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>등락률</th><th>추정단가</th></tr></thead><tbody>` +
+          list.map((r, idx) => {{
+            const amt = Number(r.netAmt) || 0;
+            const amtStr = `${{amt > 0 ? '+' : ''}}${{amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}`;
+            const chg = (r.chgPct !== null && r.chgPct !== undefined) ? `${{Number(r.chgPct) > 0 ? '+' : ''}}${{Number(r.chgPct).toFixed(1)}}%` : '-';
+            const chgCls = (r.chgPct > 0) ? 'pct-up' : ((r.chgPct < 0) ? 'pct-down' : '');
+            const avgStr = (r.avgPrice && r.avgPrice > 0) ? Number(r.avgPrice).toLocaleString('ko-KR') : '-';
+            const mTag = `<span class="flow-mkt-tag ${{r.market === 'KOSPI' ? 'kp' : 'kq'}}">${{r.market === 'KOSPI' ? 'P' : 'Q'}}</span>`;
+            const coInfo = coSet[r.code];
+            const coTag = (coInfo && coInfo.who.length >= 2) ? `<span class="flow-co-tag">${{coInfo.who.length}}주체</span>` : '';
+            const info = STOCK_LOOKUP[r.code];
+            const scrBtn = info ? `<a class="ext-link" style="background:#dbeafe; color:#1d4ed8; cursor:pointer;" onclick="jumpToStockInScreener('${{r.code}}','${{info.market}}')" title="스크리너 표에서 보기">표</a>` : '';
+            const passTag = (info && info.passed) ? `<span style="color:#15803d; font-size:10px; font-weight:800; margin-left:2px;">★</span>` : '';
+            const links = `<a class="ext-link naver" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank" title="네이버 금융">N</a><a class="ext-link fng" href="https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{r.code}}" target="_blank" title="에프엔가이드">Fn</a>${{scrBtn}}`;
+            return `<tr>
+              <td>${{idx + 1}}</td>
+              <td><b>${{escapeHtml(r.name)}}</b>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
+              <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
+              <td class="${{chgCls}}">${{chg}}</td>
+              <td style="color:#64748b;">${{avgStr}}</td>
+            </tr>`;
+          }}).join('') + `</tbody></table>`;
+      }};
+
+      grid.innerHTML = invMeta.map(im => {{
+        const invObj = snap.investors[im.key] || {{}};
+        const buyRows = filterRows(invObj.buy);
+        const sellRows = filterRows(invObj.sell);
+        const buySum = buyRows.reduce((s, r) => s + (Number(r.netAmt) || 0), 0);
+        const sellSum = sellRows.reduce((s, r) => s + (Number(r.netAmt) || 0), 0);
+        return `<div class="flow-card">
+          <div class="flow-card-head">
+            <div class="flow-card-title">${{im.label}}</div>
+            <span style="font-size:11px; color:#64748b; font-weight:700;">매수 ${{buyRows.length}} · 매도 ${{sellRows.length}}</span>
+          </div>
+          ${{sideF !== 'SELL' ? `<div class="flow-subhead buy"><span>▲ 순매수 TOP</span><span>합계 +${{Math.round(buySum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(buyRows, true)}}` : ''}}
+          ${{sideF !== 'BUY' ? `<div class="flow-subhead sell"><span>▼ 순매도 TOP</span><span>합계 ${{Math.round(sellSum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(sellRows, false)}}` : ''}}
+        </div>`;
+      }}).join('');
     }}
 
     function updateReportsHeaderAndBadges() {{
@@ -4816,14 +5307,17 @@ def auto_push_to_github(here, commit_msg=None):
     try:
         upload_targets = [
             "kospi200_yoy.py",
+            "kiwoom_flow.py",
             "index.html",
             "hankyung_reports.json",
             "op_estimate_history.json",
             "op_baseline.json",
+            "investor_flow.json",
             "requirements.txt",
             "kospi_top200_latest.xlsx",
             "kosdaq_top200_latest.xlsx",
             ".gitignore",
+            ".env.example",
             os.path.join(".github", "workflows", "main.yml"),
         ]
         existing_targets = [f for f in upload_targets if os.path.exists(os.path.join(here, f))]

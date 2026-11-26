@@ -1,0 +1,524 @@
+# -*- coding: utf-8 -*-
+"""
+키움증권 REST API 투자자별 수급(외국인 · 연기금 · 사모펀드) 자동 수집기
+- 매일(월~금) 16:20 장마감 확정 수급(일간) + 주간 누적(매주 금요일 1주 확정 집계) 수집
+- 수집 결과를 investor_flow.json 에 저장하고 index.html 웹 대시보드 생성 + GitHub Pages 자동 업로드
+
+사용법:
+  python kiwoom_flow.py --myip          # 키움 API에 등록할 현재 PC의 공인 IP 확인
+  python kiwoom_flow.py --test          # .env 키 및 API 연결·샘플 응답 테스트
+  python kiwoom_flow.py                 # 오늘 일간 + 이번주 주간 수급 수집 + 웹페이지 갱신 + GitHub 업로드
+  python kiwoom_flow.py --date 20261126 # 특정 날짜 수급 수집
+  python kiwoom_flow.py --no-push       # 웹페이지 생성까지만 수행 (GitHub 업로드 생략)
+"""
+
+import json
+import os
+import re
+import sys
+import time
+from datetime import datetime, timedelta
+
+import requests
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ENV_PATH = os.path.join(HERE, ".env")
+TOKEN_CACHE_PATH = os.path.join(HERE, "kiwoom_token_cache.json")
+FLOW_JSON_PATH = os.path.join(HERE, "investor_flow.json")
+
+# 키움 REST API ka10058 (투자자별일별매매종목요청) 투자자 코드
+INVESTORS = [
+    ("foreign", "외국인", "9000"),
+    ("pension", "연기금", "6000"),
+    ("private", "사모펀드", "3100"),
+]
+
+MARKETS = [
+    ("KOSPI", "001"),
+    ("KOSDAQ", "101"),
+]
+
+RETENTION_DAYS = 60
+RETENTION_WEEKS = 12
+TOP_N_PER_SIDE = 30
+
+
+def load_env(env_path=ENV_PATH):
+    """외부 패키지 없이 .env 파일을 안전하게 읽습니다."""
+    cfg = {}
+    if os.path.isfile(env_path):
+        with open(env_path, "r", encoding="utf-8-sig") as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k = k.strip()
+                v = v.strip().strip('"').strip("'")
+                if k:
+                    cfg[k] = v
+    # 환경변수가 직접 설정된 경우 우선 적용
+    for key in ("KIWOOM_APPKEY", "KIWOOM_SECRETKEY", "KIWOOM_ENV"):
+        if os.environ.get(key):
+            cfg[key] = os.environ[key].strip()
+    return cfg
+
+
+def get_base_url(env_mode="prod"):
+    if str(env_mode or "").lower() in ("mock", "vts", "paper", "모의"):
+        return "https://mockapi.kiwoom.com"
+    return "https://api.kiwoom.com"
+
+
+def get_public_ip():
+    for url in ("https://api.ipify.org?format=json", "https://ifconfig.me/ip"):
+        try:
+            r = requests.get(url, timeout=8)
+            if r.status_code == 200:
+                txt = r.text.strip()
+                if txt.startswith("{"):
+                    return r.json().get("ip", "")
+                return txt
+        except Exception:
+            continue
+    return ""
+
+
+def _parse_signed_num(raw):
+    if raw is None:
+        return None
+    s = str(raw).strip().replace(",", "")
+    if not s:
+        return None
+    # 키움 API가 '--1234' 또는 '+-1234' 형태로 부호를 중복 반환하는 경우 정규화
+    neg = s.count("-") > 0
+    s_clean = re.sub(r"[^0-9.]", "", s)
+    if not s_clean:
+        return None
+    try:
+        val = float(s_clean)
+        return -val if neg else val
+    except Exception:
+        return None
+
+
+def _parse_abs_num(raw):
+    v = _parse_signed_num(raw)
+    return abs(v) if v is not None else None
+
+
+def get_kiwoom_token(appkey, secretkey, env_mode="prod", force_refresh=False):
+    """키움 REST API OAuth2 접근토큰 발급 (au10001) + 로컬 캐시"""
+    base_url = get_base_url(env_mode)
+    now = datetime.now()
+
+    if not force_refresh and os.path.isfile(TOKEN_CACHE_PATH):
+        try:
+            with open(TOKEN_CACHE_PATH, "r", encoding="utf-8") as f:
+                cached = json.load(f)
+            if (
+                cached.get("env") == env_mode
+                and cached.get("appkey_tail") == appkey[-6:]
+                and cached.get("token")
+                and cached.get("expires_at")
+            ):
+                exp = datetime.strptime(cached["expires_at"], "%Y-%m-%d %H:%M:%S")
+                if exp > now + timedelta(minutes=10):
+                    return cached["token"]
+        except Exception:
+            pass
+
+    url = f"{base_url}/oauth2/token"
+    headers = {
+        "Content-Type": "application/json;charset=UTF-8",
+        "api-id": "au10001",
+    }
+    payload = {
+        "grant_type": "client_credentials",
+        "appkey": appkey,
+        "secretkey": secretkey,
+    }
+    resp = requests.post(url, headers=headers, json=payload, timeout=15)
+    try:
+        data = resp.json()
+    except Exception:
+        raise RuntimeError(f"토큰 응답 파싱 실패 (HTTP {resp.status_code}): {resp.text[:300]}")
+
+    token = data.get("token") or data.get("access_token")
+    if not token:
+        msg = data.get("return_msg") or data.get("msg") or str(data)
+        raise RuntimeError(
+            f"키움 토큰 발급 실패 (HTTP {resp.status_code}, code={data.get('return_code')}): {msg}\n"
+            "  ※ openapi.kiwoom.com 에서 현재 PC 공인 IP가 등록되었는지, AppKey/SecretKey가 정확한지 확인해 주세요."
+        )
+
+    # 만료 시각 파싱 (예: '20261127083000' 또는 기본 12시간)
+    exp_dt = now + timedelta(hours=12)
+    raw_exp = str(data.get("expires_dt") or "").strip()
+    if re.fullmatch(r"\d{14}", raw_exp):
+        try:
+            exp_dt = datetime.strptime(raw_exp, "%Y%m%d%H%M%S")
+        except Exception:
+            pass
+
+    try:
+        with open(TOKEN_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "env": env_mode,
+                    "appkey_tail": appkey[-6:],
+                    "token": token,
+                    "expires_at": exp_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                },
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+    except Exception:
+        pass
+
+    return token
+
+
+def fetch_ka10058(token, start_dt, end_dt, invsr_tp, trde_tp, mrkt_tp, env_mode="prod", stex_tp="3"):
+    """
+    키움 REST API ka10058 (투자자별일별매매종목요청) 호출
+    - start_dt, end_dt: 'YYYYMMDD'
+    - trde_tp: '2' (순매수), '1' (순매도)
+    - mrkt_tp: '001' (코스피), '101' (코스닥)
+    - invsr_tp: '9000' (외국인), '6000' (연기금), '3100' (사모펀드)
+    - stex_tp: '3' (통합), '1' (KRX)
+    """
+    base_url = get_base_url(env_mode)
+    url = f"{base_url}/api/dostk/stkinfo"
+    headers = {
+        "Content-Type": "application/json;charset=UTF-8",
+        "authorization": f"Bearer {token}",
+        "api-id": "ka10058",
+        "cont-yn": "N",
+        "next-key": "",
+    }
+    body = {
+        "strt_dt": start_dt,
+        "end_dt": end_dt,
+        "trde_tp": str(trde_tp),
+        "mrkt_tp": str(mrkt_tp),
+        "invsr_tp": str(invsr_tp),
+        "stex_tp": str(stex_tp),
+    }
+
+    resp = requests.post(url, headers=headers, json=body, timeout=15)
+    try:
+        data = resp.json()
+    except Exception:
+        raise RuntimeError(f"ka10058 응답 파싱 실패 (HTTP {resp.status_code}): {resp.text[:300]}")
+
+    ret_code = data.get("return_code")
+    if ret_code not in (None, 0, "0"):
+        raise RuntimeError(f"ka10058 오류 (code={ret_code}): {data.get('return_msg') or data}")
+
+    # 응답 리스트 키 탐색 (기본: invsr_daly_trde_stk)
+    items = data.get("invsr_daly_trde_stk")
+    if not isinstance(items, list):
+        items = next((v for v in data.values() if isinstance(v, list)), [])
+
+    mkt_label = "KOSPI" if str(mrkt_tp) == "001" else "KOSDAQ"
+    parsed = []
+    for row in items:
+        if not isinstance(row, dict):
+            continue
+        raw_cd = str(row.get("stk_cd") or row.get("isu_cd") or "").strip()
+        # 키움 종목코드 접두사 'A' 또는 '_AL' 등 제거
+        m_cd = re.search(r"(\d{6})", raw_cd)
+        if not m_cd:
+            continue
+        code = m_cd.group(1)
+        name = str(row.get("stk_nm") or "").strip()
+        if not name:
+            continue
+
+        # 순매매금액 (ka10058 기본 단위: 백만원 -> 억원 변환: ÷ 100)
+        raw_amt = (
+            row.get("netslmt_amt")
+            or row.get("netprps_amt")
+            or row.get("net_amt")
+            or row.get("trde_amt")
+        )
+        raw_qty = (
+            row.get("netslmt_qty")
+            or row.get("netprps_qty")
+            or row.get("net_qty")
+        )
+        amt_mil = _parse_signed_num(raw_amt)
+        qty_val = _parse_signed_num(raw_qty)
+        avg_prc = _parse_abs_num(row.get("prsm_avg_pric"))
+        cur_prc = _parse_abs_num(row.get("cur_prc"))
+        flu_rt = _parse_signed_num(row.get("flu_rt"))
+
+        # trde_tp='2'(순매수)는 양수, '1'(순매도)는 음수로 부호 일관화
+        if amt_mil is not None:
+            amt_eok = round(abs(amt_mil) / 100.0, 1)
+            amt_eok = amt_eok if str(trde_tp) == "2" else -amt_eok
+        else:
+            amt_eok = 0.0
+
+        if qty_val is not None:
+            qty_int = int(round(abs(qty_val)))
+            qty_int = qty_int if str(trde_tp) == "2" else -qty_int
+        else:
+            qty_int = 0
+
+        if amt_eok == 0.0 and qty_int == 0:
+            continue
+
+        parsed.append(
+            {
+                "code": code,
+                "name": name,
+                "market": mkt_label,
+                "netAmt": amt_eok,       # 단위: 억원 (+순매수 / -순매도)
+                "netQty": qty_int,       # 단위: 주
+                "avgPrice": int(round(avg_prc)) if avg_prc is not None else None,
+                "price": int(round(cur_prc)) if cur_prc is not None else None,
+                "chgPct": round(flu_rt, 2) if flu_rt is not None else None,
+            }
+        )
+
+    # 금액 절대값 기준 상위 정렬
+    parsed.sort(key=lambda x: (abs(x["netAmt"]), abs(x["netQty"])), reverse=True)
+    return parsed
+
+
+def collect_period_snapshot(token, start_dt, end_dt, env_mode="prod", top_n=TOP_N_PER_SIDE):
+    """지정 기간(start_dt~end_dt, YYYYMMDD)에 대해 외국인·연기금·사모펀드의 KOSPI/KOSDAQ 순매수·순매도 수집"""
+    s_fmt = f"{start_dt[:4]}-{start_dt[4:6]}-{start_dt[6:8]}"
+    e_fmt = f"{end_dt[:4]}-{end_dt[4:6]}-{end_dt[6:8]}"
+    investors_out = {}
+
+    for inv_key, inv_label, inv_code in INVESTORS:
+        buy_merged = []
+        sell_merged = []
+        for mkt_name, mkt_code in MARKETS:
+            try:
+                rows_buy = fetch_ka10058(token, start_dt, end_dt, inv_code, "2", mkt_code, env_mode=env_mode)
+                buy_merged.extend(rows_buy[:top_n])
+            except Exception as e:
+                print(f"  [경고] {inv_label} {mkt_name} 순매수 조회 실패: {e}")
+            time.sleep(0.35)
+
+            try:
+                rows_sell = fetch_ka10058(token, start_dt, end_dt, inv_code, "1", mkt_code, env_mode=env_mode)
+                sell_merged.extend(rows_sell[:top_n])
+            except Exception as e:
+                print(f"  [경고] {inv_label} {mkt_name} 순매도 조회 실패: {e}")
+            time.sleep(0.35)
+
+        # 종목코드 중복 제거 후 금액순 정렬 (코스피/코스닥 각각 최대 top_n개 유지 가능하도록 합산 최대 top_n*2)
+        def _dedup_sort(lst, is_buy):
+            by_code = {}
+            for it in lst:
+                cd = it["code"]
+                if cd not in by_code or abs(it["netAmt"]) > abs(by_code[cd]["netAmt"]):
+                    by_code[cd] = it
+            res = list(by_code.values())
+            res.sort(key=lambda x: x["netAmt"], reverse=is_buy)
+            return res[: top_n * 2]
+
+        investors_out[inv_key] = {
+            "label": inv_label,
+            "buy": _dedup_sort(buy_merged, True),
+            "sell": _dedup_sort(sell_merged, False),
+        }
+        print(
+            f"  - [{inv_label}] ({s_fmt}~{e_fmt}) 순매수 {len(investors_out[inv_key]['buy'])}건 / "
+            f"순매도 {len(investors_out[inv_key]['sell'])}건"
+        )
+
+    return {
+        "startDate": s_fmt,
+        "endDate": e_fmt,
+        "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "investors": investors_out,
+    }
+
+
+def load_investor_flow(here=HERE):
+    p = os.path.join(here, "investor_flow.json")
+    if os.path.isfile(p):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data.setdefault("byDate", {})
+                data.setdefault("byWeek", {})
+                data["dates"] = sorted(data["byDate"].keys(), reverse=True)
+                data["weeks"] = sorted(data["byWeek"].keys(), reverse=True)
+                return data
+        except Exception:
+            pass
+    return {
+        "updatedAt": "",
+        "latestDate": "",
+        "latestWeek": "",
+        "dates": [],
+        "weeks": [],
+        "byDate": {},
+        "byWeek": {},
+    }
+
+
+def _resolve_trading_date(raw_yyyymmdd=None):
+    if raw_yyyymmdd and re.fullmatch(r"\d{8}", str(raw_yyyymmdd)):
+        dt = datetime.strptime(str(raw_yyyymmdd), "%Y%m%d")
+    else:
+        dt = datetime.now()
+        # 주말 실행 시 직전 금요일로 보정
+        if dt.weekday() == 5:
+            dt -= timedelta(days=1)
+        elif dt.weekday() == 6:
+            dt -= timedelta(days=2)
+    return dt
+
+
+def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
+    cfg = load_env(os.path.join(here, ".env"))
+    appkey = cfg.get("KIWOOM_APPKEY", "")
+    secretkey = cfg.get("KIWOOM_SECRETKEY", "")
+    env_mode = cfg.get("KIWOOM_ENV", "prod")
+
+    if not appkey or not secretkey or "여기에_" in appkey or "여기에_" in secretkey:
+        raise RuntimeError(
+            "키움 REST API 키가 설정되지 않았습니다.\n"
+            f"  1) '{os.path.join(here, '.env.example')}' 파일을 복사해 '.env' 로 저장하세요.\n"
+            "  2) KIWOOM_APPKEY / KIWOOM_SECRETKEY 값을 입력한 뒤 다시 실행해 주세요."
+        )
+
+    dt = _resolve_trading_date(target_yyyymmdd)
+    ymd = dt.strftime("%Y%m%d")
+    ymd_dash = dt.strftime("%Y-%m-%d")
+    is_friday = (dt.weekday() == 4)
+
+    print(f"\n{'='*80}")
+    print(f" ▶ 키움 REST API 투자자 수급 수집 시작 ({ymd_dash}, env={env_mode})")
+    print(f"{'='*80}")
+
+    token = get_kiwoom_token(appkey, secretkey, env_mode=env_mode)
+    store = load_investor_flow(here)
+
+    # 1) 일간 수급 수집 (당일 장마감 확정치)
+    print(f"[1/2] 일간 수급 집계 ({ymd_dash})...")
+    daily_snap = collect_period_snapshot(token, ymd, ymd, env_mode=env_mode)
+    has_daily = any(
+        len(v.get("buy") or []) + len(v.get("sell") or []) > 0
+        for v in daily_snap["investors"].values()
+    )
+    if has_daily:
+        store["byDate"][ymd_dash] = daily_snap
+    else:
+        print(f"  [알림] {ymd_dash} 일간 수급 데이터가 비어 있습니다(휴장일 또는 장마감 집계 전일 수 있음).")
+
+    # 2) 주간 수급 수집 (매주 월~오늘 누적, 금요일에는 1주 전체 확정 집계!)
+    if include_week:
+        mon_dt = dt - timedelta(days=dt.weekday())
+        mon_ymd = mon_dt.strftime("%Y%m%d")
+        mon_dash = mon_dt.strftime("%Y-%m-%d")
+        week_tag = "금요일 주간 확정" if is_friday else "이번주 누적(진행중)"
+        print(f"[2/2] 주간 수급 집계 ({mon_dash} ~ {ymd_dash} · {week_tag})...")
+        weekly_snap = collect_period_snapshot(token, mon_ymd, ymd, env_mode=env_mode)
+        weekly_snap["isFinalWeek"] = is_friday
+        weekly_snap["weekLabel"] = f"{mon_dash} ~ {ymd_dash}" + (" (주간 확정)" if is_friday else " (진행중)")
+        has_weekly = any(
+            len(v.get("buy") or []) + len(v.get("sell") or []) > 0
+            for v in weekly_snap["investors"].values()
+        )
+        if has_weekly:
+            # 같은 주(월요일 시작일 기준) 키로 덮어써서 금요일에 주간 확정치로 완성
+            store["byWeek"][mon_dash] = weekly_snap
+
+    # 보관 기간 정리 (일간 최대 60일, 주간 최대 12주)
+    cutoff_d = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime("%Y-%m-%d")
+    store["byDate"] = {
+        k: v for k, v in sorted(store["byDate"].items(), reverse=True)
+        if k >= cutoff_d
+    }
+    week_keys = sorted(store["byWeek"].keys(), reverse=True)[:RETENTION_WEEKS]
+    store["byWeek"] = {k: store["byWeek"][k] for k in week_keys}
+
+    store["dates"] = sorted(store["byDate"].keys(), reverse=True)
+    store["weeks"] = sorted(store["byWeek"].keys(), reverse=True)
+    store["latestDate"] = store["dates"][0] if store["dates"] else ""
+    store["latestWeek"] = store["weeks"][0] if store["weeks"] else ""
+    store["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    with open(os.path.join(here, "investor_flow.json"), "w", encoding="utf-8") as f:
+        json.dump(store, f, ensure_ascii=False, indent=2)
+
+    print(
+        f" ★ 키움 수급 저장 완료: 일간 {len(store['dates'])}일 / 주간 {len(store['weeks'])}주 "
+        f"(최신일: {store['latestDate'] or '-'})"
+    )
+    print(f"{'='*80}")
+    return store
+
+
+def run_test():
+    ip = get_public_ip()
+    print(f"[현재 PC 공인 IP] {ip or '확인 실패'}")
+    cfg = load_env()
+    appkey = cfg.get("KIWOOM_APPKEY", "")
+    secretkey = cfg.get("KIWOOM_SECRETKEY", "")
+    env_mode = cfg.get("KIWOOM_ENV", "prod")
+    if not appkey or not secretkey or "여기에_" in appkey:
+        print("[안내] .env 파일에 KIWOOM_APPKEY / KIWOOM_SECRETKEY 를 먼저 입력해 주세요.")
+        return 1
+
+    print(f"[1/2] 키움 토큰 발급 테스트 (env={env_mode})...")
+    token = get_kiwoom_token(appkey, secretkey, env_mode=env_mode, force_refresh=True)
+    print(f"  ✓ 토큰 발급 성공! (앞 12자리: {token[:12]}...)")
+
+    dt = _resolve_trading_date()
+    ymd = dt.strftime("%Y%m%d")
+    print(f"[2/2] ka10058 외국인 코스피 순매수 샘플 조회 ({ymd})...")
+    rows = fetch_ka10058(token, ymd, ymd, "9000", "2", "001", env_mode=env_mode)
+    print(f"  ✓ 수신 건수: {len(rows)}건")
+    for idx, r in enumerate(rows[:5], 1):
+        print(
+            f"   {idx}. {r['name']}({r['code']}) | 순매수 {r['netAmt']:+.1f}억 ({r['netQty']:+,}주) | "
+            f"현재가 {r['price']} ({r['chgPct']}%) | 추정평균가 {r['avgPrice']}"
+        )
+    return 0
+
+
+def main():
+    args = sys.argv[1:]
+    if any(a.lower() in ("--myip", "myip") for a in args):
+        ip = get_public_ip()
+        print(f"현재 PC 공인 IP: {ip or '확인 실패'}")
+        print("→ 키움 REST API 포털(https://openapi.kiwoom.com) 마이페이지에 위 IP를 등록하세요.")
+        return
+
+    if any(a.lower() in ("--test", "test") for a in args):
+        sys.exit(run_test())
+
+    skip_push = any(a.lower() == "--no-push" for a in args)
+    target_date = None
+    for i, a in enumerate(args):
+        if a.lower() == "--date" and i + 1 < len(args):
+            target_date = args[i + 1].replace("-", "")
+
+    update_investor_flow(HERE, target_yyyymmdd=target_date, include_week=True)
+
+    # 웹 대시보드(index.html) 최신화 + GitHub 자동 업로드
+    sys.path.insert(0, HERE)
+    import kospi200_yoy as screener
+
+    screener.build_web_dashboard(HERE)
+    if not skip_push:
+        screener.auto_push_to_github(
+            HERE,
+            commit_msg=f"Auto-update Kiwoom investor flow ({datetime.now().strftime('%Y-%m-%d %H:%M')})",
+        )
+
+
+if __name__ == "__main__":
+    main()

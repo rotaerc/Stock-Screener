@@ -11,3 +11,8 @@ __pycache__/
 *.csv
 *.pyc
 깃허브_업로드.bat
+.env
+kiwoom_token_cache.json
+kiwoom_flow.log
+키움수급_수동실행.bat
+수급_자동실행_등록.bat
