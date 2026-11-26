@@ -2677,6 +2677,10 @@ def build_web_dashboard(here):
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KOSPI · KOSDAQ 200 영업이익 성장·수익성 스크리너</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon.png?v=1" />
+  <link rel="shortcut icon" href="favicon.ico?v=1" />
+  <link rel="apple-touch-icon" href="favicon.png?v=1" />
   <style>
     :root {{
       --bg: #f4f6fb;
@@ -6321,6 +6325,9 @@ def auto_push_to_github(here, commit_msg=None):
             "op_estimate_history.json",
             "op_baseline.json",
             "investor_flow.json",
+            "favicon.svg",
+            "favicon.png",
+            "favicon.ico",
             "requirements.txt",
             "kospi_top200_latest.xlsx",
             "kosdaq_top200_latest.xlsx",
