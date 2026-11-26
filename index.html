@@ -1202,6 +1202,195 @@
     @media (max-width: 960px) {
       .flow-insight-grid { grid-template-columns: 1fr; }
     }
+    .home-view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .home-view.active { display: flex; }
+    .home-body-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .home-split-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .home-mkt-card {
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-top: 3px solid var(--kospi);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .home-mkt-card.kq { border-top-color: var(--kosdaq); }
+    .home-mkt-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .home-mkt-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .home-net-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .home-net-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .home-net-pill.up { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    .home-net-pill.down { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .home-mkt-lead {
+      font-size: 12.2px;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 7px 10px;
+    }
+    .home-mkt-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .home-mkt-foot {
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px dashed #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .home-sec-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .home-sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .home-sec-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .home-sec-summary {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #1e293b;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 9px 12px;
+    }
+    .home-sec-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .home-sec-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 120px;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .home-sec-name {
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .home-sec-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .home-sec-track {
+      height: 10px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+    }
+    .home-sec-fill-kp { background: #2563eb; height: 100%; }
+    .home-sec-fill-kq { background: #10b981; height: 100%; }
+    .home-sec-stocks {
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.35;
+    }
+    .home-sec-stat {
+      text-align: right;
+      font-weight: 800;
+      color: #dc2626;
+      white-space: nowrap;
+    }
+    .home-both-badge {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+    .home-top15-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 1100px) {
+      .home-split-grid, .home-top15-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .home-sec-row { grid-template-columns: 1fr; gap: 4px; }
+      .home-sec-stat { text-align: left; }
+    }
     .flow-mkt-tag {
       display: inline-block;
       font-size: 9.5px;
@@ -1279,7 +1468,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="좌측 메뉴 접기/펼치기">☰</button>
-      <div class="brand-logo" onclick="selectMarket('KOSPI')">
+      <div class="brand-logo" onclick="selectHomeView()" title="수급 브리핑 메인 화면으로 이동">
         <span class="brand-dot">📊</span>
         <span>STOCK SCREENER</span>
       </div>
@@ -1430,6 +1619,33 @@
       </div>
     </div>
 
+    <div class="home-view" id="homeView">
+      <div class="controls-panel" style="margin-bottom:10px;">
+        <div class="filter-left">
+          <div class="flow-mode-group">
+            <button class="flow-mode-btn active" id="btnHomeDaily" onclick="selectHomeView('DAILY')">📅 일간 브리핑 (1개월)</button>
+            <button class="flow-mode-btn" id="btnHomeWeekly" onclick="selectHomeView('WEEKLY')">📆 주간 브리핑 (3개월)</button>
+          </div>
+          <div style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:3px 6px; border-radius:8px; border:1px solid #bfdbfe;">
+            <button class="pg-btn" id="btnPrevHomePeriod" onclick="stepHomePeriod(1)" title="이전 날짜/주">◀</button>
+            <select id="homePeriodSelect" class="select-box" style="font-weight:800; color:#1e3a8a; border-color:#93c5fd;" onchange="onHomePeriodChange()"></select>
+            <button class="pg-btn" id="btnNextHomePeriod" onclick="stepHomePeriod(-1)" title="다음 날짜/주">▶</button>
+          </div>
+        </div>
+        <div class="group-right">
+          <button class="rep-btn scr" onclick="selectFlowView(currentFlowMode)">🏦 수급 상세표</button>
+          <button class="rep-btn" onclick="selectMarketAndSheet('KOSPI', '1_전체')">📊 KOSPI 200</button>
+          <button class="rep-btn" onclick="selectMarketAndSheet('KOSDAQ', '1_전체')">🚀 KOSDAQ 200</button>
+          <button class="rep-btn" onclick="selectReportsView('', '')">📰 오늘의 리포트</button>
+        </div>
+      </div>
+      <div class="home-body-wrap" id="homeBodyWrap">
+        <div class="home-split-grid" id="homeMarketSplit"></div>
+        <div id="homeSectorPanel"></div>
+        <div class="home-top15-grid" id="homeTop15Grid"></div>
+      </div>
+    </div>
+
     <div class="flow-view" id="flowView">
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
@@ -1517,22 +1733,39 @@
       const rateIdx = cols.indexOf('오늘등락율(%)');
       const passIdx = cols.indexOf('통과');
       const seqIdx = cols.indexOf('연속이익성장(연간+분기)');
+      const sec1Idx = cols.indexOf('섹터1');
+      const sec2Idx = cols.indexOf('섹터2');
       const allSheet = d.sheets[0];
       if (!allSheet) return;
       allSheet.rows.forEach(r => {
         const cd = String(r.v[0] || '');
         if (!cd) return;
         const hasUp = r.t ? Object.values(r.t).some(v => String(v).startsWith('up')) : false;
+        const s1 = sec1Idx >= 0 ? String(r.v[sec1Idx] || '').trim() : '';
+        const s2 = sec2Idx >= 0 ? String(r.v[sec2Idx] || '').trim() : '';
         STOCK_LOOKUP[cd] = {
           market: mkt,
           price: priceIdx >= 0 ? r.v[priceIdx] : null,
           rate: rateIdx >= 0 ? r.v[rateIdx] : null,
           passed: passIdx >= 0 ? !!r.v[passIdx] : false,
           seqGrowth: seqIdx >= 0 ? !!r.v[seqIdx] : false,
-          hasEstUp: hasUp
+          hasEstUp: hasUp,
+          sector1: s1,
+          sector2: s2,
+          sector: s2 || s1 || ''
         };
       });
     });
+
+    function getStockSector(code) {
+      const cd = String(code || '').trim();
+      if (!cd) return '기타';
+      if (STOCK_LOOKUP[cd] && STOCK_LOOKUP[cd].sector) return STOCK_LOOKUP[cd].sector;
+      // 우선주(예: 005935 삼성전자우)는 보통주(005930) 섹터 자동 상속
+      const baseCd = cd.slice(0, 5) + '0';
+      if (STOCK_LOOKUP[baseCd] && STOCK_LOOKUP[baseCd].sector) return STOCK_LOOKUP[baseCd].sector;
+      return '기타';
+    }
 
     const SHEET_LABELS = {
       "1_전체": "1_전체 (시총순)",
@@ -1556,19 +1789,17 @@
       }
       renderDownloadButtons();
       renderTopDateChip();
-      renderSidebar();
-      selectMarket(currentMarket);
+      initReportsFilters();
+      initFlowControls();
 
       document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; renderTableBody(); });
       document.getElementById('sectorSelect').addEventListener('change', () => { currentPage = 1; renderTableBody(); });
       document.getElementById('toneSelect').addEventListener('change', () => { currentPage = 1; renderTableBody(); });
 
-      initReportsFilters();
       document.getElementById('repSearchInput').addEventListener('input', renderReportsGrid);
       document.getElementById('repBrokerSelect').addEventListener('change', renderReportsGrid);
       document.getElementById('repChangeSelect').addEventListener('change', () => { renderSidebar(); renderReportsGrid(); });
 
-      initFlowControls();
       document.getElementById('flowSearchInput').addEventListener('input', renderFlowView);
       document.getElementById('flowSideSelect').addEventListener('change', renderFlowView);
       document.getElementById('flowSortSelect').addEventListener('change', renderFlowView);
@@ -1576,6 +1807,14 @@
       document.getElementById('globalSearchInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleGlobalSearch(e.target.value);
       });
+
+      const hasFlowData = FLOW_DATA && ((FLOW_DATA.dates && FLOW_DATA.dates.length > 0) || (FLOW_DATA.weeks && FLOW_DATA.weeks.length > 0));
+      if (hasFlowData) {
+        selectHomeView('DAILY');
+      } else {
+        renderSidebar();
+        selectMarket(currentMarket);
+      }
     }
 
     function toggleSidebar() {
@@ -1777,6 +2016,22 @@
 
       nav.innerHTML = `
         <div class="nav-section">
+          <div class="nav-section-title">수급 동향 (키움)</div>
+          <button class="nav-item ${currentViewMode === 'HOME' ? 'active' : ''}" onclick="selectHomeView(currentFlowMode)">
+            <span class="nav-item-left"><span>🧠</span><span>수급 브리핑 (메인)</span></span>
+            <span class="nav-badge" style="background:#dbeafe; color:#1d4ed8;">HOME</span>
+          </button>
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' ? 'active' : ''}" onclick="selectFlowView('DAILY')">
+            <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
+            <span class="nav-badge">${(FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates.length : 0}일</span>
+          </button>
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY')">
+            <span class="nav-item-left"><span>📆</span><span>주간 수급 (3개월)</span></span>
+            <span class="nav-badge">${(FLOW_DATA && FLOW_DATA.weeks) ? FLOW_DATA.weeks.length : 0}주</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
           <div class="nav-section-title">한국 스크리너</div>
           ${mktItems}
         </div>
@@ -1807,18 +2062,6 @@
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
-          <div class="nav-section-title">수급 동향 (키움)</div>
-          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' ? 'active' : ''}" onclick="selectFlowView('DAILY')">
-            <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
-            <span class="nav-badge">${(FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates.length : 0}일</span>
-          </button>
-          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY')">
-            <span class="nav-item-left"><span>📆</span><span>주간 수급 (1주 집계)</span></span>
-            <span class="nav-badge">${(FLOW_DATA && FLOW_DATA.weeks) ? FLOW_DATA.weeks.length : 0}주</span>
-          </button>
-        </div>
-        <div class="nav-divider"></div>
-        <div class="nav-section">
           <div class="nav-section-title">다운로드 · 원문</div>
           ${dlLinks}
           <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
@@ -1840,6 +2083,7 @@
     function setScreenerVisibility(showScreener) {
       const showRep = (!showScreener && currentViewMode === 'REPORTS');
       const showFlow = (!showScreener && currentViewMode === 'FLOW');
+      const showHome = (!showScreener && currentViewMode === 'HOME');
       document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
@@ -1847,6 +2091,8 @@
       document.getElementById('reportsView').classList.toggle('active', showRep);
       const fv = document.getElementById('flowView');
       if (fv) fv.classList.toggle('active', showFlow);
+      const hv = document.getElementById('homeView');
+      if (hv) hv.classList.toggle('active', showHome);
     }
 
     let currentFlowMode = 'DAILY';
@@ -1874,11 +2120,11 @@
     }
 
     function refreshFlowPeriodSelect() {
-      const sel = document.getElementById('flowPeriodSelect');
-      if (!sel) return;
       const keys = getFlowKeys(currentFlowMode);
+      const sels = [document.getElementById('flowPeriodSelect'), document.getElementById('homePeriodSelect')].filter(Boolean);
+      if (!sels.length) return;
       if (!keys.length) {
-        sel.innerHTML = `<option value="">데이터 없음</option>`;
+        sels.forEach(s => { s.innerHTML = `<option value="">데이터 없음</option>`; });
         currentFlowKey = '';
         updateFlowPeriodNavButtons();
         return;
@@ -1887,7 +2133,7 @@
         currentFlowKey = keys[0];
       }
       const bucket = currentFlowMode === 'WEEKLY' ? (FLOW_DATA.byWeek || {}) : (FLOW_DATA.byDate || {});
-      sel.innerHTML = keys.map((k, idx) => {
+      const optsHtml = keys.map((k, idx) => {
         const snap = bucket[k] || {};
         let label = k;
         if (currentFlowMode === 'WEEKLY') {
@@ -1897,18 +2143,26 @@
         }
         return `<option value="${k}">${escapeHtml(label)}</option>`;
       }).join('');
-      sel.value = currentFlowKey;
+      sels.forEach(s => {
+        s.innerHTML = optsHtml;
+        s.value = currentFlowKey;
+      });
       updateFlowPeriodNavButtons();
     }
 
     function updateFlowPeriodNavButtons() {
-      const btnPrev = document.getElementById('btnPrevFlowPeriod');
-      const btnNext = document.getElementById('btnNextFlowPeriod');
-      if (!btnPrev || !btnNext) return;
       const keys = getFlowKeys(currentFlowMode);
       const idx = keys.indexOf(currentFlowKey);
-      btnPrev.disabled = (idx < 0 || idx >= keys.length - 1);
-      btnNext.disabled = (idx <= 0);
+      const prevDis = (idx < 0 || idx >= keys.length - 1);
+      const nextDis = (idx <= 0);
+      ['btnPrevFlowPeriod', 'btnPrevHomePeriod'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = prevDis;
+      });
+      ['btnNextFlowPeriod', 'btnNextHomePeriod'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = nextDis;
+      });
     }
 
     function stepFlowPeriod(delta) {
@@ -1917,10 +2171,358 @@
       const nextIdx = idx + delta;
       if (nextIdx >= 0 && nextIdx < keys.length) {
         currentFlowKey = keys[nextIdx];
-        document.getElementById('flowPeriodSelect').value = currentFlowKey;
+        const fs = document.getElementById('flowPeriodSelect');
+        const hs = document.getElementById('homePeriodSelect');
+        if (fs) fs.value = currentFlowKey;
+        if (hs) hs.value = currentFlowKey;
         updateFlowPeriodNavButtons();
-        renderFlowView();
+        if (currentViewMode === 'HOME') renderHomeView();
+        else renderFlowView();
       }
+    }
+
+    function stepHomePeriod(delta) { stepFlowPeriod(delta); }
+
+    function onHomePeriodChange() {
+      const hs = document.getElementById('homePeriodSelect');
+      currentFlowKey = hs ? (hs.value || '') : '';
+      const fs = document.getElementById('flowPeriodSelect');
+      if (fs) fs.value = currentFlowKey;
+      updateFlowPeriodNavButtons();
+      renderHomeView();
+    }
+
+    function openFlowMarketDetail(mkt) {
+      selectFlowView(currentFlowMode);
+      setFlowMarket(mkt);
+    }
+
+    function selectHomeView(mode = null) {
+      closeMobileNav();
+      currentViewMode = 'HOME';
+      if (mode === 'DAILY' || mode === 'WEEKLY') {
+        currentFlowMode = mode;
+      }
+      setScreenerVisibility(false);
+      const bd = document.getElementById('btnHomeDaily');
+      const bw = document.getElementById('btnHomeWeekly');
+      if (bd) bd.classList.toggle('active', currentFlowMode === 'DAILY');
+      if (bw) bw.classList.toggle('active', currentFlowMode === 'WEEKLY');
+      refreshFlowPeriodSelect();
+      renderSidebar();
+      renderHomeView();
+    }
+
+    function renderHomeView() {
+      const splitBox = document.getElementById('homeMarketSplit');
+      const sectorPanel = document.getElementById('homeSectorPanel');
+      const top15Box = document.getElementById('homeTop15Grid');
+      const bucket = currentFlowMode === 'WEEKLY' ? ((FLOW_DATA && FLOW_DATA.byWeek) || {}) : ((FLOW_DATA && FLOW_DATA.byDate) || {});
+      const snap = currentFlowKey ? bucket[currentFlowKey] : null;
+      const periodTxt = snap
+        ? (currentFlowMode === 'WEEKLY' ? (snap.weekLabel || `${snap.startDate} ~ ${snap.endDate}`) : `${snap.startDate} 기준`)
+        : '수급 데이터 대기중';
+
+      document.getElementById('pageTitle').textContent = `수급 브리핑 · KOSPI / KOSDAQ 분리 해석`;
+      document.getElementById('pageSubtitle').textContent = `키움 REST API (외국인·연기금·사모펀드 · 시총 3천억↑ · ETF 제외) · ${periodTxt}`;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">🧠 ${currentFlowMode === 'WEEKLY' ? '주간 브리핑' : '일간 브리핑'}</span>
+        <span class="meta-pill">📅 ${periodTxt}</span>
+        <span class="meta-pill">🕒 업데이트: ${(FLOW_DATA && FLOW_DATA.updatedAt) || '-'}</span>
+        <span class="meta-pill clickable" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" onclick="selectFlowView(currentFlowMode)">🏦 수급 상세표 보기 →</span>
+      `;
+
+      if (!snap || !snap.investors) {
+        splitBox.innerHTML = `<div class="flow-empty-guide" style="grid-column:1/-1;"><h3>🏦 키움 수급 데이터가 아직 없습니다</h3><p>키움 수급 수집 후 이 메인 화면에 코스피·코스닥 분리 수급 해석과 양 시장 주요 15종목 섹터 자금 흐름이 자동으로 표시됩니다.</p></div>`;
+        sectorPanel.innerHTML = '';
+        top15Box.innerHTML = '';
+        return;
+      }
+
+      const mcapMap = (FLOW_DATA && FLOW_DATA.marketCaps) ? FLOW_DATA.marketCaps : {};
+      const MIN_FLOW_MCAP = 3000;
+      const unit = currentFlowMode === 'DAILY' ? '일' : '주';
+      const allKeys = getFlowKeys(currentFlowMode);
+      const curIdx = allKeys.indexOf(currentFlowKey);
+      const invMeta = [
+        { key: 'foreign', label: '외국인', short: '외인' },
+        { key: 'pension', label: '연기금', short: '연기금' },
+        { key: 'private', label: '사모펀드', short: '사모' },
+      ];
+      const fmtEok = (v) => `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString('ko-KR')}억`;
+      const jumpAttr = (cd) => {
+        const info = STOCK_LOOKUP[cd];
+        return info ? `onclick="jumpToStockInScreener('${cd}', '${info.market}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${cd}','_blank')"`;
+      };
+      const getMcapPct = (cd, amt) => {
+        const mc = Number(mcapMap[cd]);
+        return (mc && mc > 0) ? ((Number(amt) || 0) / mc * 100.0) : null;
+      };
+      const getStreak = (invKey, isBuy, code) => {
+        const sideKey = isBuy ? 'buy' : 'sell';
+        let st = 0;
+        if (curIdx >= 0) {
+          for (let i = curIdx; i < allKeys.length; i++) {
+            const s = bucket[allKeys[i]];
+            const arr = (s && s.investors && s.investors[invKey]) ? (s.investors[invKey][sideKey] || []) : [];
+            if (arr.some(x => x.code === code)) st += 1;
+            else break;
+          }
+        }
+        return Math.max(1, st);
+      };
+
+      // 시장별 독립 분석 함수 (KOSPI / KOSDAQ 시총 규모 차이를 반영해 완전히 분리 분석)
+      const analyzeMarket = (mkt) => {
+        const buyByCode = {};
+        const sellByCode = {};
+        const netByInv = {};
+        const streakBuys = [];
+
+        invMeta.forEach(im => {
+          const invObj = snap.investors[im.key] || {};
+          const bRows = (invObj.buy || []).filter(r => r.market === mkt && Number(mcapMap[r.code]) > MIN_FLOW_MCAP);
+          const sRows = (invObj.sell || []).filter(r => r.market === mkt && Number(mcapMap[r.code]) > MIN_FLOW_MCAP);
+          const bSum = bRows.reduce((a, r) => a + (Number(r.netAmt) || 0), 0);
+          const sSum = sRows.reduce((a, r) => a + (Number(r.netAmt) || 0), 0);
+          netByInv[im.key] = { buy: bSum, sell: sSum, net: bSum + sSum };
+
+          bRows.forEach(r => {
+            const amt = Number(r.netAmt) || 0;
+            if (!buyByCode[r.code]) {
+              buyByCode[r.code] = { code: r.code, name: r.name, market: mkt, sector: getStockSector(r.code), who: [], total: 0, maxStreak: 1 };
+            }
+            buyByCode[r.code].who.push(im.short);
+            buyByCode[r.code].total += amt;
+            const st = getStreak(im.key, true, r.code);
+            if (st > buyByCode[r.code].maxStreak) buyByCode[r.code].maxStreak = st;
+            if (st >= 2) streakBuys.push({ code: r.code, name: r.name, who: im.short, streak: st, amt });
+          });
+
+          sRows.forEach(r => {
+            const amt = Number(r.netAmt) || 0;
+            if (!sellByCode[r.code]) {
+              sellByCode[r.code] = { code: r.code, name: r.name, market: mkt, sector: getStockSector(r.code), who: [], total: 0, maxStreak: 1 };
+            }
+            sellByCode[r.code].who.push(im.short);
+            sellByCode[r.code].total += amt;
+            const st = getStreak(im.key, false, r.code);
+            if (st > sellByCode[r.code].maxStreak) sellByCode[r.code].maxStreak = st;
+          });
+        });
+
+        const top15 = Object.values(buyByCode).sort((a, b) => b.total - a.total).slice(0, 15);
+        const coBuys = Object.values(buyByCode).filter(x => x.who.length >= 2).sort((a, b) => (b.who.length - a.who.length) || (b.total - a.total));
+        const topSells = Object.values(sellByCode).sort((a, b) => a.total - b.total).slice(0, 3);
+
+        streakBuys.sort((a, b) => (b.streak - a.streak) || (b.amt - a.amt));
+        const uniqStreaks = [];
+        const seenSt = new Set();
+        for (const x of streakBuys) {
+          if (seenSt.has(x.code)) continue;
+          seenSt.add(x.code);
+          uniqStreaks.push(x);
+          if (uniqStreaks.length >= 3) break;
+        }
+
+        const fundMatches = Object.values(buyByCode).map(x => {
+          const info = STOCK_LOOKUP[x.code];
+          const oh = OP_HIST_STOCKS[x.code];
+          const tags = [];
+          if (info && info.passed) tags.push('★통과');
+          if (oh && oh.lv >= 1) tags.push('분기OP▲');
+          else if (info && info.hasEstUp) tags.push('이익▲');
+          return tags.length ? { ...x, tags } : null;
+        }).filter(Boolean).sort((a, b) => (b.who.length - a.who.length) || (b.total - a.total)).slice(0, 3);
+
+        const nf = netByInv.foreign.net, np = netByInv.pension.net, npr = netByInv.private.net;
+        const posCnt = [nf > 0, np > 0, npr > 0].filter(Boolean).length;
+        const mktNote = mkt === 'KOSPI' ? '대형주 중심' : '중소형·성장주 중심';
+        let badge = '⚖️ 주체 차별화', bCls = 'mix', lead = '';
+        if (posCnt === 3) {
+          badge = '🔥 3주체 동반 매수'; bCls = 'bull';
+          lead = `${mkt}(${mktNote})에서 외국인·연기금·사모펀드 모두 매수 우위입니다. 3주체 자금이 동시에 유입되는 강한 수급 국면으로 주도 섹터 추세 연장 가능성이 높습니다.`;
+        } else if (nf > 0 && np > 0) {
+          badge = '📈 외인·연기금 동반 유입'; bCls = 'bull';
+          lead = `${mkt}에서 외국인(${fmtEok(nf)})과 연기금(${fmtEok(np)})이 함께 순매수 중입니다. 중기 펀더멘털 중심의 안정적 상승 흐름이 유리합니다.`;
+        } else if (nf < 0 && (np > 0 || npr > 0)) {
+          const whoD = [np > 0 ? '연기금' : '', npr > 0 ? '사모펀드' : ''].filter(Boolean).join('·');
+          badge = '⚖️ 외인 매도 vs 기관 방어'; bCls = 'mix';
+          lead = `${mkt}에서 외국인(${fmtEok(nf)}) 차익실현 물량을 ${whoD}이 받아내는 손바뀜 구간입니다. 기관 매집이 집중된 종목 중심의 선별 접근이 유리합니다.`;
+        } else if (nf > 0 && np <= 0 && npr <= 0) {
+          badge = '🌍 외국인 단독 주도'; bCls = 'mix';
+          lead = `${mkt}에서 국내 기관은 차익실현 중이나 외국인(${fmtEok(nf)})이 단독으로 자금을 밀어 올리고 있습니다. 외인 집중 매수주 중심의 단기 탄력이 돋보입니다.`;
+        } else if (posCnt === 0) {
+          badge = '❄️ 3주체 동반 매도'; bCls = 'bear';
+          lead = `${mkt}에서 3주체 모두 매도 우위입니다. 위험 회피·차익실현 구간이므로 연속 매집이나 실적 교집합 종목만 보수적으로 접근하는 편이 안전합니다.`;
+        } else {
+          badge = '⚖️ 종목별 차별화'; bCls = 'mix';
+          lead = `${mkt}(${mktNote})에서 3주체 방향이 엇갈리는 종목 장세입니다. 동시 매수와 연속 매집이 확인되는 핵심주 중심으로 압축 대응이 유효합니다.`;
+        }
+
+        return { mkt, netByInv, top15, coBuys, uniqStreaks, fundMatches, topSells, badge, bCls, lead };
+      };
+
+      const kp = analyzeMarket('KOSPI');
+      const kq = analyzeMarket('KOSDAQ');
+
+      // 1) 코스피 vs 코스닥 분리 수급 해석 카드 렌더링
+      const renderMarketCard = (a) => {
+        const isKQ = a.mkt === 'KOSDAQ';
+        const icon = isKQ ? '🚀' : '📊';
+        const subLbl = isKQ ? '중소형·성장주 시장' : '대형주 시장';
+        const pillHtml = invMeta.map(im => {
+          const v = a.netByInv[im.key].net;
+          return `<span class="home-net-pill ${v >= 0 ? 'up' : 'down'}">${im.label} ${fmtEok(v)}</span>`;
+        }).join('');
+
+        const coTxt = a.coBuys.length
+          ? a.coBuys.slice(0, 3).map(x => `<span class="flow-ins-link" ${jumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#dc2626;">${fmtEok(x.total)}</b>(${x.who.join('+')})`).join(', ')
+          : (a.top15.slice(0, 3).map(x => `<span class="flow-ins-link" ${jumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#dc2626;">${fmtEok(x.total)}</b>`).join(', ') || '없음');
+
+        const stTxt = a.uniqStreaks.length
+          ? a.uniqStreaks.map(x => `<span class="flow-ins-link" ${jumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#b91c1c;">${x.who} ${x.streak}${unit}연속</b>(${fmtEok(x.amt)})`).join(', ')
+          : `2${unit} 이상 연속 매집 종목 없음`;
+
+        const fnTxt = a.fundMatches.length
+          ? a.fundMatches.map(x => `<span class="flow-ins-link" ${jumpAttr(x.code)}>${escapeHtml(x.name)}</span> <span style="color:#15803d; font-weight:700;">[${x.tags.join('·')}]</span> ${fmtEok(x.total)}`).join(', ')
+          : '스크리너 통과·상향 직접 일치 종목 없음';
+
+        const slTxt = a.topSells.length
+          ? a.topSells.map(x => `<span class="flow-ins-link" ${jumpAttr(x.code)}>${escapeHtml(x.name)}</span> <b style="color:#1d4ed8;">${fmtEok(x.total)}</b>(${x.who.join('+')}${x.maxStreak >= 2 ? ` · ${x.maxStreak}${unit}연속` : ''})`).join(', ')
+          : '특이 매도 없음';
+
+        return `<div class="home-mkt-card ${isKQ ? 'kq' : ''}">
+          <div class="home-mkt-head">
+            <div class="home-mkt-title">${icon} ${a.mkt} 수급 해석 <span style="font-size:11px; color:#64748b; font-weight:600;">(${subLbl})</span></div>
+            <span class="flow-regime-badge ${a.bCls}">${a.badge}</span>
+          </div>
+          <div class="home-net-strip">${pillHtml}</div>
+          <div class="home-mkt-lead">${a.lead}</div>
+          <div class="home-mkt-bullets">
+            <div><b style="color:#9a3412;">🏆 금액·동시매수:</b> ${coTxt}</div>
+            <div><b style="color:#b91c1c;">🔥 연속 매집:</b> ${stTxt}</div>
+            <div><b style="color:#15803d;">💎 실적+수급 일치:</b> ${fnTxt}</div>
+            <div><b style="color:#1e40af;">⚠️ 매도 경계:</b> ${slTxt}</div>
+          </div>
+          <div class="home-mkt-foot">
+            <button class="rep-btn scr" onclick="openFlowMarketDetail('${a.mkt}')">${a.mkt} 수급 상세표 보기 →</button>
+          </div>
+        </div>`;
+      };
+      splitBox.innerHTML = renderMarketCard(kp) + renderMarketCard(kq);
+
+      // 2) 양 시장 주요 15종목(KOSPI 15 + KOSDAQ 15 = 30종목) 같은 선상 섹터 자금 흐름 해석
+      const secAgg = {};
+      const addTop15 = (list, mkt) => {
+        list.forEach(item => {
+          const sec = item.sector || '기타';
+          if (!secAgg[sec]) secAgg[sec] = { sector: sec, kpCnt: 0, kqCnt: 0, kpAmt: 0, kqAmt: 0, totalCnt: 0, totalAmt: 0, items: [] };
+          if (mkt === 'KOSPI') { secAgg[sec].kpCnt += 1; secAgg[sec].kpAmt += item.total; }
+          else { secAgg[sec].kqCnt += 1; secAgg[sec].kqAmt += item.total; }
+          secAgg[sec].totalCnt += 1;
+          secAgg[sec].totalAmt += item.total;
+          secAgg[sec].items.push(item);
+        });
+      };
+      addTop15(kp.top15, 'KOSPI');
+      addTop15(kq.top15, 'KOSDAQ');
+
+      const secList = Object.values(secAgg).sort((a, b) => (b.totalCnt - a.totalCnt) || ((b.kpCnt > 0 && b.kqCnt > 0 ? 1 : 0) - (a.kpCnt > 0 && a.kqCnt > 0 ? 1 : 0)) || (b.totalAmt - a.totalAmt));
+      const bothMarketSecs = secList.filter(s => s.sector !== '기타' && s.kpCnt > 0 && s.kqCnt > 0);
+      const kpOnlySecs = secList.filter(s => s.sector !== '기타' && s.kpCnt >= 2 && s.kqCnt === 0);
+      const kqOnlySecs = secList.filter(s => s.sector !== '기타' && s.kqCnt >= 2 && s.kpCnt === 0);
+
+      let secStoryParts = [];
+      if (bothMarketSecs.length) {
+        const bNames = bothMarketSecs.slice(0, 3).map(s => `<b>${escapeHtml(s.sector)}</b>(총 ${s.totalCnt}종목: 코스피 ${s.kpCnt}·코스닥 ${s.kqCnt})`).join(', ');
+        secStoryParts.push(`📌 <b>양 시장 동반 자금 집중 섹터:</b> ${bNames} — 대형주와 중소형 성장주에 동시에 기관 자금이 몰리며 시장 전체의 핵심 주도 섹터로 부각되고 있습니다.`);
+      } else if (secList.length) {
+        const topS = secList[0];
+        secStoryParts.push(`📌 <b>최다 유입 섹터:</b> <b>${escapeHtml(topS.sector)}</b>(${topS.totalCnt}종목, ${fmtEok(topS.totalAmt)}) 중심으로 자금이 모였습니다.`);
+      }
+      const diffParts = [];
+      if (kpOnlySecs.length) diffParts.push(`코스피는 <b>${kpOnlySecs.slice(0, 2).map(s => escapeHtml(s.sector)).join('·')}</b>`);
+      if (kqOnlySecs.length) diffParts.push(`코스닥은 <b>${kqOnlySecs.slice(0, 2).map(s => escapeHtml(s.sector)).join('·')}</b>`);
+      if (diffParts.length) {
+        secStoryParts.push(`🧭 <b>시장별 차별화:</b> ${diffParts.join(', ')} 쪽으로 각 시장 특화 자금이 유입되었습니다.`);
+      }
+
+      const maxCnt = Math.max(1, ...secList.map(s => s.totalCnt));
+      const barsHtml = secList.slice(0, 8).map(s => {
+        const kpW = (s.kpCnt / maxCnt * 100).toFixed(1);
+        const kqW = (s.kqCnt / maxCnt * 100).toFixed(1);
+        const isBoth = (s.kpCnt > 0 && s.kqCnt > 0 && s.sector !== '기타');
+        const stockLinks = s.items.slice(0, 6).map(it => {
+          const mkTag = it.market === 'KOSPI' ? '<span style="color:#1d4ed8; font-weight:800;">P</span>' : '<span style="color:#047857; font-weight:800;">Q</span>';
+          return `<span class="flow-ins-link" ${jumpAttr(it.code)}>${escapeHtml(it.name)}</span>(${mkTag} ${Math.round(it.total).toLocaleString('ko-KR')}억)`;
+        }).join(' · ');
+        return `<div class="home-sec-row">
+          <div class="home-sec-name">
+            <span>${escapeHtml(s.sector)}</span>
+            ${isBoth ? '<span class="home-both-badge">양시장 동반</span>' : ''}
+          </div>
+          <div class="home-sec-bar-wrap">
+            <div class="home-sec-track" title="코스피 ${s.kpCnt}종목 / 코스닥 ${s.kqCnt}종목">
+              <div class="home-sec-fill-kp" style="width:${kpW}%"></div>
+              <div class="home-sec-fill-kq" style="width:${kqW}%"></div>
+            </div>
+            <div class="home-sec-stocks">${stockLinks}</div>
+          </div>
+          <div class="home-sec-stat">
+            <div>${s.totalCnt}종목 <span style="font-size:10.5px; color:#64748b; font-weight:600;">(P${s.kpCnt}·Q${s.kqCnt})</span></div>
+            <div style="font-size:11px; color:#b91c1c;">${fmtEok(s.totalAmt)}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      sectorPanel.innerHTML = `
+        <div class="home-sec-card">
+          <div class="home-sec-head">
+            <div class="home-sec-title">🧭 양 시장 주요 15종목 동등 비교 (KOSPI 15 + KOSDAQ 15 = 총 ${kp.top15.length + kq.top15.length}종목) · 섹터 자금 쏠림 해석</div>
+            <span style="font-size:11px; color:#64748b; font-weight:700;">
+              <span style="display:inline-block; width:9px; height:9px; border-radius:2px; background:#2563eb; margin-right:3px;"></span>KOSPI
+              <span style="display:inline-block; width:9px; height:9px; border-radius:2px; background:#10b981; margin:0 3px 0 8px;"></span>KOSDAQ
+            </span>
+          </div>
+          <div class="home-sec-summary">${secStoryParts.join('<br/>')}</div>
+          <div class="home-sec-bars">${barsHtml}</div>
+        </div>
+      `;
+
+      // 3) 좌: KOSPI 주요 15종목 | 우: KOSDAQ 주요 15종목 나란히 비교표
+      const renderTop15Card = (a) => {
+        const isKQ = a.mkt === 'KOSDAQ';
+        const rowsHtml = a.top15.map((r, idx) => {
+          const mp = getMcapPct(r.code, r.total);
+          const mpStr = (mp !== null) ? `${mp > 0 ? '+' : ''}${mp.toFixed(2)}%` : '-';
+          const mpCls = (mp !== null && Math.abs(mp) >= 1.0) ? 'flow-mcap-hi-up' : 'flow-amt-up';
+          const info = STOCK_LOOKUP[r.code];
+          const passStar = (info && info.passed) ? `<span style="color:#15803d; font-weight:800; margin-left:2px;">★</span>` : '';
+          const coTag = r.who.length >= 2 ? `<span class="flow-co-tag">${r.who.join('+')}</span>` : `<span style="font-size:10.5px; color:#64748b; margin-left:3px;">${r.who[0]}</span>`;
+          const stTag = r.maxStreak >= 2 ? `<span class="flow-streak-mid buy" style="margin-left:3px;">${r.maxStreak}${unit}</span>` : '';
+          return `<tr>
+            <td>${idx + 1}</td>
+            <td><span class="flow-ins-link" ${jumpAttr(r.code)}>${escapeHtml(r.name)}</span>${passStar}${stTag}</td>
+            <td style="text-align:left; color:#475569; font-weight:600; font-size:11px;">${escapeHtml(r.sector)}</td>
+            <td class="flow-amt-up">${fmtEok(r.total)}</td>
+            <td><span class="${mpCls}">${mpStr}</span></td>
+            <td style="text-align:center;">${coTag}</td>
+          </tr>`;
+        }).join('');
+        return `<div class="flow-card">
+          <div class="flow-card-head" style="border-top:3px solid ${isKQ ? 'var(--kosdaq)' : 'var(--kospi)'};">
+            <div class="flow-card-title">${isKQ ? '🚀' : '📊'} ${a.mkt} 3주체 합산 순매수 주요 15종목</div>
+            <span style="font-size:11px; color:#64748b; font-weight:700;">시총 3천억↑ · ETF 제외</span>
+          </div>
+          <table class="flow-mini-tbl">
+            <thead><tr><th>#</th><th>종목명</th><th style="text-align:left;">섹터</th><th>합산(억)</th><th>시총대비</th><th style="text-align:center;">매수주체</th></tr></thead>
+            <tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:16px; color:#94a3b8;">데이터 없음</td></tr>'}</tbody>
+          </table>
+        </div>`;
+      };
+      top15Box.innerHTML = renderTop15Card(kp) + renderTop15Card(kq);
+      bindTooltips();
     }
 
     function onFlowPeriodChange() {
