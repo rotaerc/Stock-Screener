@@ -1,6 +1,6 @@
 {
   "date": "2026-11-26",
-  "updatedAt": "2026-11-26 08:26",
+  "updatedAt": "2026-11-26 09:58",
   "retentionDays": 60,
   "sourceUrl": "https://consensus.hankyung.com/analysis/list?skinType=business",
   "dates": [
@@ -14,6 +14,188 @@
   ],
   "byDate": {
     "2026-11-26": [
+      {
+        "date": "2026-11-26",
+        "stock_name": "스튜디오드래곤",
+        "stock_code": "253450",
+        "title": "이제부터 진검승부",
+        "target_price": "45,000",
+        "opinion": "Buy",
+        "analyst": "김회재",
+        "broker": "대신증권",
+        "report_idx": "654565",
+        "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654565",
+        "target_change": "상향",
+        "summary": [
+          "이제부터 진검승부"
+        ],
+        "source": "한경",
+        "curated": false
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "CJ ENM",
+        "stock_code": "035760",
+        "title": "시그널이 왔다",
+        "target_price": "0",
+        "opinion": "Buy",
+        "analyst": "김회재",
+        "broker": "대신증권",
+        "report_idx": "654564",
+        "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654564",
+        "target_change": "없음",
+        "summary": [
+          "660억원의 적자 달성. 두 사업부의 실적 개선 만으로도 큰 폭의 이익 개선 27E OP 전망. 티빙 265억원(+578억원 yoy), F/S 70억원(+349억원 yoy) 티빙은 2Q26부터 흑자 달성 중이고, F/S은 TV 시리즈만 충분하면 흑자 달 성이 가능하다는 것을 보여줌(19개 분기 중 5개 분기 흑자 달성) 영업실적 및 주요 투자지표 (단위: 십억원, 원, 배, %) 202..."
+        ],
+        "source": "한경",
+        "curated": false
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "CJ",
+        "stock_code": "001040",
+        "title": "성장의 청구서, 인바운드 수요가 하단을 지지",
+        "target_price": "132,000",
+        "opinion": "Buy",
+        "analyst": "이경연,이채리",
+        "broker": "대신증권",
+        "report_idx": "654563",
+        "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654563",
+        "target_change": "하향",
+        "summary": [
+          "2.1 순이익 144 61 30 106 -26.4 73.8 205 -134 적지 적전 자료: CJ, FnGuide, 대신증권 Research Center KOSPI 4697.51 시가총액 4,154십억원 시가총액비중 0.06% 자본금(보통주) 147십억원 52주 최고/최저 232,000원 / 110,100원 120일 평균거래대금 162억원 외국인지분율 20.40% 주요주주 이재현 외 7..."
+        ],
+        "source": "한경",
+        "curated": false
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "유니트론텍",
+        "stock_code": "142210",
+        "title": "PER 2배, 물러설 곳이 없다",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98500",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261126_company_12112000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98500",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "3분기 환율영향 있었지만 그래도 너무 싸다",
+          "주로 차량용 메모리를 국내 전장에 공급하는 유통사. 2Q26 영업이익 385억원(OPM 11.3%) 정점 뒤 3Q26 환율 급락으로 85억원(OPM 2.9%)까지 감소, 주가 저평가 원인. 2027년 매출총이익률 10%(vs. 2Q26 14.5%) 가정한 영업이익 820억원 전망, PER 2배로 할인은 과도하다고 판단"
+        ],
+        "current_price": 4850.0
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "카카오페이",
+        "stock_code": "377300",
+        "title": "기대하던 혁신은 2028년으로",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "중립",
+        "analyst": "",
+        "broker": "신한투자증권",
+        "report_idx": "naver_98499",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261126_company_976098000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98499",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "스테이블 코인은 유통에 그치고, 자본 배분은 증권으로",
+          "조정 순현금 및 스테이블 코인 비즈니스 축소 적용 시 2027F~2028F 적정주가는 22,000원~27,000원으로 업사이드 제한적. 투자의견 ‘중립’ 유지"
+        ],
+        "current_price": 34950.0
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "현대모비스",
+        "stock_code": "012330",
+        "title": "물적분할 시 주식매수청구권 도입 이래 최대 규모: 램프사업 매각 코멘트",
+        "target_price": "0",
+        "target_change": "없음",
+        "opinion": "없음",
+        "analyst": "",
+        "broker": "키움증권",
+        "report_idx": "naver_98498",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261126_company_242656000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98498",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "◎ 처음부터 유동성 확보 목적의 딜 구조가 아니다: 관건은 얼마까지 순현금유출을 감내할 수 있는가?",
+          "10/28 현대모비스 공시에 따르면 의결권 있는 주주의 램프사업 분할 매각 반대의사 통지 기한은 2026년 11월 23일에 마감. 2026년 11월 24일에 개최된 임시주주총회에서 분할 매각 안건에 반대, 기권 등의 의결권 행사했다 하더라도 23일까지 사전에 별도로 분할 매각 반대의사를 통지하지 않은 주주는 주식매수청구권 확보 불가.",
+          "11/24 현대모비스 공시에 따르면 임시주주총회의 결과로 의결권 행사 주식수의 18.5%가 안건에 반대 및 기권. 당사 추산에 따르면 18.5% 전량 주식매수청구권 행사 가정 시 현대모비스는 청구액 매입에 약 5.1조 원 투입 필요. 그러나 사전에 별도로 분할 매각 반대의사를 통지하지 않은 주주 & 임시주주총회에서 기권을 행사한 국민연금공단(지분율 약 9.5%, 위탁 80% 가정)이 역...",
+          "램프사업 매각대금 6,000억 원의 과반은 임직원 위로금 재원으로 투입될 예정(램프B/U 소속 글로벌 임직원수 5,000명 및 인당 평균 최소 6,000만 원 지급 가정). 이에 더해 반대 의사를 표명한 것으로 알려진 NBIM 보유 지분 전량에 대한 주식매수청구권이 행사되는 것만으로도 이미 이번 딜은 순현금유입 기대가 어려운 구조."
+        ]
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "코스메카코리아",
+        "stock_code": "241710",
+        "title": "성장의 다음 단계, 이익 회복",
+        "target_price": "150,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98497",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_325758000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98497",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표주가 15만원으로 커버리지 개시",
+          "코스메카코리아에 대한 투자의견 매수, 목표주가 150,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 17배를 적용해 산출했으며, 타깃 멀티플은 과거 수주 확대 및 수익성 개선기(2Q24~3Q24) 평균 12MF P/E다.",
+          "현재 주가는 컨센서스 기준 12MF P/E 12배에서 거래 중으로, 3Q26 영업이익이 컨센서스를 하회하며 수익성에 대한 우려가 반영된 상황이다. 다만 국내 수익성 저하는 늘어난 주문에 대응하는 과정의 비용 부담에 기인한다. 한국 법인의 수주 증가세가 이어지고 있어, 향후 외주 비용 부담이 완화되면 이익 개선과 함께 밸류에이션 재평가도 가능하다는 판단이다."
+        ],
+        "current_price": 113200.0
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "코스맥스",
+        "stock_code": "192820",
+        "title": "해외까지 탄탄한 성장 코스",
+        "target_price": "380,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98496",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_437424000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98496",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표주가 38만원으로 커버리지 개시",
+          "코스맥스에 대한 투자의견 매수, 목표주가 380,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 17배를 적용해 산출했으며, 타깃 멀티플은 글로벌 Peer 인터코스의 12MF P/E다. 현재 주가는 컨센서스 기준 12MF P/E 약 13배에서 거래 중이다. 동사는 글로벌 1위 ODM사로, 한국 법인의 수주 증가와 미국 법인의 흑자 전환에 따른 해외 사업..."
+        ],
+        "current_price": 285000.0
+      },
+      {
+        "date": "2026-11-26",
+        "stock_name": "한국콜마",
+        "stock_code": "161890",
+        "title": "국내가 증명한 체력",
+        "target_price": "160,000",
+        "target_change": "신규",
+        "opinion": "매수",
+        "analyst": "",
+        "broker": "미래에셋증권",
+        "report_idx": "naver_98495",
+        "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_727911000.pdf",
+        "naver_url": "https://stock.naver.com/research/company/98495",
+        "source": "네이버",
+        "curated": false,
+        "summary": [
+          "투자의견 매수, 목표주가 16만원으로 커버리지 개시",
+          "한국콜마에 대한 투자의견 매수, 목표주가 160,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 16배를 적용했으며, 타깃 멀티플은 글로벌 화장품 ODM사 Peer 평균 12MF P/E다. 3Q26 영업이익이 HK이노엔의 출고 조정과 재고자산 평가충당금 등 일시적 요인으로 컨센서스를 10.6% 하회했으나 국내 ODM은 분기 최대 매출을 경신했다. 1H2..."
+        ],
+        "current_price": 116000.0
+      },
       {
         "date": "2026-11-26",
         "stock_name": "LG생활건강",
@@ -4708,6 +4890,188 @@
     ]
   },
   "reports": [
+    {
+      "date": "2026-11-26",
+      "stock_name": "스튜디오드래곤",
+      "stock_code": "253450",
+      "title": "이제부터 진검승부",
+      "target_price": "45,000",
+      "opinion": "Buy",
+      "analyst": "김회재",
+      "broker": "대신증권",
+      "report_idx": "654565",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654565",
+      "target_change": "상향",
+      "summary": [
+        "이제부터 진검승부"
+      ],
+      "source": "한경",
+      "curated": false
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "CJ ENM",
+      "stock_code": "035760",
+      "title": "시그널이 왔다",
+      "target_price": "0",
+      "opinion": "Buy",
+      "analyst": "김회재",
+      "broker": "대신증권",
+      "report_idx": "654564",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654564",
+      "target_change": "없음",
+      "summary": [
+        "660억원의 적자 달성. 두 사업부의 실적 개선 만으로도 큰 폭의 이익 개선 27E OP 전망. 티빙 265억원(+578억원 yoy), F/S 70억원(+349억원 yoy) 티빙은 2Q26부터 흑자 달성 중이고, F/S은 TV 시리즈만 충분하면 흑자 달 성이 가능하다는 것을 보여줌(19개 분기 중 5개 분기 흑자 달성) 영업실적 및 주요 투자지표 (단위: 십억원, 원, 배, %) 202..."
+      ],
+      "source": "한경",
+      "curated": false
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "CJ",
+      "stock_code": "001040",
+      "title": "성장의 청구서, 인바운드 수요가 하단을 지지",
+      "target_price": "132,000",
+      "opinion": "Buy",
+      "analyst": "이경연,이채리",
+      "broker": "대신증권",
+      "report_idx": "654563",
+      "pdf_url": "https://consensus.hankyung.com/analysis/downpdf?report_idx=654563",
+      "target_change": "하향",
+      "summary": [
+        "2.1 순이익 144 61 30 106 -26.4 73.8 205 -134 적지 적전 자료: CJ, FnGuide, 대신증권 Research Center KOSPI 4697.51 시가총액 4,154십억원 시가총액비중 0.06% 자본금(보통주) 147십억원 52주 최고/최저 232,000원 / 110,100원 120일 평균거래대금 162억원 외국인지분율 20.40% 주요주주 이재현 외 7..."
+      ],
+      "source": "한경",
+      "curated": false
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "유니트론텍",
+      "stock_code": "142210",
+      "title": "PER 2배, 물러설 곳이 없다",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "신한투자증권",
+      "report_idx": "naver_98500",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261126_company_12112000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98500",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "3분기 환율영향 있었지만 그래도 너무 싸다",
+        "주로 차량용 메모리를 국내 전장에 공급하는 유통사. 2Q26 영업이익 385억원(OPM 11.3%) 정점 뒤 3Q26 환율 급락으로 85억원(OPM 2.9%)까지 감소, 주가 저평가 원인. 2027년 매출총이익률 10%(vs. 2Q26 14.5%) 가정한 영업이익 820억원 전망, PER 2배로 할인은 과도하다고 판단"
+      ],
+      "current_price": 4850.0
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "카카오페이",
+      "stock_code": "377300",
+      "title": "기대하던 혁신은 2028년으로",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "중립",
+      "analyst": "",
+      "broker": "신한투자증권",
+      "report_idx": "naver_98499",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/21/20261126_company_976098000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98499",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "스테이블 코인은 유통에 그치고, 자본 배분은 증권으로",
+        "조정 순현금 및 스테이블 코인 비즈니스 축소 적용 시 2027F~2028F 적정주가는 22,000원~27,000원으로 업사이드 제한적. 투자의견 ‘중립’ 유지"
+      ],
+      "current_price": 34950.0
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "현대모비스",
+      "stock_code": "012330",
+      "title": "물적분할 시 주식매수청구권 도입 이래 최대 규모: 램프사업 매각 코멘트",
+      "target_price": "0",
+      "target_change": "없음",
+      "opinion": "없음",
+      "analyst": "",
+      "broker": "키움증권",
+      "report_idx": "naver_98498",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/39/20261126_company_242656000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98498",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "◎ 처음부터 유동성 확보 목적의 딜 구조가 아니다: 관건은 얼마까지 순현금유출을 감내할 수 있는가?",
+        "10/28 현대모비스 공시에 따르면 의결권 있는 주주의 램프사업 분할 매각 반대의사 통지 기한은 2026년 11월 23일에 마감. 2026년 11월 24일에 개최된 임시주주총회에서 분할 매각 안건에 반대, 기권 등의 의결권 행사했다 하더라도 23일까지 사전에 별도로 분할 매각 반대의사를 통지하지 않은 주주는 주식매수청구권 확보 불가.",
+        "11/24 현대모비스 공시에 따르면 임시주주총회의 결과로 의결권 행사 주식수의 18.5%가 안건에 반대 및 기권. 당사 추산에 따르면 18.5% 전량 주식매수청구권 행사 가정 시 현대모비스는 청구액 매입에 약 5.1조 원 투입 필요. 그러나 사전에 별도로 분할 매각 반대의사를 통지하지 않은 주주 & 임시주주총회에서 기권을 행사한 국민연금공단(지분율 약 9.5%, 위탁 80% 가정)이 역...",
+        "램프사업 매각대금 6,000억 원의 과반은 임직원 위로금 재원으로 투입될 예정(램프B/U 소속 글로벌 임직원수 5,000명 및 인당 평균 최소 6,000만 원 지급 가정). 이에 더해 반대 의사를 표명한 것으로 알려진 NBIM 보유 지분 전량에 대한 주식매수청구권이 행사되는 것만으로도 이미 이번 딜은 순현금유입 기대가 어려운 구조."
+      ]
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "코스메카코리아",
+      "stock_code": "241710",
+      "title": "성장의 다음 단계, 이익 회복",
+      "target_price": "150,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "미래에셋증권",
+      "report_idx": "naver_98497",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_325758000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98497",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "투자의견 매수, 목표주가 15만원으로 커버리지 개시",
+        "코스메카코리아에 대한 투자의견 매수, 목표주가 150,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 17배를 적용해 산출했으며, 타깃 멀티플은 과거 수주 확대 및 수익성 개선기(2Q24~3Q24) 평균 12MF P/E다.",
+        "현재 주가는 컨센서스 기준 12MF P/E 12배에서 거래 중으로, 3Q26 영업이익이 컨센서스를 하회하며 수익성에 대한 우려가 반영된 상황이다. 다만 국내 수익성 저하는 늘어난 주문에 대응하는 과정의 비용 부담에 기인한다. 한국 법인의 수주 증가세가 이어지고 있어, 향후 외주 비용 부담이 완화되면 이익 개선과 함께 밸류에이션 재평가도 가능하다는 판단이다."
+      ],
+      "current_price": 113200.0
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "코스맥스",
+      "stock_code": "192820",
+      "title": "해외까지 탄탄한 성장 코스",
+      "target_price": "380,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "미래에셋증권",
+      "report_idx": "naver_98496",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_437424000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98496",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "투자의견 매수, 목표주가 38만원으로 커버리지 개시",
+        "코스맥스에 대한 투자의견 매수, 목표주가 380,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 17배를 적용해 산출했으며, 타깃 멀티플은 글로벌 Peer 인터코스의 12MF P/E다. 현재 주가는 컨센서스 기준 12MF P/E 약 13배에서 거래 중이다. 동사는 글로벌 1위 ODM사로, 한국 법인의 수주 증가와 미국 법인의 흑자 전환에 따른 해외 사업..."
+      ],
+      "current_price": 285000.0
+    },
+    {
+      "date": "2026-11-26",
+      "stock_name": "한국콜마",
+      "stock_code": "161890",
+      "title": "국내가 증명한 체력",
+      "target_price": "160,000",
+      "target_change": "신규",
+      "opinion": "매수",
+      "analyst": "",
+      "broker": "미래에셋증권",
+      "report_idx": "naver_98495",
+      "pdf_url": "https://stock.pstatic.net/stock-research/company/56/20261126_company_727911000.pdf",
+      "naver_url": "https://stock.naver.com/research/company/98495",
+      "source": "네이버",
+      "curated": false,
+      "summary": [
+        "투자의견 매수, 목표주가 16만원으로 커버리지 개시",
+        "한국콜마에 대한 투자의견 매수, 목표주가 160,000원으로 커버리지를 개시한다. 목표주가는 12MF EPS에 Target P/E 16배를 적용했으며, 타깃 멀티플은 글로벌 화장품 ODM사 Peer 평균 12MF P/E다. 3Q26 영업이익이 HK이노엔의 출고 조정과 재고자산 평가충당금 등 일시적 요인으로 컨센서스를 10.6% 하회했으나 국내 ODM은 분기 최대 매출을 경신했다. 1H2..."
+      ],
+      "current_price": 116000.0
+    },
     {
       "date": "2026-11-26",
       "stock_name": "LG생활건강",
