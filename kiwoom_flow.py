@@ -40,7 +40,7 @@ MARKETS = [
 
 RETENTION_DAYS = 60
 RETENTION_WEEKS = 14
-TOP_N_PER_SIDE = 20
+TOP_N_PER_SIDE = 25
 
 # 국내 상장 ETF / ETN 제외 필터 (개별 종목 수급만 순수 집계)
 ETF_BRAND_PREFIXES = (

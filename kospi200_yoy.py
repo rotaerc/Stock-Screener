@@ -3778,6 +3778,24 @@ def build_web_dashboard(here):
       border-radius: 4px;
       display: inline-block;
     }}
+    .flow-streak-hi {{
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      display: inline-block;
+    }}
+    .flow-streak-hi.buy {{ background: #dc2626; color: #fff; }}
+    .flow-streak-hi.sell {{ background: #1d4ed8; color: #fff; }}
+    .flow-streak-mid {{
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 999px;
+      font-size: 11px;
+      display: inline-block;
+    }}
+    .flow-streak-mid.buy {{ background: #fee2e2; color: #991b1b; }}
+    .flow-streak-mid.sell {{ background: #dbeafe; color: #1e40af; }}
     .flow-mkt-tag {{
       display: inline-block;
       font-size: 9.5px;
@@ -4032,10 +4050,11 @@ def build_web_dashboard(here):
           <select id="flowSortSelect" class="select-box" style="font-weight:700; color:#1e293b;">
             <option value="amt" selected>정렬: 순매매 금액순</option>
             <option value="mcapPct">정렬: 시총대비 %순</option>
+            <option value="streak">정렬: 연속 등장순</option>
           </select>
         </div>
         <div class="group-right">
-          <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외국인·연기금·사모펀드 · ETF 제외 · 단위: 억원)</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외·연·사 · ETF/시총3천억↓ 제외 · 단위: 억원)</span>
         </div>
       </div>
       <div class="flow-body-wrap" id="flowBodyWrap">
@@ -4569,11 +4588,45 @@ def build_web_dashboard(here):
         {{ key: 'private', label: '💼 사모펀드', short: '사모' }},
       ];
 
+      // 시가총액 3,000억원 이하 종목 제외
+      const MIN_FLOW_MCAP = 3000;
       const filterRows = (arr) => (arr || []).filter(r => {{
+        const mc = Number(mcapMap[r.code]);
+        if (!mc || mc <= MIN_FLOW_MCAP) return false;
         if (mktF && r.market !== mktF) return false;
         if (q && !(String(r.name || '').toLowerCase().includes(q) || String(r.code || '').includes(q))) return false;
         return true;
       }});
+
+      // 선택 날짜/주 기준으로 각 주체별 연속 등장 일수(주수) 및 기간 누적 등장 횟수 계산
+      const allFlowKeys = getFlowKeys(currentFlowMode);
+      const curFlowIdx = allFlowKeys.indexOf(currentFlowKey);
+      const presenceCache = {{}};
+      const getPresenceStats = (invKey, isBuy, code) => {{
+        const sideKey = isBuy ? 'buy' : 'sell';
+        const cKey = `${{invKey}}_${{sideKey}}_${{code}}`;
+        if (presenceCache[cKey]) return presenceCache[cKey];
+        let streak = 0;
+        let broken = false;
+        const hits = [];
+        if (curFlowIdx >= 0) {{
+          for (let i = curFlowIdx; i < allFlowKeys.length; i++) {{
+            const k = allFlowKeys[i];
+            const s = bucket[k];
+            const listArr = (s && s.investors && s.investors[invKey]) ? (s.investors[invKey][sideKey] || []) : [];
+            const found = listArr.find(x => x.code === code);
+            if (found) {{
+              hits.push({{ k, amt: Number(found.netAmt) || 0, label: (currentFlowMode === 'WEEKLY' && s.weekLabel) ? s.weekLabel : k }});
+              if (!broken) streak += 1;
+            }} else {{
+              broken = true;
+            }}
+          }}
+        }}
+        const res = {{ streak: Math.max(1, streak), total: Math.max(1, hits.length), hits }};
+        presenceCache[cKey] = res;
+        return res;
+      }};
 
       // 2개 이상 주체 동시 순매수 / 동시 순매도 종목 탐지
       const buyMap = {{}}, sellMap = {{}};
@@ -4620,7 +4673,7 @@ def build_web_dashboard(here):
       }}
       overlapBox.innerHTML = ovHtml;
 
-      const buildTable = (rows, isBuy) => {{
+      const buildTable = (invKey, invLabel, rows, isBuy) => {{
         const sorted = [...rows];
         if (sortF === 'mcapPct') {{
           sorted.sort((a, b) => {{
@@ -4631,6 +4684,14 @@ def build_web_dashboard(here):
             if (vb !== va) return vb - va;
             return Math.abs(Number(b.netAmt) || 0) - Math.abs(Number(a.netAmt) || 0);
           }});
+        }} else if (sortF === 'streak') {{
+          sorted.sort((a, b) => {{
+            const sa = getPresenceStats(invKey, isBuy, a.code);
+            const sb = getPresenceStats(invKey, isBuy, b.code);
+            if (sb.streak !== sa.streak) return sb.streak - sa.streak;
+            if (sb.total !== sa.total) return sb.total - sa.total;
+            return Math.abs(Number(b.netAmt) || 0) - Math.abs(Number(a.netAmt) || 0);
+          }});
         }}
         const limit = (sideF === 'BOTH') ? 15 : 30;
         const list = sorted.slice(0, limit);
@@ -4638,7 +4699,10 @@ def build_web_dashboard(here):
           return `<div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px;">해당 조건 데이터 없음</div>`;
         }}
         const coSet = isBuy ? buyMap : sellMap;
-        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>시총(억)</th><th>추정단가</th></tr></thead><tbody>` +
+        const unit = currentFlowMode === 'DAILY' ? '일' : '주';
+        const periodHead = currentFlowMode === 'DAILY' ? '등장일수' : '등장주수';
+        const sideLbl = isBuy ? '순매수' : '순매도';
+        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>시총(억)</th><th>${{periodHead}}</th></tr></thead><tbody>` +
           list.map((r, idx) => {{
             const amt = Number(r.netAmt) || 0;
             const amtStr = `${{amt > 0 ? '+' : ''}}${{amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}`;
@@ -4654,7 +4718,17 @@ def build_web_dashboard(here):
               mpTip = `data-tip="${{escapeHtml(`${{r.name}} 시가총액: ${{Math.round(mc).toLocaleString('ko-KR')}}억\\n순매매: ${{amtStr}}억 (시총 대비 ${{mpStr}})`)}}"`;
             }}
             const mcStr = (mc && mc > 0) ? Math.round(mc).toLocaleString('ko-KR') : '-';
-            const avgStr = (r.avgPrice && r.avgPrice > 0) ? Number(r.avgPrice).toLocaleString('ko-KR') : '-';
+            const st = getPresenceStats(invKey, isBuy, r.code);
+            let stCell = `<span style="color:#94a3b8;">1${{unit}}</span>`;
+            if (st.streak >= 3) {{
+              stCell = `<span class="flow-streak-hi ${{isBuy ? 'buy' : 'sell'}}">${{st.streak}}${{unit}}째</span>` + (st.total > st.streak ? `<span style="color:#94a3b8; font-size:10px;"> (${{st.total}})</span>` : '');
+            }} else if (st.streak === 2) {{
+              stCell = `<span class="flow-streak-mid ${{isBuy ? 'buy' : 'sell'}}">${{st.streak}}${{unit}}째</span>` + (st.total > st.streak ? `<span style="color:#94a3b8; font-size:10px;"> (${{st.total}})</span>` : '');
+            }} else if (st.total >= 2) {{
+              stCell = `<span style="color:#475569; font-weight:700;">1${{unit}}</span><span style="color:#94a3b8; font-size:10px;"> (총${{st.total}})</span>`;
+            }}
+            const histLines = st.hits.slice(0, 10).map(h => `• ${{h.label}}: ${{h.amt > 0 ? '+' : ''}}${{h.amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}억`).join('\\n');
+            const stTip = `data-tip="${{escapeHtml(`[${{r.name}} · ${{invLabel}} ${{sideLbl}} 등장 이력]\\n• 연속 ${{st.streak}}${{unit}}째 / 보관기간 총 ${{st.total}}${{unit}} 등장\\n────────────────────\\n${{histLines}}`)}}"`;
             const mTag = `<span class="flow-mkt-tag ${{r.market === 'KOSPI' ? 'kp' : 'kq'}}">${{r.market === 'KOSPI' ? 'P' : 'Q'}}</span>`;
             const coInfo = coSet[r.code];
             const coTag = (coInfo && coInfo.who.length >= 2) ? `<span class="flow-co-tag">${{coInfo.who.length}}주체</span>` : '';
@@ -4668,7 +4742,7 @@ def build_web_dashboard(here):
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
               <td ${{mpTip}}>${{mpCell}}</td>
               <td style="color:#475569;">${{mcStr}}</td>
-              <td style="color:#64748b;">${{avgStr}}</td>
+              <td ${{stTip}}>${{stCell}}</td>
             </tr>`;
           }}).join('') + `</tbody></table>`;
       }};
@@ -4684,8 +4758,8 @@ def build_web_dashboard(here):
             <div class="flow-card-title">${{im.label}}</div>
             <span style="font-size:11px; color:#64748b; font-weight:700;">매수 ${{buyRows.length}} · 매도 ${{sellRows.length}}</span>
           </div>
-          ${{sideF !== 'SELL' ? `<div class="flow-subhead buy"><span>▲ 순매수 TOP</span><span>합계 +${{Math.round(buySum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(buyRows, true)}}` : ''}}
-          ${{sideF !== 'BUY' ? `<div class="flow-subhead sell"><span>▼ 순매도 TOP</span><span>합계 ${{Math.round(sellSum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(sellRows, false)}}` : ''}}
+          ${{sideF !== 'SELL' ? `<div class="flow-subhead buy"><span>▲ 순매수 TOP</span><span>합계 +${{Math.round(buySum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(im.key, im.short, buyRows, true)}}` : ''}}
+          ${{sideF !== 'BUY' ? `<div class="flow-subhead sell"><span>▼ 순매도 TOP</span><span>합계 ${{Math.round(sellSum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(im.key, im.short, sellRows, false)}}` : ''}}
         </div>`;
       }}).join('');
       bindTooltips();
