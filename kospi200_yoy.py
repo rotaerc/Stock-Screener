@@ -4638,7 +4638,7 @@ def build_web_dashboard(here):
           return `<div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px;">해당 조건 데이터 없음</div>`;
         }}
         const coSet = isBuy ? buyMap : sellMap;
-        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>등락률</th><th>추정단가</th></tr></thead><tbody>` +
+        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>시총(억)</th><th>추정단가</th></tr></thead><tbody>` +
           list.map((r, idx) => {{
             const amt = Number(r.netAmt) || 0;
             const amtStr = `${{amt > 0 ? '+' : ''}}${{amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}`;
@@ -4653,8 +4653,7 @@ def build_web_dashboard(here):
               mpCell = `<span class="${{hiCls}}">${{mpStr}}</span>`;
               mpTip = `data-tip="${{escapeHtml(`${{r.name}} 시가총액: ${{Math.round(mc).toLocaleString('ko-KR')}}억\\n순매매: ${{amtStr}}억 (시총 대비 ${{mpStr}})`)}}"`;
             }}
-            const chg = (r.chgPct !== null && r.chgPct !== undefined) ? `${{Number(r.chgPct) > 0 ? '+' : ''}}${{Number(r.chgPct).toFixed(1)}}%` : '-';
-            const chgCls = (r.chgPct > 0) ? 'pct-up' : ((r.chgPct < 0) ? 'pct-down' : '');
+            const mcStr = (mc && mc > 0) ? Math.round(mc).toLocaleString('ko-KR') : '-';
             const avgStr = (r.avgPrice && r.avgPrice > 0) ? Number(r.avgPrice).toLocaleString('ko-KR') : '-';
             const mTag = `<span class="flow-mkt-tag ${{r.market === 'KOSPI' ? 'kp' : 'kq'}}">${{r.market === 'KOSPI' ? 'P' : 'Q'}}</span>`;
             const coInfo = coSet[r.code];
@@ -4668,7 +4667,7 @@ def build_web_dashboard(here):
               <td><b>${{escapeHtml(r.name)}}</b>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
               <td ${{mpTip}}>${{mpCell}}</td>
-              <td class="${{chgCls}}">${{chg}}</td>
+              <td style="color:#475569;">${{mcStr}}</td>
               <td style="color:#64748b;">${{avgStr}}</td>
             </tr>`;
           }}).join('') + `</tbody></table>`;
