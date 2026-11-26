@@ -486,7 +486,7 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
             # 같은 주(월요일 시작일 기준) 키로 덮어써서 금요일에 주간 확정치로 완성
             store["byWeek"][mon_dash] = weekly_snap
 
-    _save_investor_flow(here, store)
+    _save_investor_flow(here, store, update_mcaps=True)
 
     print(
         f" ★ 키움 수급 저장 완료: 일간 {len(store['dates'])}일 / 주간 {len(store['weeks'])}주 "
@@ -496,7 +496,70 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
     return store
 
 
-def _save_investor_flow(here, store):
+def fetch_naver_market_caps(target_codes=None):
+    """
+    네이버 증권 시가총액 API에서 KOSPI / KOSDAQ 종목별 시가총액(억원)을 조회합니다.
+    target_codes가 주어지면 필요한 종목만 추려 반환합니다.
+    """
+    need = set(target_codes) if target_codes else None
+    mcaps = {}
+    hdr = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"}
+    for mkt in ("KOSPI", "KOSDAQ"):
+        page = 1
+        max_pages = 30
+        while page <= max_pages:
+            try:
+                url = f"https://m.stock.naver.com/api/stocks/marketValue/{mkt}?page={page}&pageSize=100"
+                r = requests.get(url, headers=hdr, timeout=12)
+                if r.status_code != 200:
+                    break
+                payload = r.json() or {}
+                stocks = payload.get("stocks") or []
+                if not stocks:
+                    break
+                for st in stocks:
+                    cd = str(st.get("itemCode") or "").strip().zfill(6)
+                    if not cd:
+                        continue
+                    if need is not None and cd not in need:
+                        continue
+                    raw_mv = st.get("marketValueRaw") or st.get("marketValue")
+                    mv_num = _parse_abs_num(raw_mv)
+                    if mv_num is not None and mv_num > 0:
+                        mcaps[cd] = round(mv_num, 1)
+                total_cnt = int(payload.get("totalCount") or 0)
+                if page * 100 >= total_cnt or (need is not None and len(mcaps) >= len(need)):
+                    break
+                page += 1
+                time.sleep(0.05)
+            except Exception:
+                break
+    return mcaps
+
+
+def refresh_market_caps_in_store(store):
+    """store 내 등장하는 모든 종목의 시가총액(억원)을 최신화하여 store['marketCaps']에 저장합니다."""
+    codes = set()
+    for sec_key in ("byDate", "byWeek"):
+        for snap in (store.get(sec_key) or {}).values():
+            for iv in (snap.get("investors") or {}).values():
+                for r in (iv.get("buy") or []) + (iv.get("sell") or []):
+                    cd = str(r.get("code") or "").strip()
+                    if cd:
+                        codes.add(cd)
+    if not codes:
+        store.setdefault("marketCaps", {})
+        return store
+    existing = dict(store.get("marketCaps") or {})
+    fetched = fetch_naver_market_caps(codes)
+    if fetched:
+        existing.update(fetched)
+    store["marketCaps"] = {cd: existing[cd] for cd in sorted(codes) if cd in existing}
+    print(f"  - [시가총액] 수급 종목 {len(codes)}개 중 {len(store['marketCaps'])}개 시가총액(억원) 매칭 완료")
+    return store
+
+
+def _save_investor_flow(here, store, update_mcaps=False):
     cutoff_d = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime("%Y-%m-%d")
     store["byDate"] = {
         k: v for k, v in sorted(store.get("byDate", {}).items(), reverse=True)
@@ -511,6 +574,9 @@ def _save_investor_flow(here, store):
             for _iv in (_snap.get("investors") or {}).values():
                 _iv["buy"] = [r for r in (_iv.get("buy") or []) if not is_etf_or_etn(r.get("name"))]
                 _iv["sell"] = [r for r in (_iv.get("sell") or []) if not is_etf_or_etn(r.get("name"))]
+
+    if update_mcaps or not store.get("marketCaps"):
+        refresh_market_caps_in_store(store)
 
     store["dates"] = sorted(store["byDate"].keys(), reverse=True)
     store["weeks"] = sorted(store["byWeek"].keys(), reverse=True)
@@ -601,7 +667,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
             if added_weeks % 3 == 0:
                 _save_investor_flow(here, store)
 
-    _save_investor_flow(here, store)
+    _save_investor_flow(here, store, update_mcaps=True)
     print(
         f"\n ★ 과거 소급 수집 완료: 일간 총 {len(store['dates'])}일(+{added_days}) / "
         f"주간 총 {len(store['weeks'])}주(+{added_weeks})"
@@ -650,7 +716,10 @@ def main():
         sys.exit(run_test())
 
     skip_push = any(a.lower() == "--no-push" for a in args)
-    if any(a.lower() in ("--backfill", "backfill") for a in args):
+    if any(a.lower() in ("--mcaps", "mcaps", "--refresh-mcaps") for a in args):
+        store = load_investor_flow(HERE)
+        _save_investor_flow(HERE, store, update_mcaps=True)
+    elif any(a.lower() in ("--backfill", "backfill") for a in args):
         nums = [int(a) for a in args if a.isdigit()]
         d_days = nums[0] if len(nums) >= 1 else 31
         n_weeks = nums[1] if len(nums) >= 2 else 13

@@ -3762,6 +3762,22 @@ def build_web_dashboard(here):
     .flow-mini-tbl tr:hover td {{ background: #f8fafc; }}
     .flow-amt-up {{ color: #dc2626; font-weight: 800; }}
     .flow-amt-down {{ color: #2563eb; font-weight: 800; }}
+    .flow-mcap-hi-up {{
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-block;
+    }}
+    .flow-mcap-hi-down {{
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-block;
+    }}
     .flow-mkt-tag {{
       display: inline-block;
       font-size: 9.5px;
@@ -4013,6 +4029,10 @@ def build_web_dashboard(here):
             <option value="BUY">▲ 순매수만 보기</option>
             <option value="SELL">▼ 순매도만 보기</option>
           </select>
+          <select id="flowSortSelect" class="select-box" style="font-weight:700; color:#1e293b;">
+            <option value="amt" selected>정렬: 순매매 금액순</option>
+            <option value="mcapPct">정렬: 시총대비 %순</option>
+          </select>
         </div>
         <div class="group-right">
           <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외국인·연기금·사모펀드 · ETF 제외 · 단위: 억원)</span>
@@ -4125,6 +4145,7 @@ def build_web_dashboard(here):
       initFlowControls();
       document.getElementById('flowSearchInput').addEventListener('input', renderFlowView);
       document.getElementById('flowSideSelect').addEventListener('change', renderFlowView);
+      document.getElementById('flowSortSelect').addEventListener('change', renderFlowView);
 
       document.getElementById('globalSearchInput').addEventListener('keydown', (e) => {{
         if (e.key === 'Enter') handleGlobalSearch(e.target.value);
@@ -4534,6 +4555,13 @@ def build_web_dashboard(here):
       const q = (document.getElementById('flowSearchInput').value || '').trim().toLowerCase();
       const mktF = currentFlowMarket;
       const sideF = document.getElementById('flowSideSelect').value || 'BOTH';
+      const sortF = document.getElementById('flowSortSelect') ? document.getElementById('flowSortSelect').value : 'amt';
+      const mcapMap = (FLOW_DATA && FLOW_DATA.marketCaps) ? FLOW_DATA.marketCaps : {{}};
+      const getMcapPct = (code, amt) => {{
+        const mc = Number(mcapMap[code]);
+        if (!mc || mc <= 0) return null;
+        return (Number(amt) || 0) / mc * 100.0;
+      }};
 
       const invMeta = [
         {{ key: 'foreign', label: '🌍 외국인', short: '외인' }},
@@ -4573,7 +4601,9 @@ def build_web_dashboard(here):
             coBuys.slice(0, 14).map(x => {{
               const info = STOCK_LOOKUP[x.code];
               const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
-              return `<span class="flow-ov-chip" ${{act}} title="클릭하여 종목 상세 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span> <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
+              const mp = getMcapPct(x.code, x.total);
+              const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#b91c1c;">(시총 ${{mp > 0 ? '+' : ''}}${{mp.toFixed(2)}}%)</span>` : '';
+              return `<span class="flow-ov-chip" ${{act}} title="클릭하여 종목 상세 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         if (coSells.length && sideF !== 'BUY') {{
@@ -4581,7 +4611,9 @@ def build_web_dashboard(here):
             coSells.slice(0, 10).map(x => {{
               const info = STOCK_LOOKUP[x.code];
               const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
-              return `<span class="flow-ov-chip sell" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span> <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
+              const mp = getMcapPct(x.code, x.total);
+              const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#1d4ed8;">(시총 ${{mp.toFixed(2)}}%)</span>` : '';
+              return `<span class="flow-ov-chip sell" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         ovHtml += `</div>`;
@@ -4589,16 +4621,38 @@ def build_web_dashboard(here):
       overlapBox.innerHTML = ovHtml;
 
       const buildTable = (rows, isBuy) => {{
+        const sorted = [...rows];
+        if (sortF === 'mcapPct') {{
+          sorted.sort((a, b) => {{
+            const pa = getMcapPct(a.code, a.netAmt);
+            const pb = getMcapPct(b.code, b.netAmt);
+            const va = (pa !== null) ? Math.abs(pa) : -1;
+            const vb = (pb !== null) ? Math.abs(pb) : -1;
+            if (vb !== va) return vb - va;
+            return Math.abs(Number(b.netAmt) || 0) - Math.abs(Number(a.netAmt) || 0);
+          }});
+        }}
         const limit = (sideF === 'BOTH') ? 15 : 30;
-        const list = rows.slice(0, limit);
+        const list = sorted.slice(0, limit);
         if (!list.length) {{
           return `<div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px;">해당 조건 데이터 없음</div>`;
         }}
         const coSet = isBuy ? buyMap : sellMap;
-        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>등락률</th><th>추정단가</th></tr></thead><tbody>` +
+        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>등락률</th><th>추정단가</th></tr></thead><tbody>` +
           list.map((r, idx) => {{
             const amt = Number(r.netAmt) || 0;
             const amtStr = `${{amt > 0 ? '+' : ''}}${{amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}`;
+            const mc = Number(mcapMap[r.code]);
+            const mp = getMcapPct(r.code, amt);
+            let mpCell = '<span style="color:#cbd5e1;">-</span>';
+            let mpTip = '';
+            if (mp !== null) {{
+              const mpStr = `${{mp > 0 ? '+' : ''}}${{mp.toFixed(2)}}%`;
+              const absMp = Math.abs(mp);
+              const hiCls = absMp >= 1.0 ? (isBuy ? 'flow-mcap-hi-up' : 'flow-mcap-hi-down') : (isBuy ? 'flow-amt-up' : 'flow-amt-down');
+              mpCell = `<span class="${{hiCls}}">${{mpStr}}</span>`;
+              mpTip = `data-tip="${{escapeHtml(`${{r.name}} 시가총액: ${{Math.round(mc).toLocaleString('ko-KR')}}억\\n순매매: ${{amtStr}}억 (시총 대비 ${{mpStr}})`)}}"`;
+            }}
             const chg = (r.chgPct !== null && r.chgPct !== undefined) ? `${{Number(r.chgPct) > 0 ? '+' : ''}}${{Number(r.chgPct).toFixed(1)}}%` : '-';
             const chgCls = (r.chgPct > 0) ? 'pct-up' : ((r.chgPct < 0) ? 'pct-down' : '');
             const avgStr = (r.avgPrice && r.avgPrice > 0) ? Number(r.avgPrice).toLocaleString('ko-KR') : '-';
@@ -4613,6 +4667,7 @@ def build_web_dashboard(here):
               <td>${{idx + 1}}</td>
               <td><b>${{escapeHtml(r.name)}}</b>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
+              <td ${{mpTip}}>${{mpCell}}</td>
               <td class="${{chgCls}}">${{chg}}</td>
               <td style="color:#64748b;">${{avgStr}}</td>
             </tr>`;
@@ -4634,6 +4689,7 @@ def build_web_dashboard(here):
           ${{sideF !== 'BUY' ? `<div class="flow-subhead sell"><span>▼ 순매도 TOP</span><span>합계 ${{Math.round(sellSum).toLocaleString('ko-KR')}}억</span></div>${{buildTable(sellRows, false)}}` : ''}}
         </div>`;
       }}).join('');
+      bindTooltips();
     }}
 
     function updateReportsHeaderAndBadges() {{
