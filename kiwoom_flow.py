@@ -12,11 +12,13 @@
   python kiwoom_flow.py --no-push       # 웹페이지 생성까지만 수행 (GitHub 업로드 생략)
 """
 
+import ast
 import json
 import os
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 
 import requests
@@ -486,7 +488,7 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
             # 같은 주(월요일 시작일 기준) 키로 덮어써서 금요일에 주간 확정치로 완성
             store["byWeek"][mon_dash] = weekly_snap
 
-    _save_investor_flow(here, store, update_mcaps=True)
+    _save_investor_flow(here, store, update_mcaps=True, update_returns=True)
 
     print(
         f" ★ 키움 수급 저장 완료: 일간 {len(store['dates'])}일 / 주간 {len(store['weeks'])}주 "
@@ -565,7 +567,145 @@ def refresh_market_caps_in_store(store):
     return store
 
 
-def _save_investor_flow(here, store, update_mcaps=False):
+def _fetch_naver_daily_closes(code, start_ymd, end_ymd):
+    """네이버 시세 API에서 종목의 일별 종가 리스트 [(YYYY-MM-DD, open, close), ...] 반환"""
+    url = (
+        f"https://api.finance.naver.com/siseJson.naver"
+        f"?symbol={code}&requestType=1&startTime={start_ymd}&endTime={end_ymd}&timeframe=day"
+    )
+    hdr = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    try:
+        r = requests.get(url, headers=hdr, timeout=10)
+        if r.status_code != 200 or not r.text:
+            return code, []
+        txt = r.text.strip()
+        # Python list literal 파싱
+        rows = ast.literal_eval(txt)
+        out = []
+        for row in rows[1:]:
+            if not isinstance(row, (list, tuple)) or len(row) < 5:
+                continue
+            d_raw = str(row[0]).strip()
+            if not re.fullmatch(r"\d{8}", d_raw):
+                continue
+            d_fmt = f"{d_raw[:4]}-{d_raw[4:6]}-{d_raw[6:8]}"
+            o_val = float(row[1]) if row[1] else None
+            c_val = float(row[4]) if row[4] else None
+            if c_val is not None and c_val > 0:
+                out.append((d_fmt, o_val, c_val))
+        out.sort(key=lambda x: x[0])
+        return code, out
+    except Exception:
+        return code, []
+
+
+def _calc_period_return_pct(bars, start_dash, end_dash):
+    """
+    일봉 리스트 [(YYYY-MM-DD, open, close), ...]로부터
+    start_dash ~ end_dash 구간의 수익률(%)을 계산합니다.
+    - 기준가: start_dash 직전 영업일 종가 (없으면 start_dash 당일 시가)
+    - 종료가: end_dash 이하 가장 최근 영업일 종가
+    """
+    if not bars:
+        return None
+    end_idx = -1
+    for i, (d, _, _) in enumerate(bars):
+        if d <= end_dash:
+            end_idx = i
+        else:
+            break
+    if end_idx < 0:
+        return None
+    end_date, _, end_close = bars[end_idx]
+    if end_date < start_dash:
+        return None
+
+    # start_dash 직전 영업일 종가 찾기
+    base_close = None
+    first_in_range_open = None
+    for i, (d, o_v, c_v) in enumerate(bars):
+        if d < start_dash:
+            base_close = c_v
+        elif d >= start_dash and first_in_range_open is None:
+            first_in_range_open = o_v if (o_v and o_v > 0) else c_v
+            break
+
+    ref_price = base_close if (base_close and base_close > 0) else first_in_range_open
+    if not ref_price or ref_price <= 0:
+        return None
+    return round((end_close - ref_price) / ref_price * 100.0, 2)
+
+
+def enrich_flow_returns_in_store(store, force_all=False):
+    """
+    investor_flow.json 내 일간(byDate) 및 주간(byWeek) 종목들의 기간 등락률(chgPct)을
+    네이버 일봉 데이터 기준으로 정확히 계산·채워 넣습니다.
+    """
+    # 갱신이 필요한 스냅샷(비어 있거나 최신일/최신주)과 대상 종목·날짜 범위 수집
+    latest_d = sorted((store.get("byDate") or {}).keys(), reverse=True)[:1]
+    latest_w = sorted((store.get("byWeek") or {}).keys(), reverse=True)[:1]
+    target_snaps = []
+    codes_needed = set()
+    min_start = None
+    max_end = None
+
+    for sec_key, latest_keys in (("byDate", latest_d), ("byWeek", latest_w)):
+        for k, snap in (store.get(sec_key) or {}).items():
+            s_d = snap.get("startDate") or k
+            e_d = snap.get("endDate") or k
+            needs = force_all or (k in latest_keys)
+            snap_codes = set()
+            for iv in (snap.get("investors") or {}).values():
+                for r in (iv.get("buy") or []) + (iv.get("sell") or []):
+                    cd = str(r.get("code") or "").strip()
+                    if not cd:
+                        continue
+                    if needs or r.get("chgPct") is None:
+                        snap_codes.add(cd)
+            if snap_codes:
+                target_snaps.append((sec_key, k, snap, s_d, e_d))
+                codes_needed.update(snap_codes)
+                if min_start is None or s_d < min_start:
+                    min_start = s_d
+                if max_end is None or e_d > max_end:
+                    max_end = e_d
+
+    if not codes_needed or not min_start or not max_end:
+        return store
+
+    start_dt = datetime.strptime(min_start, "%Y-%m-%d") - timedelta(days=14)
+    start_ymd = start_dt.strftime("%Y%m%d")
+    end_ymd = max_end.replace("-", "")
+
+    bars_by_code = {}
+    with ThreadPoolExecutor(max_workers=12) as ex:
+        futs = [ex.submit(_fetch_naver_daily_closes, cd, start_ymd, end_ymd) for cd in sorted(codes_needed)]
+        for fut in as_completed(futs):
+            cd, bars = fut.result()
+            if bars:
+                bars_by_code[cd] = bars
+
+    filled_cnt = 0
+    for _sec_key, _k, snap, s_d, e_d in target_snaps:
+        for iv in (snap.get("investors") or {}).values():
+            for r in (iv.get("buy") or []) + (iv.get("sell") or []):
+                cd = str(r.get("code") or "").strip()
+                bars = bars_by_code.get(cd)
+                if not bars:
+                    continue
+                pct = _calc_period_return_pct(bars, s_d, e_d)
+                if pct is not None:
+                    r["chgPct"] = pct
+                    filled_cnt += 1
+
+    print(
+        f"  - [주가등락률] {len(codes_needed)}종목 일봉 조회({len(bars_by_code)}성공) -> "
+        f"일간·주간 등락률 {filled_cnt}건 반영 완료"
+    )
+    return store
+
+
+def _save_investor_flow(here, store, update_mcaps=False, update_returns=False, force_all_returns=False):
     cutoff_d = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime("%Y-%m-%d")
     store["byDate"] = {
         k: v for k, v in sorted(store.get("byDate", {}).items(), reverse=True)
@@ -583,6 +723,8 @@ def _save_investor_flow(here, store, update_mcaps=False):
 
     if update_mcaps or not store.get("marketCaps"):
         refresh_market_caps_in_store(store)
+    if update_returns or force_all_returns:
+        enrich_flow_returns_in_store(store, force_all=force_all_returns)
 
     store["dates"] = sorted(store["byDate"].keys(), reverse=True)
     store["weeks"] = sorted(store["byWeek"].keys(), reverse=True)
@@ -673,7 +815,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
             if added_weeks % 3 == 0:
                 _save_investor_flow(here, store)
 
-    _save_investor_flow(here, store, update_mcaps=True)
+    _save_investor_flow(here, store, update_mcaps=True, update_returns=True)
     print(
         f"\n ★ 과거 소급 수집 완료: 일간 총 {len(store['dates'])}일(+{added_days}) / "
         f"주간 총 {len(store['weeks'])}주(+{added_weeks})"
@@ -722,7 +864,10 @@ def main():
         sys.exit(run_test())
 
     skip_push = any(a.lower() == "--no-push" for a in args)
-    if any(a.lower() in ("--mcaps", "mcaps", "--refresh-mcaps") for a in args):
+    if any(a.lower() in ("--returns", "returns", "--refresh-returns") for a in args):
+        store = load_investor_flow(HERE)
+        _save_investor_flow(HERE, store, update_mcaps=True, force_all_returns=True)
+    elif any(a.lower() in ("--mcaps", "mcaps", "--refresh-mcaps") for a in args):
         store = load_investor_flow(HERE)
         _save_investor_flow(HERE, store, update_mcaps=True)
     elif any(a.lower() in ("--backfill", "backfill") for a in args):

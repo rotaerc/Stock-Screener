@@ -4349,6 +4349,7 @@ def build_web_dashboard(here):
           <select id="flowSortSelect" class="select-box" style="font-weight:700; color:#1e293b;">
             <option value="amt" selected>정렬: 순매매 금액순</option>
             <option value="mcapPct">정렬: 시총대비 %순</option>
+            <option value="chgPct">정렬: 주가 등락률순</option>
             <option value="streak">정렬: 연속 등장순</option>
           </select>
         </div>
@@ -4967,7 +4968,10 @@ def build_web_dashboard(here):
           bRows.forEach(r => {{
             const amt = Number(r.netAmt) || 0;
             if (!buyByCode[r.code]) {{
-              buyByCode[r.code] = {{ code: r.code, name: r.name, market: mkt, sector: getStockSector(r.code), who: [], total: 0, maxStreak: 1 }};
+              buyByCode[r.code] = {{ code: r.code, name: r.name, market: mkt, sector: getStockSector(r.code), who: [], total: 0, maxStreak: 1, chgPct: r.chgPct }};
+            }}
+            if (buyByCode[r.code].chgPct === null || buyByCode[r.code].chgPct === undefined) {{
+              buyByCode[r.code].chgPct = r.chgPct;
             }}
             buyByCode[r.code].who.push(im.short);
             buyByCode[r.code].total += amt;
@@ -5168,12 +5172,17 @@ def build_web_dashboard(here):
       `;
 
       // 3) 좌: KOSPI 주요 15종목 | 우: KOSDAQ 주요 15종목 나란히 비교표
+      const chgColLbl = currentFlowMode === 'WEEKLY' ? '주간등락' : '일간등락';
       const renderTop15Card = (a) => {{
         const isKQ = a.mkt === 'KOSDAQ';
         const rowsHtml = a.top15.map((r, idx) => {{
           const mp = getMcapPct(r.code, r.total);
           const mpStr = (mp !== null) ? `${{mp > 0 ? '+' : ''}}${{mp.toFixed(2)}}%` : '-';
           const mpCls = (mp !== null && Math.abs(mp) >= 1.0) ? 'flow-mcap-hi-up' : 'flow-amt-up';
+          const hasChg = (r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct)));
+          const chgNum = hasChg ? Number(r.chgPct) : null;
+          const chgStr = hasChg ? `${{chgNum > 0 ? '+' : ''}}${{chgNum.toFixed(1)}}%` : '-';
+          const chgCls = hasChg ? (chgNum > 0 ? 'pct-up' : (chgNum < 0 ? 'pct-down' : '')) : '';
           const info = STOCK_LOOKUP[r.code];
           const passStar = (info && info.passed) ? `<span style="color:#15803d; font-weight:800; margin-left:2px;">★</span>` : '';
           const coTag = r.who.length >= 2 ? `<span class="flow-co-tag">${{r.who.join('+')}}</span>` : `<span style="font-size:10.5px; color:#64748b; margin-left:3px;">${{r.who[0]}}</span>`;
@@ -5184,6 +5193,7 @@ def build_web_dashboard(here):
             <td style="text-align:left; color:#475569; font-weight:600; font-size:11px;">${{escapeHtml(r.sector)}}</td>
             <td class="flow-amt-up">${{fmtEok(r.total)}}</td>
             <td><span class="${{mpCls}}">${{mpStr}}</span></td>
+            <td class="${{chgCls}}" style="font-weight:${{hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'}};">${{chgStr}}</td>
             <td style="text-align:center;">${{coTag}}</td>
           </tr>`;
         }}).join('');
@@ -5193,8 +5203,8 @@ def build_web_dashboard(here):
             <span style="font-size:11px; color:#64748b; font-weight:700;">시총 3천억↑ · ETF 제외</span>
           </div>
           <table class="flow-mini-tbl">
-            <thead><tr><th>#</th><th>종목명</th><th style="text-align:left;">섹터</th><th>합산(억)</th><th>시총대비</th><th style="text-align:center;">매수주체</th></tr></thead>
-            <tbody>${{rowsHtml || '<tr><td colspan="6" style="text-align:center; padding:16px; color:#94a3b8;">데이터 없음</td></tr>'}}</tbody>
+            <thead><tr><th>#</th><th>종목명</th><th style="text-align:left;">섹터</th><th>합산(억)</th><th>시총대비</th><th>${{chgColLbl}}</th><th style="text-align:center;">매수주체</th></tr></thead>
+            <tbody>${{rowsHtml || '<tr><td colspan="7" style="text-align:center; padding:16px; color:#94a3b8;">데이터 없음</td></tr>'}}</tbody>
           </table>
         </div>`;
       }};
@@ -5547,6 +5557,13 @@ def build_web_dashboard(here):
             if (vb !== va) return vb - va;
             return Math.abs(Number(b.netAmt) || 0) - Math.abs(Number(a.netAmt) || 0);
           }});
+        }} else if (sortF === 'chgPct') {{
+          sorted.sort((a, b) => {{
+            const ca = (a.chgPct !== null && a.chgPct !== undefined) ? Number(a.chgPct) : -9999;
+            const cb = (b.chgPct !== null && b.chgPct !== undefined) ? Number(b.chgPct) : -9999;
+            if (cb !== ca) return cb - ca;
+            return Math.abs(Number(b.netAmt) || 0) - Math.abs(Number(a.netAmt) || 0);
+          }});
         }} else if (sortF === 'streak') {{
           sorted.sort((a, b) => {{
             const sa = getPresenceStats(invKey, isBuy, a.code);
@@ -5564,8 +5581,9 @@ def build_web_dashboard(here):
         const coSet = isBuy ? buyMap : sellMap;
         const unit = currentFlowMode === 'DAILY' ? '일' : '주';
         const periodHead = currentFlowMode === 'DAILY' ? '등장일수' : '등장주수';
+        const chgHead = currentFlowMode === 'DAILY' ? '일간등락' : '주간등락';
         const sideLbl = isBuy ? '순매수' : '순매도';
-        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>시총(억)</th><th>${{periodHead}}</th></tr></thead><tbody>` +
+        return `<table class="flow-mini-tbl"><thead><tr><th>#</th><th>종목명</th><th>순매매(억)</th><th>시총대비</th><th>${{chgHead}}</th><th>시총(억)</th><th>${{periodHead}}</th></tr></thead><tbody>` +
           list.map((r, idx) => {{
             const amt = Number(r.netAmt) || 0;
             const amtStr = `${{amt > 0 ? '+' : ''}}${{amt.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}`;
@@ -5580,6 +5598,10 @@ def build_web_dashboard(here):
               mpCell = `<span class="${{hiCls}}">${{mpStr}}</span>`;
               mpTip = `data-tip="${{escapeHtml(`${{r.name}} 시가총액: ${{Math.round(mc).toLocaleString('ko-KR')}}억\\n순매매: ${{amtStr}}억 (시총 대비 ${{mpStr}})`)}}"`;
             }}
+            const hasChg = (r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct)));
+            const chgNum = hasChg ? Number(r.chgPct) : null;
+            const chgStr = hasChg ? `${{chgNum > 0 ? '+' : ''}}${{chgNum.toFixed(1)}}%` : '-';
+            const chgCls = hasChg ? (chgNum > 0 ? 'pct-up' : (chgNum < 0 ? 'pct-down' : '')) : '';
             const mcStr = (mc && mc > 0) ? Math.round(mc).toLocaleString('ko-KR') : '-';
             const st = getPresenceStats(invKey, isBuy, r.code);
             let stCell = `<span style="color:#94a3b8;">1${{unit}}</span>`;
@@ -5604,6 +5626,7 @@ def build_web_dashboard(here):
               <td><b>${{escapeHtml(r.name)}}</b>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
               <td ${{mpTip}}>${{mpCell}}</td>
+              <td class="${{chgCls}}" style="font-weight:${{hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'}};">${{chgStr}}</td>
               <td style="color:#475569;">${{mcStr}}</td>
               <td ${{stTip}}>${{stCell}}</td>
             </tr>`;
