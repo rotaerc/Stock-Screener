@@ -523,10 +523,16 @@ def fetch_naver_market_caps(target_codes=None):
                         continue
                     if need is not None and cd not in need:
                         continue
-                    raw_mv = st.get("marketValueRaw") or st.get("marketValue")
-                    mv_num = _parse_abs_num(raw_mv)
-                    if mv_num is not None and mv_num > 0:
-                        mcaps[cd] = round(mv_num, 1)
+                    mv_eok = None
+                    raw_mv_won = st.get("marketValueRaw")
+                    if raw_mv_won is not None:
+                        won_num = _parse_abs_num(raw_mv_won)
+                        if won_num is not None and won_num > 0:
+                            mv_eok = won_num / 1e8  # 원 -> 억원
+                    if mv_eok is None:
+                        mv_eok = _parse_abs_num(st.get("marketValue"))  # 억원
+                    if mv_eok is not None and mv_eok > 0:
+                        mcaps[cd] = round(mv_eok, 1)
                 total_cnt = int(payload.get("totalCount") or 0)
                 if page * 100 >= total_cnt or (need is not None and len(mcaps) >= len(need)):
                     break
