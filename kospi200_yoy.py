@@ -4007,7 +4007,7 @@ def build_web_dashboard(here):
           </select>
         </div>
         <div class="group-right">
-          <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외국인·연기금·사모펀드 · 단위: 억원)</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">🏦 키움 REST API (외국인·연기금·사모펀드 · ETF 제외 · 단위: 억원)</span>
         </div>
       </div>
       <div class="flow-body-wrap" id="flowBodyWrap">

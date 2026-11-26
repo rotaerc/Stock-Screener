@@ -42,6 +42,33 @@ RETENTION_DAYS = 60
 RETENTION_WEEKS = 12
 TOP_N_PER_SIDE = 30
 
+# 국내 상장 ETF / ETN 제외 필터 (개별 종목 수급만 순수 집계)
+ETF_BRAND_PREFIXES = (
+    "KODEX ", "TIGER ", "RISE ", "KBSTAR ", "ACE ", "KINDEX ", "SOL ", "HANARO ",
+    "PLUS ", "ARIRANG ", "KIWOOM ", "KOSEF ", "히어로즈 ", "TIMEFOLIO ", "TIME ",
+    "WON ", "KOACT ", "FOCUS ", "TREX ", "HK ", "UNICORN ", "BNK ", "1Q ",
+    "TRUSTON ", "마이티 ", "에셋플러스 ", "파워 ", "마이다스 ", "WOORI ", "SMART ",
+    "VITA ", "MASTER ", "KTOP ",
+)
+ETF_KEYWORDS = (
+    "ETF", "ETN", "액티브", "(합성", "인버스", "레버리지", "200TR",
+    "선물(", "채권(", "국고채", "통안채", "회사채", "CD금리", "KOFR", "머니마켓", "단기채",
+)
+
+
+def is_etf_or_etn(name):
+    nm = str(name or "").strip()
+    if not nm:
+        return False
+    up = nm.upper()
+    if any(up.startswith(p.upper()) for p in ETF_BRAND_PREFIXES):
+        return True
+    if any(k.upper() in up for k in ETF_KEYWORDS):
+        return True
+    if re.search(r"\bTR$", up):
+        return True
+    return False
+
 
 def load_env(env_path=ENV_PATH):
     """외부 패키지 없이 .env 파일을 안전하게 읽습니다."""
@@ -234,7 +261,7 @@ def fetch_ka10058(token, start_dt, end_dt, invsr_tp, trde_tp, mrkt_tp, env_mode=
             continue
         code = m_cd.group(1)
         name = str(row.get("stk_nm") or "").strip()
-        if not name:
+        if not name or is_etf_or_etn(name):
             continue
 
         # 순매매금액 (ka10058 기본 단위: 백만원 -> 억원 변환: ÷ 100)
@@ -415,7 +442,27 @@ def update_investor_flow(here=HERE, target_yyyymmdd=None, include_week=True):
     if has_daily:
         store["byDate"][ymd_dash] = daily_snap
     else:
-        print(f"  [알림] {ymd_dash} 일간 수급 데이터가 비어 있습니다(휴장일 또는 장마감 집계 전일 수 있음).")
+        print(f"  [알림] {ymd_dash} 일간 수급 데이터가 아직 없습니다(장마감 16:20 이후 확정). 직전 영업일 일간 수급을 확인합니다...")
+        prev_dt = dt - timedelta(days=1)
+        while prev_dt.weekday() >= 5:
+            prev_dt -= timedelta(days=1)
+        prev_ymd = prev_dt.strftime("%Y%m%d")
+        prev_dash = prev_dt.strftime("%Y-%m-%d")
+        if prev_dash not in store["byDate"]:
+            prev_snap = collect_period_snapshot(token, prev_ymd, prev_ymd, env_mode=env_mode)
+            has_prev = any(
+                len(v.get("buy") or []) + len(v.get("sell") or []) > 0
+                for v in prev_snap["investors"].values()
+            )
+            if has_prev:
+                store["byDate"][prev_dash] = prev_snap
+
+    # 기존 저장된 과거 기록에도 ETF/ETN 항목이 남아 있으면 정리
+    for sec_key in ("byDate", "byWeek"):
+        for _k, _snap in (store.get(sec_key) or {}).items():
+            for _iv in (_snap.get("investors") or {}).values():
+                _iv["buy"] = [r for r in (_iv.get("buy") or []) if not is_etf_or_etn(r.get("name"))]
+                _iv["sell"] = [r for r in (_iv.get("sell") or []) if not is_etf_or_etn(r.get("name"))]
 
     # 2) 주간 수급 수집 (매주 월~오늘 누적, 금요일에는 1주 전체 확정 집계!)
     if include_week:
