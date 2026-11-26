@@ -4875,8 +4875,13 @@ def auto_push_to_github(here, commit_msg=None):
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
-    args = [a for a in sys.argv[1:] if a.lower() != "--no-push"]
-    skip_push = any(a.lower() == "--no-push" for a in sys.argv[1:])
+    raw_args = sys.argv[1:]
+    skip_push = any(a.lower() == "--no-push" for a in raw_args)
+    screener_only = any(a.lower() in ("--screener", "screener", "--screener-only", "--no-reports") for a in raw_args)
+    args = [
+        a for a in raw_args
+        if a.lower() not in ("--no-push", "--screener", "screener", "--screener-only", "--no-reports")
+    ]
 
     # GitHub 업로드만 즉시 실행 (예: python kospi200_yoy.py --push)
     if args and args[0].lower() in ("--push", "push"):
@@ -4937,8 +4942,9 @@ def main():
         print(f"  - [{mkt}] {os.path.basename(path)}")
     print(f"{'='*80}")
 
-    # 크롤링 및 엑셀 생성 완료 후 오늘자 한경 기업 리포트 수집 + 웹페이지(index.html) 최신화 + GitHub 자동 업로드
-    fetch_hankyung_reports(here)
+    # 크롤링 및 엑셀 생성 완료 후 (--screener 단독 실행이 아니면) 오늘자 기업 리포트 수집 + 웹페이지(index.html) 최신화 + GitHub 자동 업로드
+    if not screener_only:
+        fetch_hankyung_reports(here)
     build_web_dashboard(here)
     if not skip_push:
         auto_push_to_github(here)
