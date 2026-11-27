@@ -5347,6 +5347,7 @@ def build_web_dashboard(here):
         cmpMode: currentCompareMode,
         flowMode: currentFlowMode,
         flowSubTab: currentFlowSubTab,
+        privateWindow: currentPrivateWindow,
         flowKey: currentFlowKey,
         flowKeyDaily: currentFlowKeyByMode.DAILY || '',
         flowKeyWeekly: currentFlowKeyByMode.WEEKLY || '',
@@ -5389,6 +5390,7 @@ def build_web_dashboard(here):
       try {{
         if (st.flowMode) currentFlowMode = st.flowMode;
         if (st.flowSubTab) currentFlowSubTab = st.flowSubTab;
+        if (st.privateWindow && [1, 3, 5].includes(Number(st.privateWindow))) currentPrivateWindow = Number(st.privateWindow);
         if (st.cmpMode && st.cmpMode !== currentCompareMode) {{
           currentCompareMode = st.cmpMode;
           applyScreenerCompareAll(currentCompareMode);
@@ -6261,10 +6263,10 @@ def build_web_dashboard(here):
 
     let currentFlowMode = 'DAILY';
     let currentFlowSubTab = 'ALL'; // 'ALL' | 'PRIVATE_TOP50'
+    let currentPrivateWindow = 1; // 1 | 3 | 5 (영업일 누적)
     let currentPrivateRankFilter = 'ALL'; // 'ALL' | 'R1' | 'R3'
     let currentPrivateSort = 'mcapPct'; // 'mcapPct' | 'rank' | 'amt' | 'chgPct' | 'streak'
-    let _privateAnnualCacheKey = -1;
-    let _privateAnnualCache = {{}};
+    let _privateAnnualCacheMap = {{}};
     let currentFlowKeyByMode = {{ DAILY: '', WEEKLY: '' }};
     let currentFlowKey = '';
     let currentFlowMarket = '';
@@ -6752,6 +6754,12 @@ def build_web_dashboard(here):
       pushNavHistory();
     }}
 
+    function setPrivateWindow(n) {{
+      currentPrivateWindow = [1, 3, 5].includes(Number(n)) ? Number(n) : 1;
+      renderFlowView();
+      pushNavHistory();
+    }}
+
     function setPrivateRankFilter(f) {{
       currentPrivateRankFilter = f || 'ALL';
       renderFlowView();
@@ -6762,33 +6770,121 @@ def build_web_dashboard(here):
       renderFlowView();
     }}
 
-    function getPrivateAnnualHistory() {{
+    function getPrivateAnnualHistory(winN = 1) {{
       const dates = (FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates : [];
-      if (_privateAnnualCacheKey === dates.length && Object.keys(_privateAnnualCache).length > 0) {{
-        return _privateAnnualCache;
+      const cacheKey = `${{dates.length}}_${{winN}}`;
+      if (_privateAnnualCacheMap[cacheKey]) {{
+        return _privateAnnualCacheMap[cacheKey];
       }}
       const byDate = (FLOW_DATA && FLOW_DATA.byDate) ? FLOW_DATA.byDate : {{}};
       const mcapMap = (FLOW_DATA && FLOW_DATA.marketCaps) ? FLOW_DATA.marketCaps : {{}};
       const hist = {{}};
-      dates.forEach(dt => {{
-        const snap = byDate[dt];
-        const buys = (snap && snap.investors && snap.investors.private && snap.investors.private.buy) ? snap.investors.private.buy : [];
-        buys.forEach(r => {{
-          const cd = r.code;
-          const amt = Number(r.netAmt) || 0;
-          if (!cd || amt <= 0) return;
-          const mc = Number(mcapMap[cd]) || 0;
-          const pct = mc > 0 ? (amt / mc * 100.0) : null;
-          if (!hist[cd]) hist[cd] = [];
-          hist[cd].push({{ date: dt, amt, pct }});
+
+      if (winN <= 1) {{
+        dates.forEach((dt, idx) => {{
+          const snap = byDate[dt];
+          const buys = (snap && snap.investors && snap.investors.private && snap.investors.private.buy) ? snap.investors.private.buy : [];
+          buys.forEach(r => {{
+            const cd = r.code;
+            const amt = Number(r.netAmt) || 0;
+            if (!cd || amt <= 0) return;
+            const mc = Number(mcapMap[cd]) || 0;
+            const pct = mc > 0 ? (amt / mc * 100.0) : null;
+            if (!hist[cd]) hist[cd] = [];
+            hist[cd].push({{ date: dt, startDate: dt, idx, amt: Math.round(amt * 10) / 10, pct }});
+          }});
         }});
-      }});
-      Object.keys(hist).forEach(cd => {{
-        hist[cd].sort((a, b) => (b.amt - a.amt) || String(b.date).localeCompare(String(a.date)));
-      }});
-      _privateAnnualCacheKey = dates.length;
-      _privateAnnualCache = hist;
+        Object.keys(hist).forEach(cd => {{
+          hist[cd].sort((a, b) => (b.amt - a.amt) || String(b.date).localeCompare(String(a.date)));
+        }});
+      }} else {{
+        // 종목별 일자 인덱스 -> 사모 순매수(+)/순매도(-) 맵 구성
+        const byCodeIdx = {{}};
+        dates.forEach((dt, idx) => {{
+          const snap = byDate[dt];
+          const pObj = (snap && snap.investors && snap.investors.private) ? snap.investors.private : null;
+          if (!pObj) return;
+          (pObj.buy || []).forEach(r => {{
+            const cd = r.code; const a = Number(r.netAmt) || 0;
+            if (!cd || a === 0) return;
+            if (!byCodeIdx[cd]) byCodeIdx[cd] = {{}};
+            byCodeIdx[cd][idx] = (byCodeIdx[cd][idx] || 0) + a;
+          }});
+          (pObj.sell || []).forEach(r => {{
+            const cd = r.code; const a = Number(r.netAmt) || 0;
+            if (!cd || a === 0) return;
+            if (!byCodeIdx[cd]) byCodeIdx[cd] = {{}};
+            byCodeIdx[cd][idx] = (byCodeIdx[cd][idx] || 0) + a;
+          }});
+        }});
+
+        const maxEndIdx = dates.length - winN;
+        Object.keys(byCodeIdx).forEach(cd => {{
+          const dayMap = byCodeIdx[cd];
+          const activeIdxs = Object.keys(dayMap).map(Number);
+          const candSet = new Set();
+          activeIdxs.forEach(di => {{
+            for (let off = 0; off < winN; off++) {{
+              const ei = di - off;
+              if (ei >= 0 && ei <= maxEndIdx) candSet.add(ei);
+            }}
+          }});
+          const mc = Number(mcapMap[cd]) || 0;
+          const wins = [];
+          candSet.forEach(ei => {{
+            let sum = 0;
+            for (let k = 0; k < winN; k++) {{
+              sum += (dayMap[ei + k] || 0);
+            }}
+            sum = Math.round(sum * 10) / 10;
+            if (sum > 0) {{
+              wins.push({{
+                date: dates[ei],
+                startDate: dates[ei + winN - 1],
+                idx: ei,
+                amt: sum,
+                pct: mc > 0 ? (sum / mc * 100.0) : null,
+              }});
+            }}
+          }});
+          wins.sort((a, b) => (b.amt - a.amt) || String(b.date).localeCompare(String(a.date)));
+          if (wins.length) hist[cd] = wins;
+        }});
+      }}
+
+      _privateAnnualCacheMap[cacheKey] = hist;
       return hist;
+    }}
+
+    function computeDistinctAnnualRank(allWins, targetDate, targetIdx, winN) {{
+      if (!allWins || !allWins.length) return {{ rank: 1, total: 1, topList: [] }};
+      if (winN <= 1) {{
+        const rkIdx = allWins.findIndex(h => h.date === targetDate);
+        return {{
+          rank: rkIdx >= 0 ? (rkIdx + 1) : 1,
+          total: Math.max(1, allWins.length),
+          topList: allWins.slice(0, 5),
+        }};
+      }}
+      // N일 누적 구간 겹침 중복 제거(비최대 억제): 같은 매집 파동이 N번 중복 카운트되지 않도록 정밀 순위 산출
+      const curWin = allWins.find(h => h.date === targetDate);
+      const distinct = [];
+      for (const w of allWins) {{
+        // 조회 중인 현재 구간과 겹치는 다른 구간은 비교 대상에서 제외
+        if (w.date !== targetDate && targetIdx >= 0 && Math.abs(w.idx - targetIdx) < winN) continue;
+        if (distinct.some(k => Math.abs(k.idx - w.idx) < winN)) continue;
+        distinct.push(w);
+      }}
+      if (curWin && !distinct.some(k => k.date === targetDate)) {{
+        distinct.push(curWin);
+      }}
+      distinct.sort((a, b) => (b.amt - a.amt) || String(b.date).localeCompare(String(a.date)));
+      const rkIdx = distinct.findIndex(h => h.date === targetDate);
+      return {{
+        rank: rkIdx >= 0 ? (rkIdx + 1) : 1,
+        total: Math.max(1, distinct.length),
+        topList: distinct.slice(0, 5),
+      }};
     }}
 
     function renderPrivateTop50View(snap, periodTxt) {{
@@ -6800,13 +6896,19 @@ def build_web_dashboard(here):
       const curIdx = allDates.indexOf(currentFlowKey);
       const q = (document.getElementById('flowSearchInput').value || '').trim().toLowerCase();
       const mktF = currentFlowMarket;
+      const winN = [1, 3, 5].includes(currentPrivateWindow) ? currentPrivateWindow : 1;
+      const winDates = (curIdx >= 0) ? allDates.slice(curIdx, curIdx + winN) : (currentFlowKey ? [currentFlowKey] : []);
+      const effWinN = Math.max(1, winDates.length);
+      const winRangeTxt = effWinN > 1
+        ? `${{winDates[winDates.length - 1]}} ~ ${{winDates[0]}} (${{effWinN}}영업일 누적)`
+        : `${{winDates[0] || periodTxt}} 기준 (1일간)`;
 
       const mktTitleTag = mktF ? ` · ${{mktF}}` : ' · KOSPI+KOSDAQ';
-      document.getElementById('pageTitle').textContent = `사모펀드 시총대비% TOP 50` + mktTitleTag;
-      document.getElementById('pageSubtitle').textContent = `키움 REST API · 사모펀드 일간 순매수 · 시총 2,000억 이상 · 시총대비 %순 · 최근 1년(${{allDates.length}}영업일) 중 순매수 순위 · ${{periodTxt}}`;
+      document.getElementById('pageTitle').textContent = `사모 시총대비 수급 (${{winN}}일간)` + mktTitleTag;
+      document.getElementById('pageSubtitle').textContent = `키움 REST API · 사모펀드 ${{winN}}영업일 누적 순매수 · 시총 2,000억 이상 · 시총대비 %순 TOP 50 · 최근 1년(${{allDates.length}}영업일) 순위 · ${{winRangeTxt}}`;
       document.getElementById('metaBadges').innerHTML = `
-        <span class="meta-pill">💼 사모펀드 단독 · 시총 2,000억↑</span>
-        <span class="meta-pill">📅 ${{periodTxt}}</span>
+        <span class="meta-pill">💼 사모펀드 단독 · ${{winN}}일간 누적 · 시총 2,000억↑</span>
+        <span class="meta-pill">📅 ${{winRangeTxt}}</span>
         <span class="meta-pill">📊 1년 비교 모수: ${{allDates.length}}영업일${{(FLOW_DATA && FLOW_DATA.hasFullArchive) ? ' (전체 로딩중...)' : ''}}</span>
         <span class="meta-pill">🕒 업데이트: ${{(snap && snap.updatedAt) || (FLOW_DATA && FLOW_DATA.updatedAt) || '-'}}</span>
       `;
@@ -6815,10 +6917,50 @@ def build_web_dashboard(here):
       if (overlapBox) overlapBox.innerHTML = '';
       grid.style.display = 'block';
 
-      const annHist = getPrivateAnnualHistory();
-      const rawBuys = (snap && snap.investors && snap.investors.private && snap.investors.private.buy) ? snap.investors.private.buy : [];
-      const fBuySet = new Set(((snap && snap.investors && snap.investors.foreign && snap.investors.foreign.buy) || []).map(x => x.code));
-      const pBuySet = new Set(((snap && snap.investors && snap.investors.pension && snap.investors.pension.buy) || []).map(x => x.code));
+      const annHist = getPrivateAnnualHistory(effWinN);
+
+      // 선택 구간(winDates) 내 사모펀드 누적 순매수 + 외인/연기금 동시매수 집계
+      const aggMap = {{}};
+      const fNetMap = {{}};
+      const pNetMap = {{}};
+      winDates.forEach((dt, wi) => {{
+        const s = FLOW_DATA.byDate[dt];
+        if (!s || !s.investors) return;
+        const pObj = s.investors.private || {{}};
+        (pObj.buy || []).forEach(r => {{
+          const cd = r.code; const a = Number(r.netAmt) || 0;
+          if (!cd) return;
+          if (!aggMap[cd]) {{
+            aggMap[cd] = {{ code: cd, name: r.name, market: r.market, amt: 0, buyDays: 0, chgList: [], latestChg: null }};
+          }}
+          aggMap[cd].amt += a;
+          if (a > 0) aggMap[cd].buyDays += 1;
+          if (r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct))) {{
+            if (wi === 0 && aggMap[cd].latestChg === null) aggMap[cd].latestChg = Number(r.chgPct);
+            aggMap[cd].chgList.push({{ wi, v: Number(r.chgPct) }});
+          }}
+        }});
+        (pObj.sell || []).forEach(r => {{
+          const cd = r.code; const a = Number(r.netAmt) || 0;
+          if (!cd) return;
+          if (!aggMap[cd]) {{
+            aggMap[cd] = {{ code: cd, name: r.name, market: r.market, amt: 0, buyDays: 0, chgList: [], latestChg: null }};
+          }}
+          aggMap[cd].amt += a;
+          if (r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct))) {{
+            if (wi === 0 && aggMap[cd].latestChg === null) aggMap[cd].latestChg = Number(r.chgPct);
+            aggMap[cd].chgList.push({{ wi, v: Number(r.chgPct) }});
+          }}
+        }});
+        const fObj = s.investors.foreign || {{}};
+        [...(fObj.buy || []), ...(fObj.sell || [])].forEach(r => {{
+          if (r.code) fNetMap[r.code] = (fNetMap[r.code] || 0) + (Number(r.netAmt) || 0);
+        }});
+        const penObj = s.investors.pension || {{}};
+        [...(penObj.buy || []), ...(penObj.sell || [])].forEach(r => {{
+          if (r.code) pNetMap[r.code] = (pNetMap[r.code] || 0) + (Number(r.netAmt) || 0);
+        }});
+      }});
 
       const calcStreak = (cd) => {{
         let st = 0;
@@ -6830,31 +6972,41 @@ def build_web_dashboard(here):
             else break;
           }}
         }}
-        return Math.max(1, st);
+        return st;
       }};
 
-      let rows = rawBuys.map(r => {{
+      let rows = Object.values(aggMap).map(r => {{
         const mc = Number(mcapMap[r.code]) || 0;
-        const amt = Number(r.netAmt) || 0;
+        const amt = Math.round(r.amt * 10) / 10;
         if (mc < 2000 || amt <= 0) return null;
         if (mktF && r.market !== mktF) return null;
         if (q && !(String(r.name || '').toLowerCase().includes(q) || String(r.code || '').includes(q))) return null;
         const mcapPct = amt / mc * 100.0;
-        const hist = annHist[r.code] || [];
-        const rkIdx = hist.findIndex(h => h.date === currentFlowKey);
-        const annualRank = rkIdx >= 0 ? (rkIdx + 1) : 1;
-        const annualTotal = Math.max(1, hist.length);
+        const rkObj = computeDistinctAnnualRank(annHist[r.code] || [], currentFlowKey, curIdx, effWinN);
         const co = [];
-        if (fBuySet.has(r.code)) co.push('외인');
-        if (pBuySet.has(r.code)) co.push('연기금');
+        if ((fNetMap[r.code] || 0) > 0) co.push('외인');
+        if ((pNetMap[r.code] || 0) > 0) co.push('연기금');
+
+        // 등락률: 1일간은 당일 등락률, 3/5일간은 등장일 기준 누적(복리) 등락률
+        let dispChg = null;
+        if (effWinN === 1) {{
+          dispChg = r.latestChg;
+        }} else if (r.chgList.length > 0) {{
+          const byWi = {{}};
+          r.chgList.forEach(x => {{ if (byWi[x.wi] === undefined) byWi[x.wi] = x.v; }});
+          const mult = Object.values(byWi).reduce((acc, v) => acc * (1 + v / 100.0), 1.0);
+          dispChg = Math.round((mult - 1.0) * 10000) / 100;
+        }}
+
         return {{
           ...r,
           mcap: mc,
           amt,
           mcapPct,
-          annualRank,
-          annualTotal,
-          hist,
+          chgPct: dispChg,
+          annualRank: rkObj.rank,
+          annualTotal: rkObj.total,
+          topList: rkObj.topList,
           streak: calcStreak(r.code),
           co,
           sector: getStockSector(r.code),
@@ -6882,17 +7034,18 @@ def build_web_dashboard(here):
         const cv = (x) => (x.chgPct !== null && x.chgPct !== undefined && !isNaN(Number(x.chgPct))) ? Number(x.chgPct) : -999;
         disp.sort((a, b) => (cv(b) - cv(a)) || (b.mcapPct - a.mcapPct));
       }} else if (currentPrivateSort === 'streak') {{
-        disp.sort((a, b) => (b.streak - a.streak) || (b.mcapPct - a.mcapPct));
+        disp.sort((a, b) => (b.buyDays - a.buyDays) || (b.streak - a.streak) || (b.mcapPct - a.mcapPct));
       }} else {{
         disp.sort((a, b) => (b.mcapPct - a.mcapPct) || (b.amt - a.amt));
       }}
 
+      const pctHiThresh = effWinN >= 5 ? 0.80 : (effWinN >= 3 ? 0.50 : 0.30);
       const rowsHtml = disp.map((r, idx) => {{
         const info = STOCK_LOOKUP[r.code];
         const passStar = (info && info.passed) ? `<span style="color:#15803d; font-weight:800; margin-left:3px;" title="스크리너 메인 통과">★</span>` : '';
         const estUp = (info && info.hasEstUp) ? `<span style="color:#dc2626; font-weight:800; font-size:10px; margin-left:2px;" title="예상이익 상향">▲</span>` : '';
         const mktTag = `<span class="flow-mkt-tag ${{r.market === 'KOSDAQ' ? 'kq' : 'kp'}}">${{r.market === 'KOSDAQ' ? 'KQ' : 'KP'}}</span>`;
-        const pctHtml = r.mcapPct >= 0.30
+        const pctHtml = r.mcapPct >= pctHiThresh
           ? `<span class="pe-mcap-pct-hi">+${{r.mcapPct.toFixed(2)}}%</span>`
           : `<span style="color:#dc2626; font-weight:800;">+${{r.mcapPct.toFixed(2)}}%</span>`;
 
@@ -6901,20 +7054,30 @@ def build_web_dashboard(here):
         else if (r.annualRank <= 3) {{ rkCls = 'r3'; rkLbl = `🔥 연간 ${{r.annualRank}}위`; }}
         else if (r.annualRank <= 5) {{ rkCls = 'r5'; rkLbl = `연간 ${{r.annualRank}}위`; }}
 
-        const top5Lines = r.hist.slice(0, 5).map((h, hi) => {{
-          const mark = h.date === currentFlowKey ? ' ◀ 조회일' : '';
+        const top5Lines = r.topList.map((h, hi) => {{
+          const mark = h.date === currentFlowKey ? (effWinN > 1 ? ' ◀ 조회구간' : ' ◀ 조회일') : '';
+          const dtStr = (effWinN > 1 && h.startDate && h.startDate !== h.date) ? `${{h.startDate}}~${{h.date.slice(5)}}` : h.date;
           const pTxt = (h.pct !== null && !isNaN(h.pct)) ? ` (시총 +${{h.pct.toFixed(2)}}%)` : '';
-          return `${{hi + 1}}위. ${{h.date}}: +${{h.amt.toFixed(1)}}억${{pTxt}}${{mark}}`;
+          return `${{hi + 1}}위. ${{dtStr}}: +${{h.amt.toFixed(1)}}억${{pTxt}}${{mark}}`;
         }});
-        const tipTxt = `[${{r.name}}] 최근 1년(${{allDates.length}}영업일) 사모펀드 순매수 TOP5 (총 ${{r.annualTotal}}회 등장)\\n${{top5Lines.join('\\n')}}`;
+        const tipTxt = `[${{r.name}}] 최근 1년(${{allDates.length}}영업일) 사모펀드 ${{effWinN}}일간 누적 순매수 TOP5 (총 ${{r.annualTotal}}구간)\\n${{top5Lines.join('\\n')}}`;
 
         const hasChg = r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct));
         const chgNum = hasChg ? Number(r.chgPct) : null;
         const chgCls = hasChg ? (chgNum > 0 ? 'pct-up' : (chgNum < 0 ? 'pct-down' : '')) : '';
         const chgTxt = hasChg ? `${{chgNum > 0 ? '+' : ''}}${{chgNum.toFixed(2)}}%` : '-';
-        const stHtml = r.streak >= 2
-          ? `<span class="flow-streak-mid buy">${{r.streak}}일 연속</span>`
-          : `<span style="color:#64748b;">1일</span>`;
+        let stHtml = '';
+        if (effWinN === 1) {{
+          stHtml = r.streak >= 2
+            ? `<span class="flow-streak-mid buy">${{r.streak}}일 연속</span>`
+            : `<span style="color:#64748b;">1일</span>`;
+        }} else {{
+          const dTag = r.buyDays >= effWinN
+            ? `<span class="flow-streak-mid buy">${{r.buyDays}}/${{effWinN}}일 매수</span>`
+            : `<span style="color:#334155; font-weight:700;">${{r.buyDays}}/${{effWinN}}일</span>`;
+          const sTag = r.streak >= 2 ? ` <span style="font-size:10px; color:#dc2626; font-weight:700;">(${{r.streak}}연속)</span>` : '';
+          stHtml = dTag + sTag;
+        }}
         const coHtml = r.co.length
           ? `<span class="flow-co-tag">+${{r.co.join('+')}}</span>`
           : `<span style="color:#cbd5e1;">-</span>`;
@@ -6930,7 +7093,7 @@ def build_web_dashboard(here):
           <td style="color:#475569;">${{Math.round(r.mcap).toLocaleString('ko-KR')}}억</td>
           <td class="ctr">
             <span class="pe-rank-badge ${{rkCls}}" data-tip="${{escapeHtml(tipTxt)}}">${{rkLbl}}</span>
-            <span style="font-size:10.5px; color:#94a3b8; margin-left:3px;">/${{r.annualTotal}}회</span>
+            <span style="font-size:10.5px; color:#94a3b8; margin-left:3px;">/${{r.annualTotal}}${{effWinN > 1 ? '구간' : '회'}}</span>
           </td>
           <td class="ctr">${{stHtml}}</td>
           <td class="${{chgCls}}" style="font-weight:${{hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'}};">${{chgTxt}}</td>
@@ -6942,8 +7105,13 @@ def build_web_dashboard(here):
         <div class="pe-top50-card">
           <div class="pe-top50-head">
             <div class="pe-top50-title">
-              <span>💼 사모펀드 일간 순매수 · 시총대비 % TOP 50 (${{periodTxt}})</span>
-              <span style="font-size:11.5px; color:#64748b; font-weight:700;">시총 2,000억↑ · ${{top50All.length}}종목 · 합계 +${{Math.round(sumAmt).toLocaleString('ko-KR')}}억</span>
+              <span>💼 사모펀드 ${{winN}}일간 누적 순매수 · 시총대비 % TOP 50</span>
+              <div class="flow-mode-group" style="margin-left:4px;">
+                <button class="flow-mode-btn ${{winN === 1 ? 'active' : ''}}" onclick="setPrivateWindow(1)">1일간</button>
+                <button class="flow-mode-btn ${{winN === 3 ? 'active' : ''}}" onclick="setPrivateWindow(3)">3일간</button>
+                <button class="flow-mode-btn ${{winN === 5 ? 'active' : ''}}" onclick="setPrivateWindow(5)">5일간</button>
+              </div>
+              <span style="font-size:11.5px; color:#64748b; font-weight:700;">${{winRangeTxt}} · 시총 2,000억↑ · ${{top50All.length}}종목 · 합계 +${{Math.round(sumAmt).toLocaleString('ko-KR')}}억</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <div class="pe-filter-pills">
@@ -6955,8 +7123,8 @@ def build_web_dashboard(here):
                 <option value="mcapPct" ${{currentPrivateSort === 'mcapPct' ? 'selected' : ''}}>정렬: 시총대비 %순</option>
                 <option value="rank" ${{currentPrivateSort === 'rank' ? 'selected' : ''}}>정렬: 연간 순위순 (1위 우선)</option>
                 <option value="amt" ${{currentPrivateSort === 'amt' ? 'selected' : ''}}>정렬: 순매수 금액순</option>
-                <option value="chgPct" ${{currentPrivateSort === 'chgPct' ? 'selected' : ''}}>정렬: 일간 등락률순</option>
-                <option value="streak" ${{currentPrivateSort === 'streak' ? 'selected' : ''}}>정렬: 연속 등장순</option>
+                <option value="chgPct" ${{currentPrivateSort === 'chgPct' ? 'selected' : ''}}>정렬: 등락률순</option>
+                <option value="streak" ${{currentPrivateSort === 'streak' ? 'selected' : ''}}>정렬: ${{effWinN > 1 ? '매수일수·연속순' : '연속 등장순'}}</option>
               </select>
             </div>
           </div>
@@ -6968,12 +7136,12 @@ def build_web_dashboard(here):
                   <th class="lft">종목명</th>
                   <th class="lft">섹터</th>
                   <th>시총대비 (%)</th>
-                  <th>사모 순매수</th>
+                  <th>사모 ${{winN}}일 순매수</th>
                   <th>시가총액</th>
-                  <th class="ctr" title="최근 1년(${{allDates.length}}영업일) 중 해당 종목에 사모펀드가 순매수한 날들 가운데 몇 번째로 많이 샀는지">연간 순매수 순위</th>
-                  <th class="ctr">연속 등장</th>
-                  <th>일간 등락률</th>
-                  <th class="ctr">당일 동시매수</th>
+                  <th class="ctr" title="최근 1년(${{allDates.length}}영업일) 중 해당 종목에 사모펀드가 ${{winN}}일간 누적 순매수한 구간들 가운데 몇 번째로 많이 샀는지">연간 ${{winN}}일 순위</th>
+                  <th class="ctr">${{effWinN > 1 ? '매수일수' : '연속 등장'}}</th>
+                  <th>${{effWinN > 1 ? '누적 등락' : '일간 등락률'}}</th>
+                  <th class="ctr">${{effWinN > 1 ? '동기간 동시매수' : '당일 동시매수'}}</th>
                 </tr>
               </thead>
               <tbody>${{rowsHtml || '<tr><td colspan="10" class="ctr" style="padding:24px; color:#94a3b8;">조건에 맞는 사모펀드 순매수 종목(시총 2,000억 이상)이 없습니다.</td></tr>'}}</tbody>
