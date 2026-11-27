@@ -1149,7 +1149,7 @@ def _build_or_load_op_baseline(here, target_date=OP_BASELINE_DATE):
     return data
 
 
-def _record_daily_op_snapshot(here, prefix, snap_date, est_by_code, max_days=5):
+def _record_daily_op_snapshot(here, prefix, snap_date, est_by_code, max_days=7):
     """op_baseline.json 의 dailySnapshots 에 날짜별(YYYY-MM-DD) 예상이익 스냅샷을 저장(최근 N일 유지)."""
     if not snap_date or not est_by_code:
         return
@@ -1168,10 +1168,30 @@ def _record_daily_op_snapshot(here, prefix, snap_date, est_by_code, max_days=5):
         print(f"  [알림] dailySnapshots 저장 실패: {e}")
 
 
-def _load_prev_day_estimates(here, prefix, current_date_str):
+def _count_est_map_diffs(old_map, cur_map):
+    """두 예상이익 스냅샷({code: {col: val}}) 사이에서 변동된 셀 개수를 반환합니다."""
+    if not old_map or not cur_map:
+        return 0
+    diff_cnt = 0
+    for cd, cur_cols in cur_map.items():
+        old_cols = old_map.get(cd)
+        if not old_cols or not isinstance(cur_cols, dict):
+            continue
+        for col, new_v in cur_cols.items():
+            old_v = old_cols.get(col)
+            if old_v is None or new_v is None:
+                continue
+            if round(float(new_v), 2) != round(float(old_v), 2):
+                diff_cnt += 1
+    return diff_cnt
+
+
+def _load_prev_day_estimates(here, prefix, current_date_str, cur_est_map=None):
     """
     현재 데이터 날짜(current_date_str, YYYY-MM-DD)보다 이전인 가장 최근 영업일(어제 기준)
     예상이익 스냅샷을 (prev_date_str, {code: {col: val}}) 형태로 반환합니다.
+    만약 직전일 스냅샷이 현재 데이터와 완전히 동일(예: 새벽 지연 실행 / 휴일 / 장전 미갱신)한 경우,
+    실제 변동이 존재하는 가장 최근 이전 스냅샷으로 자동 보정합니다.
     """
     data = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
     daily = data.get("dailySnapshots") or {}
@@ -1183,6 +1203,11 @@ def _load_prev_day_estimates(here, prefix, current_date_str):
         reverse=True,
     )
     if prev_dates:
+        if cur_est_map:
+            for p_dt in prev_dates:
+                cand_map = daily[p_dt][prefix]
+                if _count_est_map_diffs(cand_map, cur_est_map) > 0:
+                    return p_dt, cand_map
         p_dt = prev_dates[0]
         return p_dt, daily[p_dt][prefix]
 
@@ -1860,16 +1885,21 @@ def _extract_market_excel_for_web(here, market):
     else:
         return None
 
+    wb = openpyxl.load_workbook(src_path, data_only=True)
+    if not wb.sheetnames:
+        return None
+
     base_fn = os.path.basename(src_path)
     m_ts = re.search(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})", base_fn)
     if m_ts:
         updated_at = f"{m_ts.group(1)}-{m_ts.group(2)}-{m_ts.group(3)} {m_ts.group(4)}:{m_ts.group(5)}"
     else:
-        updated_at = datetime.fromtimestamp(os.path.getmtime(src_path)).strftime("%Y-%m-%d %H:%M")
-
-    wb = openpyxl.load_workbook(src_path, data_only=True)
-    if not wb.sheetnames:
-        return None
+        wb_mod = getattr(wb.properties, "modified", None)
+        if wb_mod is not None:
+            from datetime import timedelta as _td
+            updated_at = (wb_mod + _td(hours=9)).strftime("%Y-%m-%d %H:%M")
+        else:
+            updated_at = datetime.fromtimestamp(os.path.getmtime(src_path)).strftime("%Y-%m-%d %H:%M")
 
     ann_summary_names = ('연간OP_성장률(%)', '연간OP_차년>당해', '연간마진_개선폭(%p)', '연간마진_차년>당해')
 
@@ -2064,8 +2094,8 @@ def _extract_market_excel_for_web(here, market):
 
     # 현재 엑셀의 일별 스냅샷 확보 및 고정기준(11/18) + 직전일(어제 기준) 비교 데이터 함께 탑재
     cur_date_str = updated_at[:10]
+    cur_snap_map = {}
     if all_sheet and code_col_idx >= 0:
-        cur_snap_map = {}
         for r in all_sheet["rows"]:
             cd = str(r["v"][code_col_idx] or "").strip()
             if not cd:
@@ -2082,7 +2112,7 @@ def _extract_market_excel_for_web(here, market):
 
     base_data_all = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
     base_est_by_code = ((base_data_all.get("markets") or {}).get(prefix) or {}).get("estimates") or {}
-    prev_date_str, prev_est_by_code = _load_prev_day_estimates(here, prefix, cur_date_str)
+    prev_date_str, prev_est_by_code = _load_prev_day_estimates(here, prefix, cur_date_str, cur_est_map=cur_snap_map)
 
     return {
         "market": market,
