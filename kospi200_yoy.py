@@ -2217,13 +2217,49 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
     hdr = {"User-Agent": UA}
     base_list_url = "https://consensus.hankyung.com/analysis/list?skinType=business"
 
+    def _next_business_day_str(dt_obj):
+        nxt = dt_obj + timedelta(days=1)
+        while nxt.weekday() >= 5:
+            nxt += timedelta(days=1)
+        return nxt.strftime("%Y-%m-%d")
+
+    def _prev_business_day_str(dt_obj):
+        prv = dt_obj - timedelta(days=1)
+        while prv.weekday() >= 5:
+            prv -= timedelta(days=1)
+        return prv.strftime("%Y-%m-%d")
+
+    now_kst = datetime.now()
+    is_after_18 = (lookback_days == 0 and not target_date and now_kst.hour >= 18)
+    next_bday_str = _next_business_day_str(end_dt)
+    prev_bday_str = _prev_business_day_str(end_dt)
+    had_existing_dates = {d for d, lst in by_date.items() if isinstance(lst, list) and len(lst) > 0}
+
+    def _assign_report_date(idx_key, raw_dt):
+        """
+        - 18시 이후 새로 올라온 리포트: 다음 영업일(다음날)로 배정
+        - 00시~17:59 당일 올라온 리포트: 당일 배정
+        - 이미 기존에 저장된 리포트: 최초 배정된 날짜 그대로 유지
+        """
+        cached = existing_by_idx.get(idx_key)
+        if cached and cached.get("date"):
+            return cached["date"], bool(cached.get("after18")), cached.get("orig_date")
+        if lookback_days > 0 or target_date:
+            return raw_dt, False, None
+        if is_after_18 and raw_dt == today_str:
+            return next_bday_str, True, raw_dt
+        if not is_after_18 and raw_dt < today_str and raw_dt in had_existing_dates:
+            return today_str, True, raw_dt
+        return raw_dt, False, None
+
     print(f"\n{'='*80}")
     if lookback_days > 0:
         start_str = (end_dt - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
         print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({start_str} ~ {today_str})...")
     else:
-        start_str = today_str
-        print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({today_str})...")
+        start_str = prev_bday_str
+        cutoff_msg = f"18시 이후 → {next_bday_str} 배정" if is_after_18 else f"전일 18시↑ + 금일 0시↑ → {today_str} 배정"
+        print(f" ▶ 한경 컨센서스 기업 리포트 수집 중 ({start_str} ~ {today_str} · {cutoff_msg})...")
 
     def parse_page(url_to_get):
         r = requests.get(url_to_get, headers=hdr, timeout=20)
@@ -2290,9 +2326,10 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 if len(pg_items) < 80 or added == 0:
                     break
         else:
-            url_today = f"{base_list_url}&sdate={today_str}&edate={today_str}&pagenum=80&now_page=1"
-            collected = [it for it in parse_page(url_today) if it["date"] == today_str]
-            # 주말·장전 등으로 오늘 리포트가 아직 없으면 가장 최근 올라온 날짜 리포트 사용
+            # 직전 영업일(전일 18시 이후 신규분 포착) ~ 금일 함께 조회
+            url_range = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page=1"
+            collected = [it for it in parse_page(url_range) if start_str <= it["date"] <= today_str]
+            # 주말·장전 등으로 범위 내 리포트가 아예 없으면 가장 최근 올라온 날짜 리포트 사용
             if not collected:
                 latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
                 if latest_items:
@@ -2305,12 +2342,24 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
 
         grouped_new = {}
         for it in collected:
-            grouped_new.setdefault(it["date"], []).append(it)
+            idx = str(it.get("report_idx") or "")
+            disp_dt, is_a18, orig_dt = _assign_report_date(idx, it["date"])
+            it["date"] = disp_dt
+            if is_a18:
+                it["after18"] = True
+                if orig_dt:
+                    it["orig_date"] = orig_dt
+            grouped_new.setdefault(disp_dt, []).append(it)
 
         for dt_key, dt_items in sorted(grouped_new.items(), reverse=True):
             dt_final = []
+            seen_hk_idx = set()
             for it in dt_items:
                 idx = str(it.get("report_idx") or "")
+                if idx and idx in seen_hk_idx:
+                    continue
+                if idx:
+                    seen_hk_idx.add(idx)
                 cached = existing_by_idx.get(idx)
                 if cached and (cached.get("curated") or cached.get("summary")):
                     dt_final.append(cached)
@@ -2346,10 +2395,15 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 dt_final.append(it)
                 existing_by_idx[idx] = it
                 time.sleep(0.15)
-            # 기존에 병합되어 있던 네이버 리포트 유지 후, 아래에서 중복 제거하며 재병합
+            # 기존 해당 날짜에 이미 저장된 한경/네이버 리포트(예: 전일 18시 이후 편입분) 보존하며 병합
+            prev_hk_keep = [
+                r for r in by_date.get(dt_key, [])
+                if not str(r.get("report_idx", "")).startswith("naver_")
+                and str(r.get("report_idx", "")) not in seen_hk_idx
+            ]
             prev_naver_for_dt = [r for r in by_date.get(dt_key, []) if str(r.get("report_idx", "")).startswith("naver_")]
-            by_date[dt_key] = dt_final + prev_naver_for_dt
-            print(f"  - [{dt_key}] 한경 리포트 {len(dt_final)}건 정리 완료")
+            by_date[dt_key] = dt_final + prev_hk_keep + prev_naver_for_dt
+            print(f"  - [{dt_key}] 한경 리포트 {len(dt_final) + len(prev_hk_keep)}건 정리 완료")
 
         # ---------------------------------------------------------------------
         # ★ 네이버 증권(stock.naver.com/research/company) 비겹침 리포트 추가 병합
@@ -2397,7 +2451,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             return ""
 
         try:
-            naver_min_date = start_str if lookback_days > 0 else (min(grouped_new.keys()) if grouped_new else today_str)
+            naver_min_date = start_str
             naver_max_date = today_str
             naver_raw_list = []
             for pg in range(1, 7):
@@ -2426,10 +2480,16 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             if naver_raw_list:
                 nv_by_dt = {}
                 for item in naver_raw_list:
-                    nv_by_dt.setdefault(item["writeDate"], []).append(item)
+                    rid = str(item.get("researchId") or "").strip()
+                    nv_idx = f"naver_{rid}"
+                    disp_dt, is_a18, orig_dt = _assign_report_date(nv_idx, item["writeDate"])
+                    item["_disp_date"] = disp_dt
+                    item["_after18"] = is_a18
+                    item["_orig_date"] = orig_dt
+                    nv_by_dt.setdefault(disp_dt, []).append(item)
 
                 for dt_key, nv_items in sorted(nv_by_dt.items(), reverse=True):
-                    # 해당 날짜의 기존 한경 리포트 목록만 기준(네이버 항목은 최신 목록으로 갱신)
+                    # 해당 날짜의 기존 한경 리포트 목록 + 기존 보존 네이버 리포트 기준
                     hk_list = [r for r in by_date.get(dt_key, []) if not str(r.get("report_idx", "")).startswith("naver_")]
                     for r in hk_list:
                         if not r.get("source"):
@@ -2445,6 +2505,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                     ]
 
                     nv_added = []
+                    seen_nv_idx = set()
                     for nv in nv_items:
                         rid = str(nv.get("researchId") or "").strip()
                         st_code = str(nv.get("itemCode") or "").strip().zfill(6)
@@ -2463,6 +2524,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                             continue
 
                         nv_idx = f"naver_{rid}"
+                        seen_nv_idx.add(nv_idx)
                         cached_nv = existing_by_idx.get(nv_idx)
                         if cached_nv and cached_nv.get("summary"):
                             cached_nv["source"] = "네이버"
@@ -2540,6 +2602,10 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                             "curated": False,
                             "summary": summary_lines,
                         }
+                        if nv.get("_after18"):
+                            rep_obj["after18"] = True
+                            if nv.get("_orig_date"):
+                                rep_obj["orig_date"] = nv["_orig_date"]
                         if prev_tp is not None:
                             rep_obj["prev_target_price"] = prev_tp
                         if chg_pct is not None:
@@ -2552,8 +2618,14 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         seen_titles.append((st_code, nt))
                         time.sleep(0.08)
 
-                    by_date[dt_key] = hk_list + nv_added
-                    print(f"  - [{dt_key}] 네이버 비겹침 리포트 +{len(nv_added)}건 병합 (총 {len(by_date[dt_key])}건)")
+                    # 기존에 dt_key에 이미 편입돼 있던 네이버 리포트(예: 전일 18시 이후 편입분)도 누락 없이 유지
+                    prev_nv_keep = [
+                        r for r in by_date.get(dt_key, [])
+                        if str(r.get("report_idx", "")).startswith("naver_")
+                        and str(r.get("report_idx", "")) not in seen_nv_idx
+                    ]
+                    by_date[dt_key] = hk_list + nv_added + prev_nv_keep
+                    print(f"  - [{dt_key}] 네이버 비겹침 리포트 +{len(nv_added) + len(prev_nv_keep)}건 병합 (총 {len(by_date[dt_key])}건)")
         except Exception as e_nv:
             print(f"  [경고] 네이버 리포트 병합 중 오류(한경 데이터는 정상 유지): {e_nv}")
 
@@ -5856,6 +5928,7 @@ def build_web_dashboard(here):
             <span>🏢 <strong>${{escapeHtml(r.broker || '-')}}</strong></span>
             ${{r.analyst ? `<span>✍️ ${{escapeHtml(r.analyst)}}</span>` : ''}}
             <span>📅 ${{escapeHtml(r.date || '-')}}</span>
+            ${{r.after18 ? `<span style="padding:1px 6px; border-radius:4px; font-weight:700; font-size:10.5px; background:#ede9fe; color:#6d28d9;" title="원문 작성일: ${{escapeHtml(r.orig_date || '')}} (18시 이후 등록 → 다음 영업일 편입)">🌙 전일 18시↑</span>` : ''}}
             <span style="margin-left:auto; padding:1px 6px; border-radius:4px; font-weight:800; font-size:10.5px; ${{r.source === '네이버' ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}}">${{r.source === '네이버' ? '네이버' : '한경'}}</span>
           </div>
           <ul class="rep-summary-list">${{summaryLis}}</ul>
