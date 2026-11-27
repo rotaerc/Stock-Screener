@@ -6346,7 +6346,7 @@ def build_web_dashboard(here):
       if (!FLOW_DATA || !Array.isArray(FLOW_DATA.weeks) || !FLOW_DATA.weeks.length || !FLOW_DATA.byWeek) return empty;
       const weeks = FLOW_DATA.weeks;
       let wkKey = weeks[0];
-      if (refDate && refDate !== 'ALL' && /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(refDate)) {{
+      if (refDate && refDate !== 'ALL' && /^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(refDate)) {{
         const found = weeks.find(w => w <= refDate);
         if (found) wkKey = found;
       }}
