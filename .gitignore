@@ -14,5 +14,8 @@ __pycache__/
 .env
 kiwoom_token_cache.json
 kiwoom_flow.log
+reports_auto.log
 키움수급_수동실행.bat
+키움수급_자동실행.bat
+리포트_자동실행.bat
 수급_자동실행_등록.bat
