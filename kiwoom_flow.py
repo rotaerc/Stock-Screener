@@ -40,8 +40,8 @@ MARKETS = [
     ("KOSDAQ", "101"),
 ]
 
-RETENTION_DAYS = 60
-RETENTION_WEEKS = 14
+RETENTION_DAYS = 365
+RETENTION_WEEKS = 52
 TOP_N_PER_SIDE = 25
 
 # 국내 상장 ETF / ETN 제외 필터 (개별 종목 수급만 순수 집계)
@@ -236,15 +236,36 @@ def fetch_ka10058(token, start_dt, end_dt, invsr_tp, trde_tp, mrkt_tp, env_mode=
         "stex_tp": str(stex_tp),
     }
 
-    resp = requests.post(url, headers=headers, json=body, timeout=15)
-    try:
-        data = resp.json()
-    except Exception:
-        raise RuntimeError(f"ka10058 응답 파싱 실패 (HTTP {resp.status_code}): {resp.text[:300]}")
-
-    ret_code = data.get("return_code")
-    if ret_code not in (None, 0, "0"):
-        raise RuntimeError(f"ka10058 오류 (code={ret_code}): {data.get('return_msg') or data}")
+    data = None
+    last_err = None
+    for attempt in range(4):
+        try:
+            resp = requests.post(url, headers=headers, json=body, timeout=15)
+            if resp.status_code in (429, 500, 502, 503, 504):
+                wait_s = 1.5 * (attempt + 1)
+                time.sleep(wait_s)
+                last_err = f"HTTP {resp.status_code}"
+                continue
+            try:
+                data = resp.json()
+            except Exception:
+                last_err = f"HTTP {resp.status_code}: {resp.text[:200]}"
+                time.sleep(1.0)
+                continue
+            ret_code = data.get("return_code")
+            ret_msg = str(data.get("return_msg") or "")
+            if ret_code not in (None, 0, "0"):
+                if "초과" in ret_msg or "허용" in ret_msg or str(ret_code) in ("1700", "429"):
+                    time.sleep(1.5 * (attempt + 1))
+                    last_err = f"code={ret_code}: {ret_msg}"
+                    continue
+                raise RuntimeError(f"ka10058 오류 (code={ret_code}): {ret_msg or data}")
+            break
+        except requests.RequestException as e:
+            last_err = str(e)
+            time.sleep(1.2 * (attempt + 1))
+    if data is None:
+        raise RuntimeError(f"ka10058 조회 실패 ({last_err})")
 
     # 응답 리스트 키 탐색 (기본: invsr_daly_trde_stk)
     items = data.get("invsr_daly_trde_stk")
@@ -714,12 +735,23 @@ def _save_investor_flow(here, store, update_mcaps=False, update_returns=False, f
     week_keys = sorted(store.get("byWeek", {}).keys(), reverse=True)[:RETENTION_WEEKS]
     store["byWeek"] = {k: store["byWeek"][k] for k in week_keys}
 
-    # 과거 기록 ETF/ETN 정리
+    # 과거 기록 ETF/ETN 정리 및 미사용 필드 경량화 (1년치 저장 시 용량 ~40% 절감)
+    def _compact_row(r):
+        out = {
+            "code": r.get("code"),
+            "name": r.get("name"),
+            "market": r.get("market"),
+            "netAmt": r.get("netAmt"),
+        }
+        if r.get("chgPct") is not None:
+            out["chgPct"] = r.get("chgPct")
+        return out
+
     for sec_key in ("byDate", "byWeek"):
         for _k, _snap in (store.get(sec_key) or {}).items():
             for _iv in (_snap.get("investors") or {}).values():
-                _iv["buy"] = [r for r in (_iv.get("buy") or []) if not is_etf_or_etn(r.get("name"))]
-                _iv["sell"] = [r for r in (_iv.get("sell") or []) if not is_etf_or_etn(r.get("name"))]
+                _iv["buy"] = [_compact_row(r) for r in (_iv.get("buy") or []) if not is_etf_or_etn(r.get("name"))]
+                _iv["sell"] = [_compact_row(r) for r in (_iv.get("sell") or []) if not is_etf_or_etn(r.get("name"))]
 
     if update_mcaps or not store.get("marketCaps"):
         refresh_market_caps_in_store(store)
@@ -737,8 +769,8 @@ def _save_investor_flow(here, store, update_mcaps=False, update_returns=False, f
     return store
 
 
-def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
-    """최근 1개월 일간 수급 + 최근 3개월(13주) 주간 수급을 키움 API로 일괄 소급 수집합니다."""
+def backfill_investor_flow(here=HERE, daily_days=365, num_weeks=52):
+    """최근 1년 일간 수급(최대 365일) + 최근 1년(52주) 주간 수급을 키움 API로 일괄 소급 수집합니다."""
     cfg = load_env(os.path.join(here, ".env"))
     appkey = cfg.get("KIWOOM_APPKEY", "")
     secretkey = cfg.get("KIWOOM_SECRETKEY", "")
@@ -754,7 +786,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
     print(f" ▶ 키움 수급 과거 소급 수집 시작 (최근 {daily_days}일 일간 + 최근 {num_weeks}주 주간)")
     print(f"{'='*80}")
 
-    # 1) 최근 1개월 평일 일간 수급 수집
+    # 1) 평일 일간 수급 수집
     day_targets = []
     for delta in range(daily_days + 1):
         d = today - timedelta(days=delta)
@@ -769,7 +801,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
             len(v.get("buy") or []) > 0 for v in (store["byDate"][d_dash].get("investors") or {}).values()
         ):
             continue
-        print(f"  ({idx}/{len(day_targets)}) 일간 {d_dash} 조회 중...")
+        print(f"  ({idx}/{len(day_targets)}) 일간 {d_dash} 조회 중...", flush=True)
         snap = collect_period_snapshot(token, d_ymd, d_ymd, env_mode=env_mode)
         has_any = any(
             len(v.get("buy") or []) + len(v.get("sell") or []) > 0
@@ -778,16 +810,16 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
         if has_any:
             store["byDate"][d_dash] = snap
             added_days += 1
-            if added_days % 4 == 0:
+            if added_days % 8 == 0:
                 _save_investor_flow(here, store)
         else:
-            print(f"    - {d_dash}: 데이터 없음(휴장일 또는 장마감 전) 건너뜀")
+            print(f"    - {d_dash}: 데이터 없음(휴장일 또는 장마감 전) 건너뜀", flush=True)
 
     _save_investor_flow(here, store)
 
-    # 2) 최근 3개월(13주) 주간 수급 수집 (각 주의 월~금)
+    # 2) 주간 수급 수집 (각 주의 월~금)
     cur_mon = today - timedelta(days=today.weekday())
-    print(f"\n[2/2] 주간 수급 점검 대상: 최근 {num_weeks}주")
+    print(f"\n[2/2] 주간 수급 점검 대상: 최근 {num_weeks}주", flush=True)
     added_weeks = 0
     for w_idx in range(num_weeks):
         mon = cur_mon - timedelta(weeks=w_idx)
@@ -801,7 +833,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
         if existing_w and existing_w.get("isFinalWeek") and w_idx > 0:
             continue
 
-        print(f"  ({w_idx + 1}/{num_weeks}) 주간 {mon_dash} ~ {end_dash} 조회 중...")
+        print(f"  ({w_idx + 1}/{num_weeks}) 주간 {mon_dash} ~ {end_dash} 조회 중...", flush=True)
         wsnap = collect_period_snapshot(token, mon.strftime("%Y%m%d"), end_d.strftime("%Y%m%d"), env_mode=env_mode)
         has_any = any(
             len(v.get("buy") or []) + len(v.get("sell") or []) > 0
@@ -812,7 +844,7 @@ def backfill_investor_flow(here=HERE, daily_days=31, num_weeks=13):
             wsnap["weekLabel"] = f"{mon_dash} ~ {end_dash}" + (" (주간 확정)" if is_final else " (진행중)")
             store["byWeek"][mon_dash] = wsnap
             added_weeks += 1
-            if added_weeks % 3 == 0:
+            if added_weeks % 4 == 0:
                 _save_investor_flow(here, store)
 
     _save_investor_flow(here, store, update_mcaps=True, update_returns=True)
@@ -872,8 +904,8 @@ def main():
         _save_investor_flow(HERE, store, update_mcaps=True)
     elif any(a.lower() in ("--backfill", "backfill") for a in args):
         nums = [int(a) for a in args if a.isdigit()]
-        d_days = nums[0] if len(nums) >= 1 else 31
-        n_weeks = nums[1] if len(nums) >= 2 else 13
+        d_days = nums[0] if len(nums) >= 1 else 365
+        n_weeks = nums[1] if len(nums) >= 2 else 52
         backfill_investor_flow(HERE, daily_days=d_days, num_weeks=n_weeks)
     else:
         target_date = None

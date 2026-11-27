@@ -2975,7 +2975,26 @@ def build_web_dashboard(here):
     json_payload = json.dumps(datasets, ensure_ascii=False).replace("</", "<\\/")
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
     op_hist_payload = json.dumps(op_hist_compact, ensure_ascii=False).replace("</", "<\\/")
-    flow_payload = json.dumps(flow_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    # index.html 초기 로딩 속도 유지를 위해 최근 31일(일간) + 14주(주간)만 인라인 내장하고,
+    # 1년치 전체 데이터(investor_flow.json)는 웹에서 비동기 fetch()로 즉시 병합 로딩
+    _all_d = flow_data.get("dates") or []
+    _all_w = flow_data.get("weeks") or []
+    _inline_d = _all_d[:31]
+    _inline_w = _all_w[:14]
+    flow_inline = {
+        "updatedAt": flow_data.get("updatedAt") or "",
+        "latestDate": flow_data.get("latestDate") or "",
+        "latestWeek": flow_data.get("latestWeek") or "",
+        "dates": _inline_d,
+        "weeks": _inline_w,
+        "totalDays": len(_all_d),
+        "totalWeeks": len(_all_w),
+        "hasFullArchive": (len(_all_d) > len(_inline_d)) or (len(_all_w) > len(_inline_w)),
+        "marketCaps": flow_data.get("marketCaps") or {},
+        "byDate": {k: flow_data["byDate"][k] for k in _inline_d if k in (flow_data.get("byDate") or {})},
+        "byWeek": {k: flow_data["byWeek"][k] for k in _inline_w if k in (flow_data.get("byWeek") or {})},
+    }
+    flow_payload = json.dumps(flow_inline, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     semicon_payload = json.dumps(semicon_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
@@ -4954,8 +4973,8 @@ def build_web_dashboard(here):
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
           <div class="flow-mode-group">
-            <button class="flow-mode-btn active" id="btnHomeDaily" onclick="selectHomeView('DAILY')">📅 일간 브리핑 (1개월)</button>
-            <button class="flow-mode-btn" id="btnHomeWeekly" onclick="selectHomeView('WEEKLY')">📆 주간 브리핑 (3개월)</button>
+            <button class="flow-mode-btn active" id="btnHomeDaily" onclick="selectHomeView('DAILY')">📅 일간 브리핑 (1년)</button>
+            <button class="flow-mode-btn" id="btnHomeWeekly" onclick="selectHomeView('WEEKLY')">📆 주간 브리핑 (1년)</button>
           </div>
           <div style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:3px 6px; border-radius:8px; border:1px solid #bfdbfe;">
             <button class="pg-btn" id="btnPrevHomePeriod" onclick="stepHomePeriod(1)" title="이전 날짜/주">◀</button>
@@ -4981,8 +5000,8 @@ def build_web_dashboard(here):
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
           <div class="flow-mode-group">
-            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (1개월)</button>
-            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (3개월)</button>
+            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (1년)</button>
+            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (1년)</button>
           </div>
           <div class="flow-mode-group" id="flowMarketTabs">
             <button class="flow-mode-btn active" id="btnFlowMktAll" onclick="setFlowMarket('')">전체</button>
@@ -5181,11 +5200,39 @@ def build_web_dashboard(here):
         isRestoringHistory = false;
       }}
       pushNavHistory(true);
+      loadFullFlowArchive();
       window.addEventListener('popstate', (e) => {{
         if (e.state && e.state.view) {{
           applyNavState(e.state);
         }}
       }});
+    }}
+
+    let fullFlowArchiveLoaded = false;
+    function loadFullFlowArchive() {{
+      if (fullFlowArchiveLoaded || !FLOW_DATA || !FLOW_DATA.hasFullArchive) return;
+      if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
+      const ver = encodeURIComponent(FLOW_DATA.updatedAt || String(Date.now()));
+      fetch(`investor_flow.json?v=${{ver}}`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(full => {{
+          if (!full || typeof full !== 'object') return;
+          if (full.byDate) FLOW_DATA.byDate = Object.assign({{}}, full.byDate, FLOW_DATA.byDate || {{}});
+          if (full.byWeek) FLOW_DATA.byWeek = Object.assign({{}}, full.byWeek, FLOW_DATA.byWeek || {{}});
+          if (full.marketCaps) FLOW_DATA.marketCaps = Object.assign({{}}, full.marketCaps, FLOW_DATA.marketCaps || {{}});
+          FLOW_DATA.dates = Object.keys(FLOW_DATA.byDate || {{}}).sort().reverse();
+          FLOW_DATA.weeks = Object.keys(FLOW_DATA.byWeek || {{}}).sort().reverse();
+          FLOW_DATA.totalDays = FLOW_DATA.dates.length;
+          FLOW_DATA.totalWeeks = FLOW_DATA.weeks.length;
+          FLOW_DATA.hasFullArchive = false;
+          fullFlowArchiveLoaded = true;
+          refreshFlowPeriodSelect();
+          renderSidebar();
+          if (currentViewMode === 'HOME') renderHomeView();
+          else if (currentViewMode === 'FLOW') renderFlowView();
+          else if (currentViewMode === 'REPORTS') renderReportsGrid();
+        }})
+        .catch(() => {{}});
     }}
 
     let isRestoringHistory = false;
@@ -5492,11 +5539,11 @@ def build_web_dashboard(here):
           </button>
           <button class="nav-item ${{currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' ? 'active' : ''}}" onclick="selectFlowView('DAILY')">
             <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
-            <span class="nav-badge">${{(FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates.length : 0}}일</span>
+            <span class="nav-badge">${{(FLOW_DATA && (FLOW_DATA.totalDays || (FLOW_DATA.dates && FLOW_DATA.dates.length))) || 0}}일</span>
           </button>
           <button class="nav-item ${{currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}}" onclick="selectFlowView('WEEKLY')">
-            <span class="nav-item-left"><span>📆</span><span>주간 수급 (3개월)</span></span>
-            <span class="nav-badge">${{(FLOW_DATA && FLOW_DATA.weeks) ? FLOW_DATA.weeks.length : 0}}주</span>
+            <span class="nav-item-left"><span>📆</span><span>주간 수급 (1년)</span></span>
+            <span class="nav-badge">${{(FLOW_DATA && (FLOW_DATA.totalWeeks || (FLOW_DATA.weeks && FLOW_DATA.weeks.length))) || 0}}주</span>
           </button>
         </div>
         <div class="nav-divider"></div>
@@ -6595,7 +6642,7 @@ def build_web_dashboard(here):
       const bucket = currentFlowMode === 'WEEKLY' ? ((FLOW_DATA && FLOW_DATA.byWeek) || {{}}) : ((FLOW_DATA && FLOW_DATA.byDate) || {{}});
       const snap = currentFlowKey ? bucket[currentFlowKey] : null;
 
-      const modeTitle = currentFlowMode === 'WEEKLY' ? '주간 수급 동향 (최근 3개월)' : '일간 수급 동향 (최근 1개월)';
+      const modeTitle = currentFlowMode === 'WEEKLY' ? '주간 수급 동향 (최근 1년)' : '일간 수급 동향 (최근 1년)';
       const mktTitleTag = currentFlowMarket ? ` · ${{currentFlowMarket}}` : ' · KOSPI+KOSDAQ';
       document.getElementById('pageTitle').textContent = modeTitle + mktTitleTag;
       const periodTxt = snap
