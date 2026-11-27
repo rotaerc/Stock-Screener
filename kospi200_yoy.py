@@ -4893,6 +4893,41 @@ def build_web_dashboard(here):
     }}
     .wl-star-btn:hover {{ color: #f59e0b; transform: scale(1.18); }}
     .wl-star-btn.on {{ color: #f59e0b; }}
+    .flow-rep-r-btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      margin-left: 3px;
+      border-radius: 4px;
+      border: 1px solid #93c5fd;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: all 0.12s;
+    }}
+    .flow-rep-r-btn:hover {{
+      background: #2563eb;
+      color: #fff;
+      border-color: #1d4ed8;
+      transform: translateY(-0.5px);
+    }}
+    .flow-rep-r-btn.up {{
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }}
+    .flow-rep-r-btn.up:hover {{
+      background: #dc2626;
+      color: #fff;
+      border-color: #b91c1c;
+    }}
     .wl-modal-backdrop {{
       position: fixed;
       inset: 0;
@@ -5410,8 +5445,9 @@ def build_web_dashboard(here):
     REPORT_DATES.forEach(dt => {{
       (REPORTS_BY_DATE[dt] || []).forEach(rep => {{
         if (rep.stock_code) {{
-          if (!REPORTS_BY_CODE[rep.stock_code]) REPORTS_BY_CODE[rep.stock_code] = [];
-          REPORTS_BY_CODE[rep.stock_code].push(rep);
+          const cd6 = String(rep.stock_code).trim().padStart(6, '0');
+          if (!REPORTS_BY_CODE[cd6]) REPORTS_BY_CODE[cd6] = [];
+          REPORTS_BY_CODE[cd6].push({{ ...rep, _bucketDate: dt }});
         }}
       }});
     }});
@@ -6190,6 +6226,7 @@ def build_web_dashboard(here):
       }}
       bindLiveQuotes();
       bindWatchlistStars();
+      bindFlowReportBadges();
     }}
 
     function drawSemiHeroChart(container, rows, hasKosis, overlayMode) {{
@@ -7829,13 +7866,17 @@ def build_web_dashboard(here):
       setScreenerVisibility(false);
 
       if (focusCode) {{
-        const matched = REPORTS_BY_CODE[focusCode];
-        if (matched && matched.length > 0 && matched[0].date) {{
-          currentReportDate = matched[0].date;
-          const dateSel = document.getElementById('repDateSelect');
-          if (dateSel) dateSel.value = currentReportDate;
-          refreshReportBrokers();
-          updateReportDateNavButtons();
+        const fc6 = String(focusCode).trim().padStart(6, '0');
+        const matched = REPORTS_BY_CODE[fc6] || REPORTS_BY_CODE[focusCode];
+        if (matched && matched.length > 0) {{
+          const targetDt = matched[0]._bucketDate || matched[0].date || '';
+          if (targetDt && REPORTS_BY_DATE[targetDt]) {{
+            currentReportDate = targetDt;
+            const dateSel = document.getElementById('repDateSelect');
+            if (dateSel) dateSel.value = currentReportDate;
+            refreshReportBrokers();
+            updateReportDateNavButtons();
+          }}
         }}
         document.getElementById('repSearchInput').value = '';
         document.getElementById('repBrokerSelect').value = '';
@@ -9022,6 +9063,49 @@ def build_web_dashboard(here):
       }});
       bindLiveQuotes();
       bindWatchlistStars();
+      bindFlowReportBadges();
+    }}
+
+    function bindFlowReportBadges() {{
+      const roots = [document.getElementById('flowView'), document.getElementById('homeView')].filter(Boolean);
+      const tipBox = document.getElementById('tooltipBox');
+      roots.forEach(root => {{
+        root.querySelectorAll('[data-live-code]').forEach(el => {{
+          if (el._repRBound || el.classList.contains('rep-btn')) return;
+          el._repRBound = true;
+          const cd = String(el.getAttribute('data-live-code') || '').trim().padStart(6, '0');
+          const reps = REPORTS_BY_CODE[cd];
+          if (!reps || !reps.length) return;
+          const latest = reps[0];
+          const hasUp = reps.some(x => x.target_change === '상향');
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'flow-rep-r-btn' + (hasUp ? ' up' : '');
+          btn.textContent = 'R';
+          const preview = reps.slice(0, 3).map(r => {{
+            const dt = r._bucketDate || r.date || '';
+            const chg = r.target_change ? ` [${{r.target_change}}]` : '';
+            return `• ${{dt}} ${{r.broker || ''}}${{chg}}: ${{r.title || ''}}`;
+          }}).join('\\n');
+          const tip = `[리포트 ${{reps.length}}건 · 클릭 시 리포트 페이지로 이동]\\n${{preview}}`;
+          btn.setAttribute('data-tip', tip);
+          btn.onclick = (e) => {{
+            e.preventDefault();
+            e.stopPropagation();
+            if (tipBox) tipBox.style.display = 'none';
+            selectReportsView(cd);
+          }};
+          btn.onmouseenter = (e) => {{
+            if (!tipBox) return;
+            tipBox.textContent = tip;
+            tipBox.style.display = 'block';
+            positionTip(e);
+          }};
+          btn.onmousemove = (e) => positionTip(e);
+          btn.onmouseleave = () => {{ if (tipBox) tipBox.style.display = 'none'; }};
+          el.parentNode.insertBefore(btn, el.nextSibling);
+        }});
+      }});
     }}
 
     // ================= 영웅문4 관심종목 장바구니 & 내보내기 =================
