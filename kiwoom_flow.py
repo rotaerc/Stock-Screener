@@ -348,10 +348,12 @@ def collect_period_snapshot(token, start_dt, end_dt, env_mode="prod", top_n=TOP_
     for inv_key, inv_label, inv_code in INVESTORS:
         buy_merged = []
         sell_merged = []
+        # 사모펀드 순매수는 시총 2천억↑ TOP50 산출을 위해 시장별 30개(합 최대 60개) 확보
+        buy_limit = max(top_n, 30) if inv_key == "private" else top_n
         for mkt_name, mkt_code in MARKETS:
             try:
                 rows_buy = fetch_ka10058(token, start_dt, end_dt, inv_code, "2", mkt_code, env_mode=env_mode)
-                buy_merged.extend(rows_buy[:top_n])
+                buy_merged.extend(rows_buy[:buy_limit])
             except Exception as e:
                 print(f"  [경고] {inv_label} {mkt_name} 순매수 조회 실패: {e}")
             time.sleep(0.28)
@@ -363,8 +365,8 @@ def collect_period_snapshot(token, start_dt, end_dt, env_mode="prod", top_n=TOP_
                 print(f"  [경고] {inv_label} {mkt_name} 순매도 조회 실패: {e}")
             time.sleep(0.28)
 
-        # 종목코드 중복 제거 후 시장별 최대 top_n개 유지 + 금액순 정렬
-        def _dedup_sort(lst, is_buy):
+        # 종목코드 중복 제거 후 시장별 최대 limit개 유지 + 금액순 정렬
+        def _dedup_sort(lst, is_buy, per_mkt_limit=top_n):
             by_code = {}
             for it in lst:
                 cd = it["code"]
@@ -374,14 +376,14 @@ def collect_period_snapshot(token, start_dt, end_dt, env_mode="prod", top_n=TOP_
             kq = [x for x in by_code.values() if x.get("market") != "KOSPI"]
             kp.sort(key=lambda x: x["netAmt"], reverse=is_buy)
             kq.sort(key=lambda x: x["netAmt"], reverse=is_buy)
-            res = kp[:top_n] + kq[:top_n]
+            res = kp[:per_mkt_limit] + kq[:per_mkt_limit]
             res.sort(key=lambda x: x["netAmt"], reverse=is_buy)
             return res
 
         investors_out[inv_key] = {
             "label": inv_label,
-            "buy": _dedup_sort(buy_merged, True),
-            "sell": _dedup_sort(sell_merged, False),
+            "buy": _dedup_sort(buy_merged, True, buy_limit),
+            "sell": _dedup_sort(sell_merged, False, top_n),
         }
         print(
             f"  - [{inv_label}] ({s_fmt}~{e_fmt}) 순매수 {len(investors_out[inv_key]['buy'])}건 / "

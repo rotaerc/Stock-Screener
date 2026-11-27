@@ -1763,6 +1763,105 @@
       font-weight: 600;
     }
     .semi-tbl tbody tr:hover td { background: #f8fafc; }
+    .pe-top50-card {
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-top: 3px solid #7c3aed;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+      overflow: hidden;
+    }
+    .pe-top50-head {
+      padding: 11px 14px;
+      background: linear-gradient(135deg, #faf5ff, #f8fafc);
+      border-bottom: 1px solid #e9d5ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pe-top50-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #4c1d95;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .pe-filter-pills {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .pe-pill-btn {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .pe-pill-btn:hover { background: #f1f5f9; }
+    .pe-pill-btn.active { background: #6d28d9; color: #fff; border-color: #6d28d9; }
+    .pe-tbl-wrap {
+      overflow-x: auto;
+    }
+    .pe-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .pe-tbl th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 800;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .pe-tbl th.lft, .pe-tbl td.lft { text-align: left; }
+    .pe-tbl th.ctr, .pe-tbl td.ctr { text-align: center; }
+    .pe-tbl td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+      white-space: nowrap;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    .pe-tbl tbody tr:hover td { background: #faf5ff; }
+    .pe-tbl tbody tr.pe-row-r1 td { background: #fffbeb; }
+    .pe-tbl tbody tr.pe-row-r1:hover td { background: #fef3c7; }
+    .pe-rank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: help;
+    }
+    .pe-rank-badge.r1 { background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; }
+    .pe-rank-badge.r3 { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .pe-rank-badge.r5 { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+    .pe-rank-badge.rn { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .pe-mcap-pct-hi {
+      display: inline-block;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-weight: 900;
+    }
     @media (max-width: 1080px) {
       .semi-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .semi-split-grid { grid-template-columns: 1fr; }
@@ -2001,8 +2100,9 @@
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
           <div class="flow-mode-group">
-            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY')">📅 일간 수급 (1년)</button>
-            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY')">📆 주간 수급 (1년)</button>
+            <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY', 'ALL')">📅 일간 수급 (1년)</button>
+            <button class="flow-mode-btn" id="btnFlowPrivateTop50" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">💼 사모 시총비중 TOP50</button>
+            <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY', 'ALL')">📆 주간 수급 (1년)</button>
           </div>
           <div class="flow-mode-group" id="flowMarketTabs">
             <button class="flow-mode-btn active" id="btnFlowMktAll" onclick="setFlowMarket('')">전체</button>
@@ -2247,6 +2347,7 @@
         sheetIdx: currentSheetIdx,
         cmpMode: currentCompareMode,
         flowMode: currentFlowMode,
+        flowSubTab: currentFlowSubTab,
         flowKey: currentFlowKey,
         flowKeyDaily: currentFlowKeyByMode.DAILY || '',
         flowKeyWeekly: currentFlowKeyByMode.WEEKLY || '',
@@ -2288,6 +2389,7 @@
       isRestoringHistory = true;
       try {
         if (st.flowMode) currentFlowMode = st.flowMode;
+        if (st.flowSubTab) currentFlowSubTab = st.flowSubTab;
         if (st.cmpMode && st.cmpMode !== currentCompareMode) {
           currentCompareMode = st.cmpMode;
           applyScreenerCompareAll(currentCompareMode);
@@ -2317,7 +2419,7 @@
         if (st.view === 'HOME') {
           selectHomeView(st.flowMode || 'DAILY');
         } else if (st.view === 'FLOW') {
-          selectFlowView(st.flowMode || 'DAILY');
+          selectFlowView(st.flowMode || 'DAILY', st.flowSubTab || 'ALL');
           setFlowMarket(st.flowMarket || '');
         } else if (st.view === 'SEMICON') {
           selectSemiconView();
@@ -2538,11 +2640,15 @@
             <span class="nav-item-left"><span>🧠</span><span>수급 브리핑 (메인)</span></span>
             <span class="nav-badge" style="background:#dbeafe; color:#1d4ed8;">HOME</span>
           </button>
-          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' ? 'active' : ''}" onclick="selectFlowView('DAILY')">
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab !== 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'ALL')">
             <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
             <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalDays || (FLOW_DATA.dates && FLOW_DATA.dates.length))) || 0}일</span>
           </button>
-          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY')">
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">
+            <span class="nav-item-left"><span>💼</span><span>사모 시총비중 TOP50</span></span>
+            <span class="nav-badge" style="background:#ede9fe; color:#6d28d9;">2천억↑</span>
+          </button>
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY', 'ALL')">
             <span class="nav-item-left"><span>📆</span><span>주간 수급 (1년)</span></span>
             <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalWeeks || (FLOW_DATA.weeks && FLOW_DATA.weeks.length))) || 0}주</span>
           </button>
@@ -3159,6 +3265,11 @@
     }
 
     let currentFlowMode = 'DAILY';
+    let currentFlowSubTab = 'ALL'; // 'ALL' | 'PRIVATE_TOP50'
+    let currentPrivateRankFilter = 'ALL'; // 'ALL' | 'R1' | 'R3'
+    let currentPrivateSort = 'mcapPct'; // 'mcapPct' | 'rank' | 'amt' | 'chgPct' | 'streak'
+    let _privateAnnualCacheKey = -1;
+    let _privateAnnualCache = {};
     let currentFlowKeyByMode = { DAILY: '', WEEKLY: '' };
     let currentFlowKey = '';
     let currentFlowMarket = '';
@@ -3623,17 +3734,259 @@
       pushNavHistory();
     }
 
-    function selectFlowView(mode = 'DAILY') {
+    function selectFlowView(mode = 'DAILY', subTab = 'ALL') {
       closeMobileNav();
       currentViewMode = 'FLOW';
       currentFlowMode = (mode === 'WEEKLY') ? 'WEEKLY' : 'DAILY';
+      currentFlowSubTab = (currentFlowMode === 'DAILY' && subTab === 'PRIVATE_TOP50') ? 'PRIVATE_TOP50' : 'ALL';
       setScreenerVisibility(false);
-      document.getElementById('btnFlowDaily').classList.toggle('active', currentFlowMode === 'DAILY');
-      document.getElementById('btnFlowWeekly').classList.toggle('active', currentFlowMode === 'WEEKLY');
+      const bDaily = document.getElementById('btnFlowDaily');
+      const bPe50 = document.getElementById('btnFlowPrivateTop50');
+      const bWeekly = document.getElementById('btnFlowWeekly');
+      if (bDaily) bDaily.classList.toggle('active', currentFlowMode === 'DAILY' && currentFlowSubTab !== 'PRIVATE_TOP50');
+      if (bPe50) bPe50.classList.toggle('active', currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50');
+      if (bWeekly) bWeekly.classList.toggle('active', currentFlowMode === 'WEEKLY');
+      const sideSel = document.getElementById('flowSideSelect');
+      const sortSel = document.getElementById('flowSortSelect');
+      const isPe = (currentFlowSubTab === 'PRIVATE_TOP50');
+      if (sideSel) sideSel.style.display = isPe ? 'none' : '';
+      if (sortSel) sortSel.style.display = isPe ? 'none' : '';
       refreshFlowPeriodSelect();
       renderSidebar();
       renderFlowView();
       pushNavHistory();
+    }
+
+    function setPrivateRankFilter(f) {
+      currentPrivateRankFilter = f || 'ALL';
+      renderFlowView();
+    }
+
+    function setPrivateSort(s) {
+      currentPrivateSort = s || 'mcapPct';
+      renderFlowView();
+    }
+
+    function getPrivateAnnualHistory() {
+      const dates = (FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates : [];
+      if (_privateAnnualCacheKey === dates.length && Object.keys(_privateAnnualCache).length > 0) {
+        return _privateAnnualCache;
+      }
+      const byDate = (FLOW_DATA && FLOW_DATA.byDate) ? FLOW_DATA.byDate : {};
+      const mcapMap = (FLOW_DATA && FLOW_DATA.marketCaps) ? FLOW_DATA.marketCaps : {};
+      const hist = {};
+      dates.forEach(dt => {
+        const snap = byDate[dt];
+        const buys = (snap && snap.investors && snap.investors.private && snap.investors.private.buy) ? snap.investors.private.buy : [];
+        buys.forEach(r => {
+          const cd = r.code;
+          const amt = Number(r.netAmt) || 0;
+          if (!cd || amt <= 0) return;
+          const mc = Number(mcapMap[cd]) || 0;
+          const pct = mc > 0 ? (amt / mc * 100.0) : null;
+          if (!hist[cd]) hist[cd] = [];
+          hist[cd].push({ date: dt, amt, pct });
+        });
+      });
+      Object.keys(hist).forEach(cd => {
+        hist[cd].sort((a, b) => (b.amt - a.amt) || String(b.date).localeCompare(String(a.date)));
+      });
+      _privateAnnualCacheKey = dates.length;
+      _privateAnnualCache = hist;
+      return hist;
+    }
+
+    function renderPrivateTop50View(snap, periodTxt) {
+      const insightBox = document.getElementById('flowInsightBox');
+      const overlapBox = document.getElementById('flowOverlapBox');
+      const grid = document.getElementById('flowGrid');
+      const mcapMap = (FLOW_DATA && FLOW_DATA.marketCaps) ? FLOW_DATA.marketCaps : {};
+      const allDates = (FLOW_DATA && FLOW_DATA.dates) ? FLOW_DATA.dates : [];
+      const curIdx = allDates.indexOf(currentFlowKey);
+      const q = (document.getElementById('flowSearchInput').value || '').trim().toLowerCase();
+      const mktF = currentFlowMarket;
+
+      const mktTitleTag = mktF ? ` · ${mktF}` : ' · KOSPI+KOSDAQ';
+      document.getElementById('pageTitle').textContent = `사모펀드 시총대비% TOP 50` + mktTitleTag;
+      document.getElementById('pageSubtitle').textContent = `키움 REST API · 사모펀드 일간 순매수 · 시총 2,000억 이상 · 시총대비 %순 · 최근 1년(${allDates.length}영업일) 중 순매수 순위 · ${periodTxt}`;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">💼 사모펀드 단독 · 시총 2,000억↑</span>
+        <span class="meta-pill">📅 ${periodTxt}</span>
+        <span class="meta-pill">📊 1년 비교 모수: ${allDates.length}영업일${(FLOW_DATA && FLOW_DATA.hasFullArchive) ? ' (전체 로딩중...)' : ''}</span>
+        <span class="meta-pill">🕒 업데이트: ${(snap && snap.updatedAt) || (FLOW_DATA && FLOW_DATA.updatedAt) || '-'}</span>
+      `;
+
+      if (insightBox) insightBox.innerHTML = '';
+      if (overlapBox) overlapBox.innerHTML = '';
+      grid.style.display = 'block';
+
+      const annHist = getPrivateAnnualHistory();
+      const rawBuys = (snap && snap.investors && snap.investors.private && snap.investors.private.buy) ? snap.investors.private.buy : [];
+      const fBuySet = new Set(((snap && snap.investors && snap.investors.foreign && snap.investors.foreign.buy) || []).map(x => x.code));
+      const pBuySet = new Set(((snap && snap.investors && snap.investors.pension && snap.investors.pension.buy) || []).map(x => x.code));
+
+      const calcStreak = (cd) => {
+        let st = 0;
+        if (curIdx >= 0) {
+          for (let i = curIdx; i < allDates.length; i++) {
+            const s = FLOW_DATA.byDate[allDates[i]];
+            const arr = (s && s.investors && s.investors.private) ? (s.investors.private.buy || []) : [];
+            if (arr.some(x => x.code === cd)) st += 1;
+            else break;
+          }
+        }
+        return Math.max(1, st);
+      };
+
+      let rows = rawBuys.map(r => {
+        const mc = Number(mcapMap[r.code]) || 0;
+        const amt = Number(r.netAmt) || 0;
+        if (mc < 2000 || amt <= 0) return null;
+        if (mktF && r.market !== mktF) return null;
+        if (q && !(String(r.name || '').toLowerCase().includes(q) || String(r.code || '').includes(q))) return null;
+        const mcapPct = amt / mc * 100.0;
+        const hist = annHist[r.code] || [];
+        const rkIdx = hist.findIndex(h => h.date === currentFlowKey);
+        const annualRank = rkIdx >= 0 ? (rkIdx + 1) : 1;
+        const annualTotal = Math.max(1, hist.length);
+        const co = [];
+        if (fBuySet.has(r.code)) co.push('외인');
+        if (pBuySet.has(r.code)) co.push('연기금');
+        return {
+          ...r,
+          mcap: mc,
+          amt,
+          mcapPct,
+          annualRank,
+          annualTotal,
+          hist,
+          streak: calcStreak(r.code),
+          co,
+          sector: getStockSector(r.code),
+        };
+      }).filter(Boolean);
+
+      // 먼저 시총대비 %순 상위 50개 선별
+      rows.sort((a, b) => (b.mcapPct - a.mcapPct) || (b.amt - a.amt));
+      const top50All = rows.slice(0, 50);
+
+      const r1Cnt = top50All.filter(x => x.annualRank === 1).length;
+      const r3Cnt = top50All.filter(x => x.annualRank <= 3).length;
+      const sumAmt = top50All.reduce((acc, x) => acc + x.amt, 0);
+
+      let disp = top50All;
+      if (currentPrivateRankFilter === 'R1') disp = top50All.filter(x => x.annualRank === 1);
+      else if (currentPrivateRankFilter === 'R3') disp = top50All.filter(x => x.annualRank <= 3);
+
+      disp = [...disp];
+      if (currentPrivateSort === 'rank') {
+        disp.sort((a, b) => (a.annualRank - b.annualRank) || (b.mcapPct - a.mcapPct));
+      } else if (currentPrivateSort === 'amt') {
+        disp.sort((a, b) => (b.amt - a.amt) || (b.mcapPct - a.mcapPct));
+      } else if (currentPrivateSort === 'chgPct') {
+        const cv = (x) => (x.chgPct !== null && x.chgPct !== undefined && !isNaN(Number(x.chgPct))) ? Number(x.chgPct) : -999;
+        disp.sort((a, b) => (cv(b) - cv(a)) || (b.mcapPct - a.mcapPct));
+      } else if (currentPrivateSort === 'streak') {
+        disp.sort((a, b) => (b.streak - a.streak) || (b.mcapPct - a.mcapPct));
+      } else {
+        disp.sort((a, b) => (b.mcapPct - a.mcapPct) || (b.amt - a.amt));
+      }
+
+      const rowsHtml = disp.map((r, idx) => {
+        const info = STOCK_LOOKUP[r.code];
+        const passStar = (info && info.passed) ? `<span style="color:#15803d; font-weight:800; margin-left:3px;" title="스크리너 메인 통과">★</span>` : '';
+        const estUp = (info && info.hasEstUp) ? `<span style="color:#dc2626; font-weight:800; font-size:10px; margin-left:2px;" title="예상이익 상향">▲</span>` : '';
+        const mktTag = `<span class="flow-mkt-tag ${r.market === 'KOSDAQ' ? 'kq' : 'kp'}">${r.market === 'KOSDAQ' ? 'KQ' : 'KP'}</span>`;
+        const pctHtml = r.mcapPct >= 0.30
+          ? `<span class="pe-mcap-pct-hi">+${r.mcapPct.toFixed(2)}%</span>`
+          : `<span style="color:#dc2626; font-weight:800;">+${r.mcapPct.toFixed(2)}%</span>`;
+
+        let rkCls = 'rn', rkLbl = `연간 ${r.annualRank}위`;
+        if (r.annualRank === 1) { rkCls = 'r1'; rkLbl = '🏆 연간 1위 (최대)'; }
+        else if (r.annualRank <= 3) { rkCls = 'r3'; rkLbl = `🔥 연간 ${r.annualRank}위`; }
+        else if (r.annualRank <= 5) { rkCls = 'r5'; rkLbl = `연간 ${r.annualRank}위`; }
+
+        const top5Lines = r.hist.slice(0, 5).map((h, hi) => {
+          const mark = h.date === currentFlowKey ? ' ◀ 조회일' : '';
+          const pTxt = (h.pct !== null && !isNaN(h.pct)) ? ` (시총 +${h.pct.toFixed(2)}%)` : '';
+          return `${hi + 1}위. ${h.date}: +${h.amt.toFixed(1)}억${pTxt}${mark}`;
+        });
+        const tipTxt = `[${r.name}] 최근 1년(${allDates.length}영업일) 사모펀드 순매수 TOP5 (총 ${r.annualTotal}회 등장)\n${top5Lines.join('\n')}`;
+
+        const hasChg = r.chgPct !== null && r.chgPct !== undefined && !isNaN(Number(r.chgPct));
+        const chgNum = hasChg ? Number(r.chgPct) : null;
+        const chgCls = hasChg ? (chgNum > 0 ? 'pct-up' : (chgNum < 0 ? 'pct-down' : '')) : '';
+        const chgTxt = hasChg ? `${chgNum > 0 ? '+' : ''}${chgNum.toFixed(2)}%` : '-';
+        const stHtml = r.streak >= 2
+          ? `<span class="flow-streak-mid buy">${r.streak}일 연속</span>`
+          : `<span style="color:#64748b;">1일</span>`;
+        const coHtml = r.co.length
+          ? `<span class="flow-co-tag">+${r.co.join('+')}</span>`
+          : `<span style="color:#cbd5e1;">-</span>`;
+
+        return `<tr class="${r.annualRank === 1 ? 'pe-row-r1' : ''}">
+          <td class="ctr" style="color:#64748b; font-weight:800;">${idx + 1}</td>
+          <td class="lft">
+            <a class="rep-sheet-link" data-live-code="${r.code}" href="https://finance.naver.com/item/main.naver?code=${r.code}" target="_blank" style="text-decoration:none;">${escapeHtml(r.name)}</a>${mktTag}${passStar}${estUp}
+          </td>
+          <td class="lft" style="color:#475569; font-size:11.5px;">${escapeHtml(r.sector || '-')}</td>
+          <td>${pctHtml}</td>
+          <td class="flow-amt-up">+${r.amt.toFixed(1)}억</td>
+          <td style="color:#475569;">${Math.round(r.mcap).toLocaleString('ko-KR')}억</td>
+          <td class="ctr">
+            <span class="pe-rank-badge ${rkCls}" data-tip="${escapeHtml(tipTxt)}">${rkLbl}</span>
+            <span style="font-size:10.5px; color:#94a3b8; margin-left:3px;">/${r.annualTotal}회</span>
+          </td>
+          <td class="ctr">${stHtml}</td>
+          <td class="${chgCls}" style="font-weight:${hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'};">${chgTxt}</td>
+          <td class="ctr">${coHtml}</td>
+        </tr>`;
+      }).join('');
+
+      grid.innerHTML = `
+        <div class="pe-top50-card">
+          <div class="pe-top50-head">
+            <div class="pe-top50-title">
+              <span>💼 사모펀드 일간 순매수 · 시총대비 % TOP 50 (${periodTxt})</span>
+              <span style="font-size:11.5px; color:#64748b; font-weight:700;">시총 2,000억↑ · ${top50All.length}종목 · 합계 +${Math.round(sumAmt).toLocaleString('ko-KR')}억</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <div class="pe-filter-pills">
+                <button class="pe-pill-btn ${currentPrivateRankFilter === 'ALL' ? 'active' : ''}" onclick="setPrivateRankFilter('ALL')">전체 (${top50All.length})</button>
+                <button class="pe-pill-btn ${currentPrivateRankFilter === 'R1' ? 'active' : ''}" onclick="setPrivateRankFilter('R1')">🏆 연간 1위 (${r1Cnt})</button>
+                <button class="pe-pill-btn ${currentPrivateRankFilter === 'R3' ? 'active' : ''}" onclick="setPrivateRankFilter('R3')">🔥 연간 TOP3 (${r3Cnt})</button>
+              </div>
+              <select class="select-box" style="font-weight:700; font-size:11.5px;" onchange="setPrivateSort(this.value)">
+                <option value="mcapPct" ${currentPrivateSort === 'mcapPct' ? 'selected' : ''}>정렬: 시총대비 %순</option>
+                <option value="rank" ${currentPrivateSort === 'rank' ? 'selected' : ''}>정렬: 연간 순위순 (1위 우선)</option>
+                <option value="amt" ${currentPrivateSort === 'amt' ? 'selected' : ''}>정렬: 순매수 금액순</option>
+                <option value="chgPct" ${currentPrivateSort === 'chgPct' ? 'selected' : ''}>정렬: 일간 등락률순</option>
+                <option value="streak" ${currentPrivateSort === 'streak' ? 'selected' : ''}>정렬: 연속 등장순</option>
+              </select>
+            </div>
+          </div>
+          <div class="pe-tbl-wrap">
+            <table class="pe-tbl">
+              <thead>
+                <tr>
+                  <th class="ctr" style="width:40px;">#</th>
+                  <th class="lft">종목명</th>
+                  <th class="lft">섹터</th>
+                  <th>시총대비 (%)</th>
+                  <th>사모 순매수</th>
+                  <th>시가총액</th>
+                  <th class="ctr" title="최근 1년(${allDates.length}영업일) 중 해당 종목에 사모펀드가 순매수한 날들 가운데 몇 번째로 많이 샀는지">연간 순매수 순위</th>
+                  <th class="ctr">연속 등장</th>
+                  <th>일간 등락률</th>
+                  <th class="ctr">당일 동시매수</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml || '<tr><td colspan="10" class="ctr" style="padding:24px; color:#94a3b8;">조건에 맞는 사모펀드 순매수 종목(시총 2,000억 이상)이 없습니다.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      bindTooltips();
     }
 
     function renderFlowView() {
@@ -3671,6 +4024,11 @@
             </ol>
           </div>
         `;
+        return;
+      }
+
+      if (currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50') {
+        renderPrivateTop50View(snap, periodTxt);
         return;
       }
 
