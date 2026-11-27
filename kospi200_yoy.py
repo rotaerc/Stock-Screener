@@ -5159,10 +5159,7 @@ def build_web_dashboard(here):
         {{ key: 'private', label: '사모펀드', short: '사모' }},
       ];
       const fmtEok = (v) => `${{v > 0 ? '+' : ''}}${{Math.round(v).toLocaleString('ko-KR')}}억`;
-      const jumpAttr = (cd) => {{
-        const info = STOCK_LOOKUP[cd];
-        return info ? `onclick="jumpToStockInScreener('${{cd}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')"`;
-      }};
+      const jumpAttr = (cd) => `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')" title="네이버 금융에서 보기"`;
       const getMcapPct = (cd, amt) => {{
         const mc = Number(mcapMap[cd]);
         return (mc && mc > 0) ? ((Number(amt) || 0) / mc * 100.0) : null;
@@ -5580,10 +5577,7 @@ def build_web_dashboard(here):
         const unit = currentFlowMode === 'DAILY' ? '일' : '주';
         const mktLbl = mktF || 'KOSPI+KOSDAQ';
         const fmtEok = (v) => `${{v > 0 ? '+' : ''}}${{Math.round(v).toLocaleString('ko-KR')}}억`;
-        const stockJumpAttr = (cd) => {{
-          const info = STOCK_LOOKUP[cd];
-          return info ? `onclick="jumpToStockInScreener('${{cd}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')"`;
-        }};
+        const stockJumpAttr = (cd) => `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')" title="네이버 금융에서 보기"`;
 
         // 1) 3주체별 순유입/순유출 계산 (상위 매수합 - 상위 매도합)
         const netByInv = {{}};
@@ -5756,21 +5750,19 @@ def build_web_dashboard(here):
         if (coBuys.length && sideF !== 'SELL') {{
           ovHtml += `<div class="flow-overlap-title">🔥 공동 순매수 핵심 종목 (2~3개 주체 동시 매수 · ${{coBuys.length}}종목)</div><div class="flow-overlap-chips">` +
             coBuys.slice(0, 14).map(x => {{
-              const info = STOCK_LOOKUP[x.code];
-              const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              const act = `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
               const mp = getMcapPct(x.code, x.total);
               const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#b91c1c;">(시총 ${{mp > 0 ? '+' : ''}}${{mp.toFixed(2)}}%)</span>` : '';
-              return `<span class="flow-ov-chip" ${{act}} title="클릭하여 종목 상세 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
+              return `<span class="flow-ov-chip" ${{act}} title="네이버 금융에서 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         if (coSells.length && sideF !== 'BUY') {{
           ovHtml += `<div class="flow-overlap-title" style="color:#1e40af; margin-top:4px;">❄️ 공동 순매도 주의 종목 (2~3개 주체 동시 매도 · ${{coSells.length}}종목)</div><div class="flow-overlap-chips">` +
             coSells.slice(0, 10).map(x => {{
-              const info = STOCK_LOOKUP[x.code];
-              const act = info ? `onclick="jumpToStockInScreener('${{x.code}}', '${{info.market}}')"` : `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              const act = `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
               const mp = getMcapPct(x.code, x.total);
               const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#1d4ed8;">(시총 ${{mp.toFixed(2)}}%)</span>` : '';
-              return `<span class="flow-ov-chip sell" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
+              return `<span class="flow-ov-chip sell" ${{act}} title="네이버 금융에서 보기">${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         ovHtml += `</div>`;
@@ -5854,7 +5846,7 @@ def build_web_dashboard(here):
             const links = `<a class="ext-link naver" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank" title="네이버 금융">N</a><a class="ext-link fng" href="https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{r.code}}" target="_blank" title="에프엔가이드">Fn</a>${{scrBtn}}`;
             return `<tr>
               <td>${{idx + 1}}</td>
-              <td><b>${{escapeHtml(r.name)}}</b>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
+              <td><a class="flow-ins-link" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank" title="네이버 금융에서 보기">${{escapeHtml(r.name)}}</a>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
               <td ${{mpTip}}>${{mpCell}}</td>
               <td class="${{chgCls}}" style="font-weight:${{hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'}};">${{chgStr}}</td>
@@ -6141,12 +6133,12 @@ def build_web_dashboard(here):
             return `<tr class="${{chg === '상향' ? 'row-up' : ''}}">
               <td class="ctr" style="color:#94a3b8; font-weight:700; width:34px;">${{idx + 1}}</td>
               <td style="white-space:nowrap;">
-                <span class="rep-sheet-link" onclick="scrollToReportCard('${{cardDomId}}')" title="클릭하면 아래 상세 요약 카드로 이동">${{escapeHtml(r.stock_name || '-')}}</span>
+                <a class="rep-sheet-link" href="https://finance.naver.com/item/main.naver?code=${{r.stock_code}}" target="_blank" style="text-decoration:none;" title="네이버 금융에서 보기">${{escapeHtml(r.stock_name || '-')}}</a>
                 ${{miniTags.join('')}}
                 <span style="font-size:10.5px; color:#94a3b8; margin-left:2px;">${{escapeHtml(r.stock_code || '')}}</span>
               </td>
               <td>
-                <span class="rep-sheet-link" style="font-weight:600;" onclick="scrollToReportCard('${{cardDomId}}')">${{escapeHtml(r.title || '-')}}</span>${{pdfMini}}
+                <span class="rep-sheet-link" style="font-weight:600;" onclick="scrollToReportCard('${{cardDomId}}')" title="클릭하면 리포트 상세 요약으로 이동">${{escapeHtml(r.title || '-')}}</span>${{pdfMini}}
               </td>
               <td style="white-space:nowrap; color:#334155; font-weight:600;">${{escapeHtml(r.broker || '-')}}${{srcTag}}</td>
               <td class="num">${{tpHtml}}</td>
@@ -6235,7 +6227,7 @@ def build_web_dashboard(here):
         return `<div class="rep-card ${{hlCls}}" id="rep-card-item-${{idx}}" data-stock-code="${{r.stock_code}}">
           <div class="rep-card-head">
             <div class="rep-stock-title">
-              <span class="rep-stock-name">${{escapeHtml(r.stock_name || '기업명')}}</span>
+              <a class="rep-stock-name" href="${{naverUrl}}" target="_blank" style="text-decoration:none; color:inherit;" title="네이버 금융에서 보기" onmouseover="this.style.color='#2563eb';this.style.textDecoration='underline'" onmouseout="this.style.color='inherit';this.style.textDecoration='none'">${{escapeHtml(r.stock_name || '기업명')}}</a>
               <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
               <span class="rep-pill chg-${{chg}}" ${{prevTpTip}}>${{chgText}}</span>
               ${{cnt3m > 0 ? `<span class="rep-3m-badge ${{cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low')}}" title="최근 3개월(90일) 발간 리포트 횟수">📚 3개월 ${{cnt3m}}회</span>` : ''}}
