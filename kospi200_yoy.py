@@ -3973,6 +3973,40 @@ def build_web_dashboard(here):
     .rep-3m-badge.hi {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }}
     .rep-3m-badge.mid {{ background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }}
     .rep-3m-badge.low {{ background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }}
+    .rep-flow-cell {{
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }}
+    .rep-flow-sum {{
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }}
+    .rep-flow-sum.buy {{ color: #dc2626; }}
+    .rep-flow-sum.sell {{ color: #2563eb; }}
+    .rep-flow-mcap {{
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      margin-left: 3px;
+    }}
+    .rep-flow-parts {{
+      display: inline-flex;
+      flex-wrap: nowrap;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+    }}
+    .rep-flow-p {{
+      padding: 0 4px;
+      border-radius: 3px;
+    }}
+    .rep-flow-p.buy {{ background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }}
+    .rep-flow-p.sell {{ background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }}
     .live-quote-box {{
       position: fixed;
       z-index: 9999;
@@ -4711,6 +4745,7 @@ def build_web_dashboard(here):
           </select>
           <select id="repSortSelect" class="select-box" style="font-weight:700; color:#1e293b;" onchange="renderReportsGrid()">
             <option value="priority" selected>정렬: 목표가상향율순 → 예상이익상향 → 괴리율순</option>
+            <option value="wkFlow">정렬: 주간 3주체 순매수 큰순</option>
             <option value="cnt3m">정렬: 최근 3개월 발간 많은순</option>
             <option value="gap">정렬: 괴리율 높은순</option>
             <option value="estUp">정렬: 예상이익 상향 우선</option>
@@ -6306,6 +6341,55 @@ def build_web_dashboard(here):
       return (REPORTS_BY_CODE[cd] || []).length;
     }}
 
+    function getWeeklyCombinedFlowMap(refDate) {{
+      const empty = {{ wkKey: '', weekRange: '', weekLabel: '', map: {{}} }};
+      if (!FLOW_DATA || !Array.isArray(FLOW_DATA.weeks) || !FLOW_DATA.weeks.length || !FLOW_DATA.byWeek) return empty;
+      const weeks = FLOW_DATA.weeks;
+      let wkKey = weeks[0];
+      if (refDate && refDate !== 'ALL' && /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(refDate)) {{
+        const found = weeks.find(w => w <= refDate);
+        if (found) wkKey = found;
+      }}
+      const snap = FLOW_DATA.byWeek[wkKey];
+      if (!snap || !snap.investors) return empty;
+
+      const sDt = snap.startDate || wkKey;
+      const eDt = snap.endDate || wkKey;
+      const fmtMD = (s) => (s && s.length >= 10) ? `${{s.slice(5, 7)}}/${{s.slice(8, 10)}}` : s;
+      const weekRange = (sDt && eDt && sDt !== eDt) ? `${{fmtMD(sDt)}}~${{fmtMD(eDt)}}` : fmtMD(wkKey);
+      const weekLabel = snap.weekLabel || `${{sDt}} ~ ${{eDt}}`;
+      const mcapMap = FLOW_DATA.marketCaps || {{}};
+      const invDefs = [
+        {{ key: 'foreign', tag: '외', full: '외국인' }},
+        {{ key: 'pension', tag: '연', full: '연기금' }},
+        {{ key: 'private', tag: '사', full: '사모펀드' }},
+      ];
+      const byCode = {{}};
+      invDefs.forEach(def => {{
+        const invObj = snap.investors[def.key] || {{}};
+        ['buy', 'sell'].forEach(side => {{
+          (invObj[side] || []).forEach(it => {{
+            const cd = String(it.code || '').trim().padStart(6, '0');
+            if (!cd) return;
+            let amt = Number(it.netAmt) || 0;
+            if (side === 'sell' && amt > 0) amt = -amt;
+            else if (side === 'buy' && amt < 0) amt = Math.abs(amt);
+            if (!byCode[cd]) {{
+              byCode[cd] = {{ total: 0, parts: {{ foreign: 0, pension: 0, private: 0 }}, has: {{ foreign: false, pension: false, private: false }} }};
+            }}
+            byCode[cd].parts[def.key] += amt;
+            byCode[cd].has[def.key] = true;
+            byCode[cd].total += amt;
+          }});
+        }});
+      }});
+      Object.keys(byCode).forEach(cd => {{
+        const mc = Number(mcapMap[cd]);
+        byCode[cd].mcapPct = (mc && mc > 0) ? (byCode[cd].total / mc * 100.0) : null;
+      }});
+      return {{ wkKey, weekRange, weekLabel, map: byCode }};
+    }}
+
     function setReportViewMode(mode) {{
       currentReportViewMode = (mode === 'CARDS') ? 'CARDS' : 'SHEET';
       const b2 = document.getElementById('btnRepViewSheet');
@@ -6337,8 +6421,18 @@ def build_web_dashboard(here):
       const sortMode = document.getElementById('repSortSelect') ? document.getElementById('repSortSelect').value : 'priority';
       const isGlobalSearch = q.length > 0 && currentReportDate !== 'ALL';
       const reps = isGlobalSearch ? getAllStoredReportsList() : getActiveReportsList();
+      const wkFlowCtx = getWeeklyCombinedFlowMap(isGlobalSearch ? '' : currentReportDate);
 
-      let items = reps.map((r, origIdx) => ({{ r, origIdx, meta: computeReportRankMeta(r), cnt3m: getReportCount3m(r.stock_code) }})).filter(({{ r }}) => {{
+      let items = reps.map((r, origIdx) => {{
+        const cd6 = String(r.stock_code || '').trim().padStart(6, '0');
+        return {{
+          r,
+          origIdx,
+          meta: computeReportRankMeta(r),
+          cnt3m: getReportCount3m(r.stock_code),
+          wkFlow: wkFlowCtx.map[cd6] || null,
+        }};
+      }}).filter(({{ r }}) => {{
         if (brokerF && r.broker !== brokerF) return false;
         if (chgF && r.target_change !== chgF) return false;
         if (q) {{
@@ -6366,6 +6460,14 @@ def build_web_dashboard(here):
           const dd = String(b.r.date || '').localeCompare(String(a.r.date || ''));
           if (dd !== 0) return dd;
           return a.origIdx - b.origIdx;
+        }});
+      }} else if (sortMode === 'wkFlow') {{
+        items.sort((a, b) => {{
+          const ha = a.wkFlow ? 1 : 0;
+          const hb = b.wkFlow ? 1 : 0;
+          if (hb !== ha) return hb - ha;
+          if (ha && hb && b.wkFlow.total !== a.wkFlow.total) return b.wkFlow.total - a.wkFlow.total;
+          return gapVal(b.meta) - gapVal(a.meta);
         }});
       }} else if (sortMode === 'cnt3m') {{
         items.sort((a, b) => {{
@@ -6408,10 +6510,13 @@ def build_web_dashboard(here):
           const upN = items.filter(x => x.r.target_change === '상향').length;
           const newN = items.filter(x => x.r.target_change === '신규').length;
           const dnN = items.filter(x => x.r.target_change === '하향').length;
+          const flowBuyCodes = new Set(items.filter(x => x.wkFlow && x.wkFlow.total > 0).map(x => x.r.stock_code));
+          const flowSellCodes = new Set(items.filter(x => x.wkFlow && x.wkFlow.total < 0).map(x => x.r.stock_code));
           const dateTag = isGlobalSearch
             ? `전체 검색 결과`
             : (currentReportDate === 'ALL' ? `최근 ${{REPORT_DATES.length}}일 전체` : `${{currentReportDate || REPORTS_DATA.date || '-'}} 발간`);
-          const sheetRows = items.map(({{ r, meta, cnt3m }}, idx) => {{
+          const fmtEokInt = (v) => `${{v > 0 ? '+' : ''}}${{Math.round(v).toLocaleString('ko-KR')}}억`;
+          const sheetRows = items.map(({{ r, meta, cnt3m, wkFlow }}, idx) => {{
             const {{ info, tpNum, hasTp, gap }} = meta;
             const chg = r.target_change || '유지';
             const tpPct = meta.tpChgPct;
@@ -6444,6 +6549,37 @@ def build_web_dashboard(here):
             const gapHtml = (gap !== null && !isNaN(gap))
               ? `<span class="${{gap >= 0 ? 'pct-up' : 'pct-down'}}" style="font-weight:800;">${{gap >= 0 ? '+' : ''}}${{gap.toFixed(1)}}%</span>`
               : '<span style="color:#cbd5e1;">-</span>';
+            let flowHtml = '<span style="color:#cbd5e1;" title="주간 외국인·연기금·사모펀드 순매수/순매도 상위 25권 외">-</span>';
+            if (wkFlow) {{
+              const isBuy = wkFlow.total >= 0;
+              const sumCls = isBuy ? 'buy' : 'sell';
+              const mcapTxt = (wkFlow.mcapPct !== null && !isNaN(wkFlow.mcapPct))
+                ? `<span class="rep-flow-mcap">(${{wkFlow.mcapPct >= 0 ? '+' : ''}}${{wkFlow.mcapPct.toFixed(2)}}%)</span>`
+                : '';
+              const pTags = [];
+              const tipParts = [];
+              [
+                {{ key: 'foreign', tag: '외', full: '외국인' }},
+                {{ key: 'pension', tag: '연', full: '연기금' }},
+                {{ key: 'private', tag: '사', full: '사모펀드' }},
+              ].forEach(def => {{
+                if (wkFlow.has[def.key]) {{
+                  const v = wkFlow.parts[def.key];
+                  const cls = v >= 0 ? 'buy' : 'sell';
+                  const vInt = Math.round(v);
+                  pTags.push(`<span class="rep-flow-p ${{cls}}">${{def.tag}}${{vInt > 0 ? '+' : ''}}${{vInt.toLocaleString('ko-KR')}}</span>`);
+                  tipParts.push(`${{def.full}} ${{fmtEokInt(v)}}`);
+                }}
+              }});
+              const tipMcap = (wkFlow.mcapPct !== null && !isNaN(wkFlow.mcapPct))
+                ? ` · 시총대비 ${{wkFlow.mcapPct >= 0 ? '+' : ''}}${{wkFlow.mcapPct.toFixed(2)}}%`
+                : '';
+              const tipTxt = `[주간 3주체 합산 · ${{wkFlowCtx.weekLabel}}] 합계 ${{fmtEokInt(wkFlow.total)}} (${{tipParts.join(' / ')}})${{tipMcap}}`;
+              flowHtml = `<div class="rep-flow-cell" title="${{escapeHtml(tipTxt)}}">
+                <div class="rep-flow-sum ${{sumCls}}">${{fmtEokInt(wkFlow.total)}}${{mcapTxt}}</div>
+                <div class="rep-flow-parts">${{pTags.join('')}}</div>
+              </div>`;
+            }}
             const c3Cls = cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low');
             const c3Txt = cnt3m > 0 ? `${{cnt3m >= 10 ? '🔥 ' : ''}}${{cnt3m}}회` : '-';
             const cardDomId = `rep-card-item-${{idx}}`;
@@ -6468,19 +6604,27 @@ def build_web_dashboard(here):
               <td style="white-space:nowrap; color:#334155; font-weight:600;">${{escapeHtml(r.broker || '-')}}${{srcTag}}</td>
               <td class="num">${{tpHtml}}</td>
               <td class="num">${{gapHtml}}</td>
+              <td class="num">${{flowHtml}}</td>
               <td class="ctr"><span class="rep-3m-badge ${{c3Cls}}" title="최근 3개월(90일) 동안 해당 종목에 발간된 증권사 리포트 수">${{c3Txt}}</span></td>
             </tr>`;
           }}).join('');
           const repUpdTxt = (REPORTS_DATA && REPORTS_DATA.updatedAt) ? ` · 🕒 ${{REPORTS_DATA.updatedAt}} 업데이트` : '';
+          const wkRangeBadge = wkFlowCtx.weekRange
+            ? `<span style="color:#0f766e;" title="주간 외국인·연기금·사모펀드 합산 수급 기준 기간: ${{escapeHtml(wkFlowCtx.weekLabel)}}">🏦 주간3주체(${{wkFlowCtx.weekRange}}) 순매수 ${{flowBuyCodes.size}} · 순매도 ${{flowSellCodes.size}}종목</span>`
+            : '';
+          const wkColHead = wkFlowCtx.weekRange
+            ? `주간 3주체 수급 <span style="font-size:10px; color:#64748b; font-weight:600;">(${{wkFlowCtx.weekRange}})</span>`
+            : '주간 3주체 수급';
           sheetBox.innerHTML = `
             <div class="rep-sheet-card">
               <div class="rep-sheet-head">
                 <div class="rep-sheet-title">📋 오늘의 리포트 한눈에 보기 (장표 · ${{dateTag}} · 총 ${{items.length}}건${{repUpdTxt}})</div>
-                <div style="display:flex; gap:8px; font-size:11.5px; font-weight:700; color:#475569;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:11.5px; font-weight:700; color:#475569;">
                   <span style="color:#dc2626;">▲ 목표가 상향 ${{upN}}건</span>
                   <span style="color:#6d28d9;">★ 신규 ${{newN}}건</span>
                   <span style="color:#2563eb;">▼ 하향 ${{dnN}}건</span>
-                  <span style="color:#64748b;">· 행 클릭 시 상세 카드로 바로 이동</span>
+                  ${{wkRangeBadge}}
+                  <span style="color:#64748b;">· 제목 클릭 시 상세 카드로 이동</span>
                 </div>
               </div>
               <div class="rep-sheet-wrap">
@@ -6493,6 +6637,7 @@ def build_web_dashboard(here):
                       <th>증권사</th>
                       <th class="num">목표가 변동 (이전 → 변경)</th>
                       <th class="num">괴리율</th>
+                      <th class="num" title="키움 REST API 주간 외국인·연기금·사모펀드 합산 순매수/순매도(억) 및 주체별 내역">${{wkColHead}}</th>
                       <th class="ctr">최근 3개월 발간</th>
                     </tr>
                   </thead>
