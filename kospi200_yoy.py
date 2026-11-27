@@ -4510,9 +4510,8 @@ def build_web_dashboard(here):
         </div>
         <div class="group-right">
           <div class="flow-mode-group">
-            <button class="flow-mode-btn active" id="btnRepViewBoth" onclick="setReportViewMode('BOTH')">📋 장표+카드</button>
-            <button class="flow-mode-btn" id="btnRepViewSheet" onclick="setReportViewMode('SHEET')">📋 장표만</button>
-            <button class="flow-mode-btn" id="btnRepViewCards" onclick="setReportViewMode('CARDS')">🗂️ 카드만</button>
+            <button class="flow-mode-btn active" id="btnRepViewSheet" onclick="setReportViewMode('SHEET')">📋 리포트 장표</button>
+            <button class="flow-mode-btn" id="btnRepViewCards" onclick="setReportViewMode('CARDS')">📰 리포트 상세</button>
           </div>
           <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 원문</a>
           <a class="rep-btn" href="https://stock.naver.com/research/company" target="_blank">💚 네이버 리서치</a>
@@ -4949,7 +4948,11 @@ def build_web_dashboard(here):
         <div class="nav-divider"></div>
         <div class="nav-section">
           <div class="nav-section-title">기업 리포트</div>
-          <button class="nav-item ${{isRep && !curRepChg ? 'active' : ''}}" onclick="selectReportsView('', '')">
+          <button class="nav-item ${{isRep && currentReportViewMode === 'SHEET' && !curRepChg ? 'active' : ''}}" onclick="selectReportsView('', '', 'SHEET')">
+            <span class="nav-item-left"><span>📋</span><span>리포트 장표</span></span>
+            <span class="nav-badge">${{reps.length}}</span>
+          </button>
+          <button class="nav-item ${{isRep && currentReportViewMode === 'CARDS' && !curRepChg ? 'active' : ''}}" onclick="selectReportsView('', '', 'CARDS')">
             <span class="nav-item-left"><span>📰</span><span>오늘의 리포트</span></span>
             <span class="nav-badge">${{reps.length}}</span>
           </button>
@@ -5884,7 +5887,9 @@ def build_web_dashboard(here):
       const dateLabel = currentReportDate === 'ALL'
         ? `전체 보관기간 (최근 ${{REPORT_DATES.length}}일)`
         : `${{currentReportDate || REPORTS_DATA.date || '-'}} 기준`;
-      document.getElementById('pageTitle').textContent = '기업 리포트 요약';
+      document.getElementById('pageTitle').textContent = currentReportViewMode === 'SHEET'
+        ? '기업 리포트 장표 (한눈에 보기)'
+        : '기업 리포트 상세 요약';
       document.getElementById('pageSubtitle').textContent = `한경 · 네이버 증권 통합 · ${{dateLabel}} · 목표가상향 → 예상이익상향 → 괴리율순`;
 
       const upCnt = reps.filter(r => r.target_change === '상향').length;
@@ -5899,10 +5904,19 @@ def build_web_dashboard(here):
       `;
     }}
 
-    function selectReportsView(focusCode = '', filterChange = null) {{
+    function selectReportsView(focusCode = '', filterChange = null, viewMode = null) {{
       closeMobileNav();
       currentViewMode = 'REPORTS';
       highlightReportCode = focusCode || '';
+      if (viewMode === 'SHEET' || viewMode === 'CARDS') {{
+        currentReportViewMode = viewMode;
+      }} else if (focusCode) {{
+        currentReportViewMode = 'CARDS';
+      }}
+      const bSheet = document.getElementById('btnRepViewSheet');
+      const bCards = document.getElementById('btnRepViewCards');
+      if (bSheet) bSheet.classList.toggle('active', currentReportViewMode === 'SHEET');
+      if (bCards) bCards.classList.toggle('active', currentReportViewMode === 'CARDS');
       setScreenerVisibility(false);
 
       if (focusCode) {{
@@ -5966,7 +5980,7 @@ def build_web_dashboard(here):
       }};
     }}
 
-    let currentReportViewMode = 'BOTH'; // 'BOTH' | 'SHEET' | 'CARDS'
+    let currentReportViewMode = 'SHEET'; // 'SHEET' | 'CARDS'
     const REPORT_COUNTS_3M = (REPORTS_DATA && REPORTS_DATA.reportCounts3m) ? REPORTS_DATA.reportCounts3m : {{}};
 
     function getReportCount3m(code) {{
@@ -5977,19 +5991,19 @@ def build_web_dashboard(here):
     }}
 
     function setReportViewMode(mode) {{
-      currentReportViewMode = mode || 'BOTH';
-      const b1 = document.getElementById('btnRepViewBoth');
+      currentReportViewMode = (mode === 'CARDS') ? 'CARDS' : 'SHEET';
       const b2 = document.getElementById('btnRepViewSheet');
       const b3 = document.getElementById('btnRepViewCards');
-      if (b1) b1.classList.toggle('active', currentReportViewMode === 'BOTH');
       if (b2) b2.classList.toggle('active', currentReportViewMode === 'SHEET');
       if (b3) b3.classList.toggle('active', currentReportViewMode === 'CARDS');
+      updateReportsHeaderAndBadges();
+      renderSidebar();
       renderReportsGrid();
     }}
 
     function scrollToReportCard(cardId) {{
-      if (currentReportViewMode === 'SHEET') {{
-        setReportViewMode('BOTH');
+      if (currentReportViewMode !== 'CARDS') {{
+        setReportViewMode('CARDS');
       }}
       const el = document.getElementById(cardId);
       if (el) {{
@@ -6148,7 +6162,7 @@ def build_web_dashboard(here):
                   <span style="color:#dc2626;">▲ 목표가 상향 ${{upN}}건</span>
                   <span style="color:#6d28d9;">★ 신규 ${{newN}}건</span>
                   <span style="color:#2563eb;">▼ 하향 ${{dnN}}건</span>
-                  <span style="color:#64748b;">· 행 클릭 시 아래 상세 요약으로 이동</span>
+                  <span style="color:#64748b;">· 행 클릭 시 상세 카드로 바로 이동</span>
                 </div>
               </div>
               <div class="rep-sheet-wrap">
