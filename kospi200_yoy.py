@@ -4992,6 +4992,8 @@ def build_web_dashboard(here):
         cmpMode: currentCompareMode,
         flowMode: currentFlowMode,
         flowKey: currentFlowKey,
+        flowKeyDaily: currentFlowKeyByMode.DAILY || '',
+        flowKeyWeekly: currentFlowKeyByMode.WEEKLY || '',
         flowMarket: currentFlowMarket,
         repViewMode: currentReportViewMode,
         repDate: currentReportDate,
@@ -5032,7 +5034,12 @@ def build_web_dashboard(here):
           currentCompareMode = st.cmpMode;
           applyScreenerCompareAll(currentCompareMode);
         }}
-        if (st.flowKey !== undefined) currentFlowKey = st.flowKey || '';
+        if (st.flowKeyDaily !== undefined) currentFlowKeyByMode.DAILY = st.flowKeyDaily || '';
+        if (st.flowKeyWeekly !== undefined) currentFlowKeyByMode.WEEKLY = st.flowKeyWeekly || '';
+        if (st.flowKey !== undefined) {{
+          currentFlowKey = st.flowKey || '';
+          currentFlowKeyByMode[currentFlowMode] = currentFlowKey;
+        }}
         if (st.flowMarket !== undefined) currentFlowMarket = st.flowMarket || '';
         if (st.repViewMode) currentReportViewMode = st.repViewMode;
         if (st.repDate) {{
@@ -5349,6 +5356,7 @@ def build_web_dashboard(here):
     }}
 
     let currentFlowMode = 'DAILY';
+    let currentFlowKeyByMode = {{ DAILY: '', WEEKLY: '' }};
     let currentFlowKey = '';
     let currentFlowMarket = '';
 
@@ -5370,6 +5378,12 @@ def build_web_dashboard(here):
     }}
 
     function initFlowControls() {{
+      const dKeys = getFlowKeys('DAILY');
+      const wKeys = getFlowKeys('WEEKLY');
+      // 웹페이지를 처음 열었을 때는 일간/주간 모두 가장 최근일로 초기화
+      currentFlowKeyByMode.DAILY = dKeys.length ? dKeys[0] : '';
+      currentFlowKeyByMode.WEEKLY = wKeys.length ? wKeys[0] : '';
+      currentFlowKey = currentFlowKeyByMode[currentFlowMode] || '';
       refreshFlowPeriodSelect();
     }}
 
@@ -5380,12 +5394,16 @@ def build_web_dashboard(here):
       if (!keys.length) {{
         sels.forEach(s => {{ s.innerHTML = `<option value="">데이터 없음</option>`; }});
         currentFlowKey = '';
+        currentFlowKeyByMode[currentFlowMode] = '';
         updateFlowPeriodNavButtons();
         return;
       }}
-      if (!currentFlowKey || !keys.includes(currentFlowKey)) {{
-        currentFlowKey = keys[0];
+      let savedKey = currentFlowKeyByMode[currentFlowMode] || '';
+      if (!savedKey || !keys.includes(savedKey)) {{
+        savedKey = keys[0];
       }}
+      currentFlowKey = savedKey;
+      currentFlowKeyByMode[currentFlowMode] = savedKey;
       const bucket = currentFlowMode === 'WEEKLY' ? (FLOW_DATA.byWeek || {{}}) : (FLOW_DATA.byDate || {{}});
       const optsHtml = keys.map((k, idx) => {{
         const snap = bucket[k] || {{}};
@@ -5425,6 +5443,7 @@ def build_web_dashboard(here):
       const nextIdx = idx + delta;
       if (nextIdx >= 0 && nextIdx < keys.length) {{
         currentFlowKey = keys[nextIdx];
+        currentFlowKeyByMode[currentFlowMode] = currentFlowKey;
         const fs = document.getElementById('flowPeriodSelect');
         const hs = document.getElementById('homePeriodSelect');
         if (fs) fs.value = currentFlowKey;
@@ -5441,6 +5460,7 @@ def build_web_dashboard(here):
     function onHomePeriodChange() {{
       const hs = document.getElementById('homePeriodSelect');
       currentFlowKey = hs ? (hs.value || '') : '';
+      currentFlowKeyByMode[currentFlowMode] = currentFlowKey;
       const fs = document.getElementById('flowPeriodSelect');
       if (fs) fs.value = currentFlowKey;
       updateFlowPeriodNavButtons();
@@ -5792,6 +5812,7 @@ def build_web_dashboard(here):
 
     function onFlowPeriodChange() {{
       currentFlowKey = document.getElementById('flowPeriodSelect').value || '';
+      currentFlowKeyByMode[currentFlowMode] = currentFlowKey;
       const hs = document.getElementById('homePeriodSelect');
       if (hs) hs.value = currentFlowKey;
       updateFlowPeriodNavButtons();
