@@ -2605,10 +2605,10 @@
 
       const mktItems = marketKeys.map(m => {
         const icon = m === 'KOSPI' ? '📊' : '🚀';
+        const label = m === 'KOSPI' ? '코스피' : (m === 'KOSDAQ' ? '코스닥' : m);
         const active = (isScr && currentMarket === m && curSheetName === '1_전체') ? 'active' : '';
         return `<button class="nav-item ${active}" onclick="selectMarketAndSheet('${m}', '1_전체')">
-          <span class="nav-item-left"><span>${icon}</span><span>${m} 상위 200</span></span>
-          <span class="nav-badge">${DB[m].sheets[0] ? DB[m].sheets[0].count : 0}</span>
+          <span class="nav-item-left"><span>${icon}</span><span>${label}</span></span>
         </button>`;
       }).join('');
 
@@ -2641,16 +2641,13 @@
             <span class="nav-badge" style="background:#dbeafe; color:#1d4ed8;">HOME</span>
           </button>
           <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab !== 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'ALL')">
-            <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
-            <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalDays || (FLOW_DATA.dates && FLOW_DATA.dates.length))) || 0}일</span>
+            <span class="nav-item-left"><span>🏦</span><span>일간 수급</span></span>
           </button>
           <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY', 'ALL')">
-            <span class="nav-item-left"><span>📆</span><span>주간 수급 (1년)</span></span>
-            <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalWeeks || (FLOW_DATA.weeks && FLOW_DATA.weeks.length))) || 0}주</span>
+            <span class="nav-item-left"><span>📆</span><span>주간 수급</span></span>
           </button>
           <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">
             <span class="nav-item-left"><span>💼</span><span>사모 시총비중 TOP50</span></span>
-            <span class="nav-badge" style="background:#ede9fe; color:#6d28d9;">2천억↑</span>
           </button>
         </div>
         <div class="nav-divider"></div>
@@ -2692,7 +2689,6 @@
           <div class="nav-section-title">반도체 사이클 (통계청)</div>
           <button class="nav-item ${currentViewMode === 'SEMICON' ? 'active' : ''}" onclick="selectSemiconView()">
             <span class="nav-item-left"><span>🔄</span><span>반도체 재고순환</span></span>
-            <span class="nav-badge" style="${(SEMICON_DATA && SEMICON_DATA.hasKosisData) ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}">${(SEMICON_DATA && SEMICON_DATA.latestMonth) ? SEMICON_DATA.latestMonth.slice(2) : '설정'}</span>
           </button>
         </div>
         <div class="nav-divider"></div>
