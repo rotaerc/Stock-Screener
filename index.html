@@ -2101,8 +2101,8 @@
         <div class="filter-left">
           <div class="flow-mode-group">
             <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY', 'ALL')">📅 일간 수급 (1년)</button>
-            <button class="flow-mode-btn" id="btnFlowPrivateTop50" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">💼 사모 시총비중 TOP50</button>
             <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY', 'ALL')">📆 주간 수급 (1년)</button>
+            <button class="flow-mode-btn" id="btnFlowPrivateTop50" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">💼 사모 시총비중 TOP50</button>
           </div>
           <div class="flow-mode-group" id="flowMarketTabs">
             <button class="flow-mode-btn active" id="btnFlowMktAll" onclick="setFlowMarket('')">전체</button>
@@ -2644,13 +2644,13 @@
             <span class="nav-item-left"><span>🏦</span><span>일간 수급 (외·연·사)</span></span>
             <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalDays || (FLOW_DATA.dates && FLOW_DATA.dates.length))) || 0}일</span>
           </button>
-          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">
-            <span class="nav-item-left"><span>💼</span><span>사모 시총비중 TOP50</span></span>
-            <span class="nav-badge" style="background:#ede9fe; color:#6d28d9;">2천억↑</span>
-          </button>
           <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'WEEKLY' ? 'active' : ''}" onclick="selectFlowView('WEEKLY', 'ALL')">
             <span class="nav-item-left"><span>📆</span><span>주간 수급 (1년)</span></span>
             <span class="nav-badge">${(FLOW_DATA && (FLOW_DATA.totalWeeks || (FLOW_DATA.weeks && FLOW_DATA.weeks.length))) || 0}주</span>
+          </button>
+          <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">
+            <span class="nav-item-left"><span>💼</span><span>사모 시총비중 TOP50</span></span>
+            <span class="nav-badge" style="background:#ede9fe; color:#6d28d9;">2천억↑</span>
           </button>
         </div>
         <div class="nav-divider"></div>
