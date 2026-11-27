@@ -5501,24 +5501,6 @@ def build_web_dashboard(here):
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
-          <div class="nav-section-title">반도체 사이클 (통계청)</div>
-          <button class="nav-item ${{currentViewMode === 'SEMICON' ? 'active' : ''}}" onclick="selectSemiconView()">
-            <span class="nav-item-left"><span>🔄</span><span>반도체 재고순환</span></span>
-            <span class="nav-badge" style="${{(SEMICON_DATA && SEMICON_DATA.hasKosisData) ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}}">${{(SEMICON_DATA && SEMICON_DATA.latestMonth) ? SEMICON_DATA.latestMonth.slice(2) : '설정'}}</span>
-          </button>
-        </div>
-        <div class="nav-divider"></div>
-        <div class="nav-section">
-          <div class="nav-section-title">한국 스크리너</div>
-          ${{mktItems}}
-        </div>
-        <div class="nav-divider"></div>
-        <div class="nav-section">
-          <div class="nav-section-title">${{currentMarket}} 빠른 필터</div>
-          ${{quickSheets}}
-        </div>
-        <div class="nav-divider"></div>
-        <div class="nav-section">
           <div class="nav-section-title">기업 리포트</div>
           <button class="nav-item ${{isRep && currentReportViewMode === 'SHEET' && !curRepChg ? 'active' : ''}}" onclick="selectReportsView('', '', 'SHEET')">
             <span class="nav-item-left"><span>📋</span><span>리포트 장표</span></span>
@@ -5539,6 +5521,24 @@ def build_web_dashboard(here):
           <button class="nav-item ${{isRep && curRepChg === '하향' ? 'active' : ''}}" onclick="selectReportsView('', '하향')">
             <span class="nav-item-left"><span>📉</span><span>목표가 하향</span></span>
             <span class="nav-badge down">${{repDown}}</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">한국 스크리너</div>
+          ${{mktItems}}
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">${{currentMarket}} 빠른 필터</div>
+          ${{quickSheets}}
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-section-title">반도체 사이클 (통계청)</div>
+          <button class="nav-item ${{currentViewMode === 'SEMICON' ? 'active' : ''}}" onclick="selectSemiconView()">
+            <span class="nav-item-left"><span>🔄</span><span>반도체 재고순환</span></span>
+            <span class="nav-badge" style="${{(SEMICON_DATA && SEMICON_DATA.hasKosisData) ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}}">${{(SEMICON_DATA && SEMICON_DATA.latestMonth) ? SEMICON_DATA.latestMonth.slice(2) : '설정'}}</span>
           </button>
         </div>
         <div class="nav-divider"></div>
