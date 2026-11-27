@@ -1143,10 +1143,77 @@ def _build_or_load_op_baseline(here, target_date=OP_BASELINE_DATE):
     if changed:
         try:
             with open(b_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False)
+                json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
         except Exception as e:
             print(f"  [알림] op_baseline.json 저장 실패: {e}")
     return data
+
+
+def _record_daily_op_snapshot(here, prefix, snap_date, est_by_code, max_days=5):
+    """op_baseline.json 의 dailySnapshots 에 날짜별(YYYY-MM-DD) 예상이익 스냅샷을 저장(최근 N일 유지)."""
+    if not snap_date or not est_by_code:
+        return
+    data = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
+    daily = data.setdefault("dailySnapshots", {})
+    day_entry = daily.setdefault(snap_date, {})
+    day_entry[prefix] = est_by_code
+    # 최근 max_days 개 날짜만 보관
+    keep_dates = sorted(daily.keys(), reverse=True)[:max_days]
+    data["dailySnapshots"] = {k: daily[k] for k in keep_dates}
+    b_path = os.path.join(here, "op_baseline.json")
+    try:
+        with open(b_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+    except Exception as e:
+        print(f"  [알림] dailySnapshots 저장 실패: {e}")
+
+
+def _load_prev_day_estimates(here, prefix, current_date_str):
+    """
+    현재 데이터 날짜(current_date_str, YYYY-MM-DD)보다 이전인 가장 최근 영업일(어제 기준)
+    예상이익 스냅샷을 (prev_date_str, {code: {col: val}}) 형태로 반환합니다.
+    """
+    data = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
+    daily = data.get("dailySnapshots") or {}
+    cur_d = str(current_date_str or "")[:10]
+
+    # 1) op_baseline.json 에 누적 저장된 dailySnapshots 에서 current_date_str 미만 최신일 탐색
+    prev_dates = sorted(
+        [d for d, m_map in daily.items() if (not cur_d or d < cur_d) and isinstance(m_map, dict) and m_map.get(prefix)],
+        reverse=True,
+    )
+    if prev_dates:
+        p_dt = prev_dates[0]
+        return p_dt, daily[p_dt][prefix]
+
+    # 2) 로컬 폴더 / 엑셀백업 에서 current_date_str 이전 가장 최근 통합시트 엑셀 스캔 후 캐시
+    cands = []
+    for d_path in [here, os.path.join(here, "엑셀백업")]:
+        if not os.path.isdir(d_path):
+            continue
+        for fn in os.listdir(d_path):
+            if fn.startswith("~$") or not fn.lower().endswith(".xlsx"):
+                continue
+            if fn.startswith(f"{prefix}_통합시트_") or fn.startswith(f"{prefix}_전체_"):
+                m_ts = re.search(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})", fn)
+                if not m_ts:
+                    continue
+                f_date = f"{m_ts.group(1)}-{m_ts.group(2)}-{m_ts.group(3)}"
+                if cur_d and f_date >= cur_d:
+                    continue
+                cands.append((f_date, fn, os.path.join(d_path, fn)))
+    if cands:
+        cands.sort(key=lambda x: (x[0], x[1]), reverse=True)
+        f_date, _, full_p = cands[0]
+        try:
+            est_map = _extract_est_map_from_excel(full_p)
+            if est_map:
+                _record_daily_op_snapshot(here, prefix, f_date, est_map)
+                return f_date, est_map
+        except Exception:
+            pass
+
+    return "", {}
 
 
 def _load_latest_prev_estimates(here, prefix):
@@ -1662,6 +1729,27 @@ def run_market(market, sess, here):
     op_hist_data = update_op_estimate_history_from_df(here, df_all)
     op_hist_stocks = op_hist_data.get("stocks", {})
 
+    # 오늘자 일별 스냅샷을 op_baseline.json(dailySnapshots)에 자동 저장 (내일 '어제 기준' 비교용)
+    try:
+        today_snap_map = {}
+        if "종목코드" in df_all.columns and est_compare_cols:
+            for _, row in df_all.iterrows():
+                raw_cd = str(row.get("종목코드", "") or "").strip()
+                if not raw_cd:
+                    continue
+                cd = raw_cd.split(".")[0].zfill(6)
+                row_e = {}
+                for col in est_compare_cols:
+                    v_n = _num(row.get(col))
+                    if v_n is not None:
+                        row_e[str(col)] = round(float(v_n), 2)
+                if row_e:
+                    today_snap_map[cd] = row_e
+        if today_snap_map:
+            _record_daily_op_snapshot(here, prefix, datetime.now().strftime("%Y-%m-%d"), today_snap_map)
+    except Exception:
+        pass
+
     all_up_cnt, all_down_cnt = 0, 0
     with pd.ExcelWriter(p_xlsx_multi, engine="openpyxl") as writer:
         sheets_to_write = [
@@ -1974,12 +2062,36 @@ def _extract_market_excel_for_web(here, market):
                 "rows": down_rows,
             })
 
+    # 현재 엑셀의 일별 스냅샷 확보 및 고정기준(11/18) + 직전일(어제 기준) 비교 데이터 함께 탑재
+    cur_date_str = updated_at[:10]
+    if all_sheet and code_col_idx >= 0:
+        cur_snap_map = {}
+        for r in all_sheet["rows"]:
+            cd = str(r["v"][code_col_idx] or "").strip()
+            if not cd:
+                continue
+            row_e = {}
+            for ci in est_col_idxs:
+                vn = _num(r["v"][ci]) if ci < len(r["v"]) else None
+                if vn is not None:
+                    row_e[raw_cols[ci]] = round(float(vn), 2)
+            if row_e:
+                cur_snap_map[cd] = row_e
+        if cur_snap_map and re.match(r"^\d{4}-\d{2}-\d{2}$", cur_date_str):
+            _record_daily_op_snapshot(here, prefix, cur_date_str, cur_snap_map)
+
+    base_data_all = _build_or_load_op_baseline(here, OP_BASELINE_DATE)
+    base_est_by_code = ((base_data_all.get("markets") or {}).get(prefix) or {}).get("estimates") or {}
+    prev_date_str, prev_est_by_code = _load_prev_day_estimates(here, prefix, cur_date_str)
+
     return {
         "market": market,
         "filename": base_fn,
         "downloadFile": f"{prefix}_latest.xlsx",
         "updatedAt": updated_at,
         "baselineDate": baseline_date_str,
+        "baseCompare": {"date": OP_BASELINE_DATE, "estimates": base_est_by_code},
+        "prevCompare": {"date": prev_date_str, "estimates": prev_est_by_code},
         "upCount": total_up,
         "downCount": total_down,
         "columns": columns_meta,
@@ -4461,6 +4573,10 @@ def build_web_dashboard(here):
 
     <div class="controls-panel" id="screenerControls">
       <div class="filter-left">
+        <div class="flow-mode-group" id="screenerCompareTabs" title="예상이익 상향/하향 셀 비교 기준 선택">
+          <button class="flow-mode-btn active" id="btnCmpBase" onclick="setScreenerCompareMode('BASE')">📌 11/18 기준</button>
+          <button class="flow-mode-btn" id="btnCmpPrev" onclick="setScreenerCompareMode('PREV')">🕒 어제 기준</button>
+        </div>
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 종목명 / 코드 / 섹터 검색..." />
         <select id="sectorSelect" class="select-box">
           <option value="">전체 섹터</option>
@@ -4524,7 +4640,7 @@ def build_web_dashboard(here):
         <span class="lg-chip" style="background:#60a5fa; color:#0f172a; border-left:3px solid #1d4ed8;">▼15%</span>
         <span class="lg-chip" style="background:#1d4ed8; color:#fff; border-left:3px solid #1e3a8a;">▼20%↓</span>
         <span style="color:#cbd5e1; margin:0 2px;">|</span>
-        <span style="color:#475569;">셀 변동({OP_BASELINE_DATE[5:].replace('-', '/')} 기준):</span>
+        <span style="color:#475569;" id="cellLegendLabel">셀 변동({OP_BASELINE_DATE[5:].replace('-', '/')} 기준):</span>
         <span class="lg-chip" style="background:#ffe4e6; color:#9f1239;">▲&lt;5%</span>
         <span class="lg-chip" style="background:#fca5a5; color:#7f1d1d;">▲5~10%</span>
         <span class="lg-chip" style="background:#dc2626; color:#fff;">▲10%↑</span>
@@ -4668,6 +4784,7 @@ def build_web_dashboard(here):
     const OP_HIST_STOCKS = (OP_HIST && OP_HIST.stocks) ? OP_HIST.stocks : {{}};
     const marketKeys = Object.keys(DB);
     let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
+    let currentCompareMode = 'BASE'; // 'BASE' (11/18 기준) | 'PREV' (어제 기준)
     let currentMarket = marketKeys.includes('KOSPI') ? 'KOSPI' : marketKeys[0];
     let currentSheetIdx = 0;
     let openGroups = {{ A: false, B: false, E: false, C: false, D: false }};
@@ -4807,6 +4924,7 @@ def build_web_dashboard(here):
         view: currentViewMode,
         market: currentMarket,
         sheetIdx: currentSheetIdx,
+        cmpMode: currentCompareMode,
         flowMode: currentFlowMode,
         flowKey: currentFlowKey,
         flowMarket: currentFlowMarket,
@@ -4845,6 +4963,10 @@ def build_web_dashboard(here):
       isRestoringHistory = true;
       try {{
         if (st.flowMode) currentFlowMode = st.flowMode;
+        if (st.cmpMode && st.cmpMode !== currentCompareMode) {{
+          currentCompareMode = st.cmpMode;
+          applyScreenerCompareAll(currentCompareMode);
+        }}
         if (st.flowKey !== undefined) currentFlowKey = st.flowKey || '';
         if (st.flowMarket !== undefined) currentFlowMarket = st.flowMarket || '';
         if (st.repViewMode) currentReportViewMode = st.repViewMode;
@@ -6442,17 +6564,22 @@ def build_web_dashboard(here):
       currentPage = 1;
       setScreenerVisibility(true);
       const d = DB[currentMarket];
+      const activeCmpDate = d.activeCompareDate || d.baselineDate || '';
+      const cmpTag = currentCompareMode === 'PREV'
+        ? `어제(${{activeCmpDate}})`
+        : `${{activeCmpDate || '11/18'}} 기준`;
 
       document.getElementById('pageTitle').textContent = `${{currentMarket}} 상위 200`;
       document.getElementById('pageSubtitle').textContent = '영업이익 성장 · 수익성 · 예상이익 변동 스크리너';
       renderTopDateChip();
+      updateCompareModeUI();
 
-      const basePill = d.baselineDate ? `<span class="meta-pill" style="background:#f1f5f9; color:#334155;">📌 비교기준: ${{d.baselineDate}}</span>` : '';
+      const basePill = activeCmpDate ? `<span class="meta-pill" style="background:#f1f5f9; color:#334155;">📌 비교기준: ${{cmpTag}}</span>` : '';
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">🕒 업데이트: ${{d.updatedAt}}</span>
         ${{basePill}}
-        <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="${{d.baselineDate || '직전'}} 대비 예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
-        <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="${{d.baselineDate || '직전'}} 대비 예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
+        <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="${{cmpTag}} 대비 예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
+        <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="${{cmpTag}} 대비 예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
       `;
 
       if (currentSheetIdx >= d.sheets.length) currentSheetIdx = 0;
@@ -6460,6 +6587,156 @@ def build_web_dashboard(here):
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
+      pushNavHistory();
+    }}
+
+    function updateCompareModeUI() {{
+      const d = DB[currentMarket] || DB[marketKeys[0]];
+      const bBase = document.getElementById('btnCmpBase');
+      const bPrev = document.getElementById('btnCmpPrev');
+      const baseDt = (d && d.baseCompare && d.baseCompare.date) ? d.baseCompare.date : '2026-11-18';
+      const prevDt = (d && d.prevCompare && d.prevCompare.date) ? d.prevCompare.date : '';
+      if (bBase) {{
+        bBase.classList.toggle('active', currentCompareMode === 'BASE');
+        bBase.textContent = `📌 ${{baseDt.slice(5).replace('-', '/')}} 기준`;
+      }}
+      if (bPrev) {{
+        bPrev.classList.toggle('active', currentCompareMode === 'PREV');
+        bPrev.textContent = prevDt ? `🕒 어제(${{prevDt.slice(5).replace('-', '/')}}) 기준` : `🕒 어제 기준`;
+        bPrev.disabled = !prevDt;
+      }}
+      const leg = document.getElementById('cellLegendLabel');
+      if (leg) {{
+        const curLbl = currentCompareMode === 'PREV'
+          ? (prevDt ? `어제 ${{(prevDt.slice(5).replace('-', '/'))}} 기준` : '어제 기준')
+          : `${{baseDt.slice(5).replace('-', '/')}} 기준`;
+        leg.textContent = `셀 변동(${{curLbl}}):`;
+      }}
+      const ts = document.getElementById('toneSelect');
+      if (ts) {{
+        const shortLbl = currentCompareMode === 'PREV'
+          ? (prevDt ? `어제 ${{prevDt.slice(5).replace('-', '/')}} 기준` : '어제 기준')
+          : `${{baseDt.slice(5).replace('-', '/')}} 기준`;
+        const optMap = {{
+          up: `▲ 예상이익 상향 전체 (${{shortLbl}})`,
+          up5: `▲ 예상이익 +5% 이상 상향 (${{shortLbl}})`,
+          up10: `▲▲ 예상이익 +10% 이상 대폭 상향 (${{shortLbl}})`,
+          down: `▼ 예상이익 하향 전체 (${{shortLbl}})`,
+          down5: `▼ 예상이익 -5% 이하 하향 (${{shortLbl}})`,
+          down10: `▼▼ 예상이익 -10% 이하 대폭 하향 (${{shortLbl}})`,
+        }};
+        Array.from(ts.options).forEach(op => {{
+          if (optMap[op.value]) op.textContent = optMap[op.value];
+        }});
+      }}
+    }}
+
+    function applyScreenerCompareAll(mode) {{
+      marketKeys.forEach(mkt => {{
+        const d = DB[mkt];
+        if (!d) return;
+        const cmpObj = (mode === 'PREV' && d.prevCompare && d.prevCompare.estimates && Object.keys(d.prevCompare.estimates).length > 0)
+          ? d.prevCompare
+          : d.baseCompare;
+        if (!cmpObj || !cmpObj.estimates) return;
+        const estMap = cmpObj.estimates;
+        const cmpDate = cmpObj.date || '';
+        const modeTag = (mode === 'PREV') ? `${{cmpDate}} 어제 기준` : `${{cmpDate}} 기준`;
+        d.activeCompareDate = cmpDate;
+
+        const cols = d.columns.map(c => c.name);
+        const codeIdx = cols.indexOf('종목코드');
+        const estIdxs = cols.map((c, i) => ((c.startsWith('OP_') || c.startsWith('연간OP_')) && c.endsWith('(E)')) ? i : -1).filter(i => i >= 0);
+
+        let allUpCells = 0, allDownCells = 0;
+        const allSheet = d.sheets.find(s => s.name === '1_전체') || d.sheets[0];
+
+        d.sheets.forEach(s => {{
+          if (s.name === '7_예상이익상향' || s.name === '8_예상이익하향') return;
+          let sUp = 0, sDown = 0;
+          s.rows.forEach(r => {{
+            const cd = codeIdx >= 0 ? String(r.v[codeIdx] || '').trim() : '';
+            const oldCols = cd ? estMap[cd] : null;
+            const newTones = {{}};
+            const newNotes = {{}};
+            // 비-예상이익 셀에 기존 메모가 있다면 보존
+            if (r.n) {{
+              Object.keys(r.n).forEach(k => {{
+                if (!estIdxs.includes(Number(k))) newNotes[k] = r.n[k];
+              }});
+            }}
+            estIdxs.forEach(ci => {{
+              const colName = cols[ci];
+              const oldV = oldCols ? oldCols[colName] : undefined;
+              const rawNew = r.v[ci];
+              const newV = (rawNew !== null && rawNew !== undefined && rawNew !== '' && !isNaN(Number(rawNew))) ? Number(rawNew) : null;
+              if (oldV === undefined || oldV === null || newV === null) return;
+              const oldR = Math.round(Number(oldV) * 100) / 100;
+              const newR = Math.round(newV * 100) / 100;
+              if (newR !== oldR) {{
+                const diff = newR - oldR;
+                const pct = oldR !== 0 ? (diff / Math.abs(oldR) * 100.0) : null;
+                const absP = pct !== null ? Math.abs(pct) : 0;
+                const tier = absP >= 10.0 ? 3 : (absP >= 5.0 ? 2 : 1);
+                const dir = newR > oldR ? 'up' : 'down';
+                newTones[String(ci)] = `${{dir}}${{tier}}`;
+                const pctStr = pct !== null ? ` (${{pct >= 0 ? '+' : ''}}${{pct.toFixed(2)}}%)` : '';
+                const head = dir === 'up' ? '[예상이익 상향 ▲]' : '[예상이익 하향 ▼]';
+                newNotes[String(ci)] = `${{head}}\\n  (비교: ${{modeTag}})\\n• 기준(${{cmpDate}}): ${{oldR.toLocaleString('ko-KR', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}\\n• 현재: ${{newR.toLocaleString('ko-KR', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}\\n• 증감: ${{diff >= 0 ? '+' : ''}}${{diff.toLocaleString('ko-KR', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}${{pctStr}}`;
+                if (dir === 'up') sUp += 1;
+                else sDown += 1;
+              }}
+            }});
+            r.t = Object.keys(newTones).length ? newTones : null;
+            r.n = Object.keys(newNotes).length ? newNotes : null;
+            if (s === allSheet && cd && STOCK_LOOKUP[cd]) {{
+              STOCK_LOOKUP[cd].hasEstUp = r.t ? Object.values(r.t).some(v => String(v).startsWith('up')) : false;
+            }}
+          }});
+          if (s === allSheet) {{
+            allUpCells = sUp;
+            allDownCells = sDown;
+          }}
+        }});
+
+        d.upCount = allUpCells;
+        d.downCount = allDownCells;
+
+        if (allSheet) {{
+          const upRows = allSheet.rows.filter(r => r.t && Object.values(r.t).some(v => String(v).startsWith('up')));
+          upRows.sort((a, b) => Object.values(b.t || {{}}).filter(v => String(v).startsWith('up')).length - Object.values(a.t || {{}}).filter(v => String(v).startsWith('up')).length);
+          const downRows = allSheet.rows.filter(r => r.t && Object.values(r.t).some(v => String(v).startsWith('down')));
+          downRows.sort((a, b) => Object.values(b.t || {{}}).filter(v => String(v).startsWith('down')).length - Object.values(a.t || {{}}).filter(v => String(v).startsWith('down')).length);
+
+          const s7 = d.sheets.find(s => s.name === '7_예상이익상향');
+          if (s7) {{ s7.rows = upRows; s7.count = upRows.length; }}
+          const s8 = d.sheets.find(s => s.name === '8_예상이익하향');
+          if (s8) {{ s8.rows = downRows; s8.count = downRows.length; }}
+        }}
+      }});
+      updateCompareModeUI();
+    }}
+
+    function setScreenerCompareMode(mode) {{
+      const next = (mode === 'PREV') ? 'PREV' : 'BASE';
+      currentCompareMode = next;
+      applyScreenerCompareAll(currentCompareMode);
+      if (currentViewMode === 'SCREENER') {{
+        const d = DB[currentMarket];
+        const activeCmpDate = d.activeCompareDate || d.baselineDate || '';
+        const cmpTag = currentCompareMode === 'PREV' ? `어제(${{activeCmpDate}})` : `${{activeCmpDate || '11/18'}} 기준`;
+        const basePill = activeCmpDate ? `<span class="meta-pill" style="background:#f1f5f9; color:#334155;">📌 비교기준: ${{cmpTag}}</span>` : '';
+        document.getElementById('metaBadges').innerHTML = `
+          <span class="meta-pill">🕒 업데이트: ${{d.updatedAt}}</span>
+          ${{basePill}}
+          <span class="meta-pill up clickable" onclick="selectSheetByName('7_예상이익상향')" title="${{cmpTag}} 대비 예상이익 상향 기업 탭으로 바로 이동">▲ 예상이익 상향 ${{d.upCount}}셀</span>
+          <span class="meta-pill down clickable" onclick="selectSheetByName('8_예상이익하향')" title="${{cmpTag}} 대비 예상이익 하향 기업 탭으로 바로 이동">▼ 예상이익 하향 ${{d.downCount}}셀</span>
+        `;
+        renderSidebar();
+        renderSheetTabs();
+        currentPage = 1;
+        renderTable();
+      }}
       pushNavHistory();
     }}
 
