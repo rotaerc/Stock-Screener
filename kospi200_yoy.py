@@ -4861,6 +4861,194 @@ def build_web_dashboard(here):
       padding: 1px 6px;
       font-weight: 900;
     }}
+    .wl-top-btn {{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+      padding: 5px 10px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.14s;
+    }}
+    .wl-top-btn:hover {{ background: #fde68a; border-color: #f59e0b; }}
+    .wl-top-btn.has-items {{ background: #f59e0b; color: #fff; border-color: #d97706; }}
+    .wl-top-btn.has-items:hover {{ background: #d97706; }}
+    .wl-star-btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1;
+      padding: 0 3px 0 0;
+      margin: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: color 0.12s, transform 0.12s;
+    }}
+    .wl-star-btn:hover {{ color: #f59e0b; transform: scale(1.18); }}
+    .wl-star-btn.on {{ color: #f59e0b; }}
+    .wl-modal-backdrop {{
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.48);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }}
+    .wl-modal-backdrop.open {{ display: flex; }}
+    .wl-modal {{
+      background: #fff;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+      overflow: hidden;
+    }}
+    .wl-modal-head {{
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-bottom: 1px solid #fde68a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }}
+    .wl-modal-title {{
+      font-size: 15px;
+      font-weight: 900;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .wl-modal-close {{
+      border: none;
+      background: rgba(255,255,255,0.7);
+      color: #78350f;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }}
+    .wl-modal-close:hover {{ background: #fde68a; }}
+    .wl-modal-body {{
+      padding: 14px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+    .wl-toolbar {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+    .wl-chip-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 54px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      align-content: flex-start;
+    }}
+    .wl-chip {{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+    }}
+    .wl-chip-cd {{ font-size: 10.5px; color: #64748b; font-weight: 600; }}
+    .wl-chip-x {{
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0 2px;
+    }}
+    .wl-chip-x:hover {{ color: #dc2626; }}
+    .wl-export-row {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }}
+    .wl-exp-btn {{
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #0f172a;
+      border-radius: 9px;
+      padding: 10px 8px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.14s;
+    }}
+    .wl-exp-btn:hover {{ background: #e2e8f0; }}
+    .wl-exp-btn.primary {{
+      background: #2563eb;
+      color: #fff;
+      border-color: #1d4ed8;
+    }}
+    .wl-exp-btn.primary:hover {{ background: #1d4ed8; }}
+    .wl-exp-btn:disabled {{ opacity: 0.45; cursor: not-allowed; }}
+    .wl-guide-box {{
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      line-height: 1.55;
+      color: #166534;
+    }}
+    .wl-toast {{
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #0f172a;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.28);
+      z-index: 10050;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s, transform 0.18s;
+    }}
+    .wl-toast.show {{ opacity: 1; transform: translateX(-50%) translateY(0); }}
     @media (max-width: 1080px) {{
       .semi-kpi-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .semi-split-grid {{ grid-template-columns: 1fr; }}
@@ -5166,6 +5354,33 @@ def build_web_dashboard(here):
 
   <div class="tooltip-box" id="tooltipBox"></div>
   <div class="live-quote-box" id="liveQuoteBox"></div>
+  <div class="wl-modal-backdrop" id="watchlistModal" onclick="if(event.target===this)closeWatchlistModal()">
+    <div class="wl-modal">
+      <div class="wl-modal-head">
+        <div class="wl-modal-title">⭐ 영웅문4 관심종목 내보내기 (<span id="wlModalCnt">0</span>종목)</div>
+        <button class="wl-modal-close" onclick="closeWatchlistModal()" title="닫기">✕</button>
+      </div>
+      <div class="wl-modal-body">
+        <div class="wl-toolbar">
+          <button class="pe-pill-btn active" onclick="addCurrentViewToWatchlist()">➕ 현재 화면 종목 모두 담기</button>
+          <button class="pe-pill-btn" style="color:#dc2626; border-color:#fecaca;" onclick="clearWatchlist()">🗑️ 전체 비우기</button>
+        </div>
+        <div class="wl-chip-list" id="wlChipList"></div>
+        <div class="wl-export-row">
+          <button class="wl-exp-btn primary" id="btnWlXls" onclick="downloadHeroXls()">📥 영웅문 엑셀(.xls)</button>
+          <button class="wl-exp-btn" id="btnWlTxt" onclick="downloadHeroTxt()">📄 텍스트(.txt)</button>
+          <button class="wl-exp-btn" id="btnWlCopy" onclick="copyHeroCodes()">📋 코드 복사</button>
+        </div>
+        <div class="wl-guide-box">
+          <b>📌 영웅문4 [0130] 관심종목에 3초 만에 넣는 법</b><br/>
+          1. 영웅문4 <b>[0130] 관심종목</b> → <b>[등록]</b> → <b>[새그룹]</b> 생성<br/>
+          2. <b>[관심종목 가져오기]</b> → <b>Excel 화일(.xls)</b> 또는 <b>텍스트(.txt)</b> 선택<br/>
+          3. <b>[전체 추가]</b> → <b>[적용]</b> 클릭 *(서버저장 시 모바일 영웅문S# 자동 연동)*
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wl-toast" id="wlToast"></div>
 
   <script>
     const DB = {json_payload};
@@ -5580,7 +5795,9 @@ def build_web_dashboard(here):
 
     function renderDownloadButtons() {{
       const box = document.getElementById('dlActions');
-      box.innerHTML = marketKeys.map(m => {{
+      const wlCnt = WATCHLIST.length;
+      const wlBtn = `<button class="wl-top-btn ${{wlCnt > 0 ? 'has-items' : ''}}" id="wlTopBtn" onclick="openWatchlistModal()" title="종목 옆 ☆을 눌러 모아둔 뒤 영웅문4 [0130] 관심종목 가져오기 파일로 다운로드">⭐ 영웅문 (<span id="wlTopCnt">${{wlCnt}}</span>)</button>`;
+      box.innerHTML = wlBtn + marketKeys.map(m => {{
         const d = DB[m];
         return `<a class="dl-btn" href="${{d.downloadFile}}" download="${{d.filename}}">📥 ${{m}} 엑셀</a>`;
       }}).join('');
@@ -5975,6 +6192,7 @@ def build_web_dashboard(here):
         }}
       }}
       bindLiveQuotes();
+      bindWatchlistStars();
     }}
 
     function drawSemiHeroChart(container, rows, hasKosis, overlayMode) {{
@@ -7118,6 +7336,7 @@ def build_web_dashboard(here):
                 <button class="pe-pill-btn ${{currentPrivateRankFilter === 'ALL' ? 'active' : ''}}" onclick="setPrivateRankFilter('ALL')">전체 (${{top50All.length}})</button>
                 <button class="pe-pill-btn ${{currentPrivateRankFilter === 'R1' ? 'active' : ''}}" onclick="setPrivateRankFilter('R1')">🏆 연간 1위 (${{r1Cnt}})</button>
                 <button class="pe-pill-btn ${{currentPrivateRankFilter === 'R3' ? 'active' : ''}}" onclick="setPrivateRankFilter('R3')">🔥 연간 TOP3 (${{r3Cnt}})</button>
+                <button class="pe-pill-btn" style="background:#fffbeb; color:#b45309; border-color:#fcd34d;" onclick="addCurrentViewToWatchlist(true)" title="현재 표시된 종목을 영웅문 관심종목 바구니에 한 번에 담기">⭐ 영웅문 담기</button>
               </div>
               <select class="select-box" style="font-weight:700; font-size:11.5px;" onchange="setPrivateSort(this.value)">
                 <option value="mcapPct" ${{currentPrivateSort === 'mcapPct' ? 'selected' : ''}}>정렬: 시총대비 %순</option>
@@ -8565,6 +8784,7 @@ def build_web_dashboard(here):
       }}
 
       document.getElementById('rowCountLabel').textContent = `표시 종목: ${{filtered.length}} / ${{sheet.count}}개`;
+      lastScreenerFilteredStocks = filtered.map(r => ({{ code: String(r.v[0] || '').trim().padStart(6, '0'), name: String(r.v[1] || '').trim() }})).filter(x => /^\\d{{6}}$/.test(x.code));
 
       let pageRows = filtered;
       const pageNavGroup = document.getElementById('pageNavGroup');
@@ -8613,7 +8833,7 @@ def build_web_dashboard(here):
 
           let note = r.n ? r.n[String(idx)] : null;
           if (c.name === '종목명') {{
-            const cd = String(r.v[0] || '');
+            const cd = String(r.v[0] || '').trim().padStart(6, '0');
             const oh = OP_HIST_STOCKS[cd];
             if (oh) {{
               if (oh.lv >= 1) classes.push(`name-up${{oh.lv}}`);
@@ -8623,8 +8843,17 @@ def build_web_dashboard(here):
           }}
           const tipAttr = note ? `data-tip="${{escapeHtml(note)}}"` : '';
           const arrow = tone ? (tone.startsWith('up') ? ' ▲' : ' ▼') : '';
+          let wlStarHtml = '';
+          if (c.name === '종목명') {{
+            const cd6 = String(r.v[0] || '').trim().padStart(6, '0');
+            const nmTxt = String(val || '').trim();
+            if (/^\\d{{6}}$/.test(cd6)) {{
+              const isOn = isInWatchlist(cd6);
+              wlStarHtml = `<button type="button" class="wl-star-btn ${{isOn ? 'on' : ''}}" data-wl-code="${{cd6}}" data-wl-name="${{escapeHtml(nmTxt)}}" onclick="event.stopPropagation(); toggleWatchlistStock('${{cd6}}', '${{escapeHtml(nmTxt).replace(/'/g, '')}}')" title="영웅문 관심종목 담기/해제">${{isOn ? '★' : '☆'}}</button>`;
+            }}
+          }}
 
-          cells += `<td class="${{classes.join(' ')}}" ${{tipAttr}}>${{formatCell(c.name, val, r.v, idx)}}${{arrow}}</td>`;
+          cells += `<td class="${{classes.join(' ')}}" ${{tipAttr}}>${{wlStarHtml}}${{formatCell(c.name, val, r.v, idx)}}${{arrow}}</td>`;
         }});
         cells += '</tr>';
         return cells;
@@ -8795,6 +9024,256 @@ def build_web_dashboard(here):
         el.onmouseleave = () => {{ tipBox.style.display = 'none'; }};
       }});
       bindLiveQuotes();
+      bindWatchlistStars();
+    }}
+
+    // ================= 영웅문4 관심종목 장바구니 & 내보내기 =================
+    const WL_STORAGE_KEY = 'stock_screener_hero_watchlist_v1';
+    let lastScreenerFilteredStocks = [];
+    let wlToastTimer = null;
+
+    function loadWatchlist() {{
+      try {{
+        const raw = localStorage.getItem(WL_STORAGE_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(arr)) {{
+          return arr.filter(x => x && /^\\d{{6}}$/.test(String(x.code || ''))).map(x => ({{
+            code: String(x.code).padStart(6, '0'),
+            name: String(x.name || x.code),
+          }}));
+        }}
+      }} catch (e) {{}}
+      return [];
+    }}
+
+    let WATCHLIST = loadWatchlist();
+
+    function saveWatchlist() {{
+      try {{ localStorage.setItem(WL_STORAGE_KEY, JSON.stringify(WATCHLIST)); }} catch (e) {{}}
+      updateWatchlistUI();
+    }}
+
+    function isInWatchlist(code) {{
+      const cd = String(code || '').trim().padStart(6, '0');
+      return WATCHLIST.some(x => x.code === cd);
+    }}
+
+    function showWlToast(msg) {{
+      const t = document.getElementById('wlToast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(wlToastTimer);
+      wlToastTimer = setTimeout(() => t.classList.remove('show'), 2100);
+    }}
+
+    function toggleWatchlistStock(code, name) {{
+      const cd = String(code || '').trim().padStart(6, '0');
+      if (!/^\\d{{6}}$/.test(cd)) return;
+      const idx = WATCHLIST.findIndex(x => x.code === cd);
+      if (idx >= 0) {{
+        const rem = WATCHLIST[idx];
+        WATCHLIST.splice(idx, 1);
+        saveWatchlist();
+        showWlToast(`☆ ${{rem.name}} 관심종목에서 제거 (총 ${{WATCHLIST.length}}종목)`);
+      }} else {{
+        const resolvedName = (name && name !== cd)
+          ? name
+          : ((STOCK_LOOKUP[cd] && STOCK_LOOKUP[cd].name) ? STOCK_LOOKUP[cd].name : cd);
+        WATCHLIST.push({{ code: cd, name: resolvedName }});
+        saveWatchlist();
+        showWlToast(`★ ${{resolvedName}} 영웅문 바구니에 추가 (총 ${{WATCHLIST.length}}종목)`);
+      }}
+    }}
+
+    function removeWatchlistStock(code) {{
+      const cd = String(code || '').trim().padStart(6, '0');
+      WATCHLIST = WATCHLIST.filter(x => x.code !== cd);
+      saveWatchlist();
+    }}
+
+    function clearWatchlist() {{
+      if (!WATCHLIST.length) return;
+      WATCHLIST = [];
+      saveWatchlist();
+      showWlToast('관심종목 바구니를 비웠습니다.');
+    }}
+
+    function updateWatchlistUI() {{
+      const cnt = WATCHLIST.length;
+      const topCnt = document.getElementById('wlTopCnt');
+      const topBtn = document.getElementById('wlTopBtn');
+      const modalCnt = document.getElementById('wlModalCnt');
+      if (topCnt) topCnt.textContent = cnt;
+      if (topBtn) topBtn.classList.toggle('has-items', cnt > 0);
+      if (modalCnt) modalCnt.textContent = cnt;
+
+      document.querySelectorAll('.wl-star-btn[data-wl-code]').forEach(btn => {{
+        const cd = btn.getAttribute('data-wl-code');
+        const on = isInWatchlist(cd);
+        btn.classList.toggle('on', on);
+        btn.textContent = on ? '★' : '☆';
+      }});
+
+      const chipBox = document.getElementById('wlChipList');
+      if (chipBox) {{
+        if (!cnt) {{
+          chipBox.innerHTML = `<div style="width:100%; text-align:center; color:#94a3b8; font-size:12px; padding:12px 0;">아직 담은 종목이 없습니다. 종목명 앞의 <b>☆</b>을 누르거나 위 <b>[현재 화면 종목 모두 담기]</b>를 눌러주세요.</div>`;
+        }} else {{
+          chipBox.innerHTML = WATCHLIST.map(x => `
+            <span class="wl-chip">
+              <span>${{escapeHtml(x.name)}}</span>
+              <span class="wl-chip-cd">${{x.code}}</span>
+              <button type="button" class="wl-chip-x" onclick="removeWatchlistStock('${{x.code}}')" title="제거">✕</button>
+            </span>
+          `).join('');
+        }}
+      }}
+      ['btnWlXls', 'btnWlTxt', 'btnWlCopy'].forEach(id => {{
+        const b = document.getElementById(id);
+        if (b) b.disabled = (cnt === 0);
+      }});
+    }}
+
+    function bindWatchlistStars() {{
+      document.querySelectorAll('[data-live-code]').forEach(el => {{
+        if (el.closest('.wl-modal') || el.classList.contains('rep-btn')) return;
+        if (el._wlStarBound) return;
+        el._wlStarBound = true;
+        const cd = String(el.getAttribute('data-live-code') || '').trim().padStart(6, '0');
+        if (!/^\\d{{6}}$/.test(cd)) return;
+        const nm = (el.textContent || '').trim().replace(/[★▲▼]+/g, '').trim() || cd;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const on = isInWatchlist(cd);
+        btn.className = 'wl-star-btn' + (on ? ' on' : '');
+        btn.setAttribute('data-wl-code', cd);
+        btn.setAttribute('data-wl-name', nm);
+        btn.title = '영웅문 관심종목 담기/해제';
+        btn.textContent = on ? '★' : '☆';
+        btn.onclick = (e) => {{
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWatchlistStock(cd, nm);
+        }};
+        el.parentNode.insertBefore(btn, el);
+      }});
+    }}
+
+    function openWatchlistModal() {{
+      updateWatchlistUI();
+      const m = document.getElementById('watchlistModal');
+      if (m) m.classList.add('open');
+    }}
+
+    function closeWatchlistModal() {{
+      const m = document.getElementById('watchlistModal');
+      if (m) m.classList.remove('open');
+    }}
+
+    function addCurrentViewToWatchlist(openAfter = false) {{
+      let cands = [];
+      if (currentViewMode === 'SCREENER') {{
+        cands = lastScreenerFilteredStocks || [];
+      }} else {{
+        const rootId = currentViewMode === 'HOME' ? 'homeView'
+          : (currentViewMode === 'FLOW' ? 'flowView'
+          : (currentViewMode === 'REPORTS' ? 'reportsView' : 'semiconView'));
+        const root = document.getElementById(rootId);
+        if (root) {{
+          root.querySelectorAll('[data-live-code]').forEach(el => {{
+            if (el.classList.contains('rep-btn')) return;
+            const cd = String(el.getAttribute('data-live-code') || '').trim().padStart(6, '0');
+            if (!/^\\d{{6}}$/.test(cd)) return;
+            const nm = (el.textContent || '').trim().replace(/[★▲▼]+/g, '').trim() || cd;
+            cands.push({{ code: cd, name: nm }});
+          }});
+        }}
+      }}
+      let added = 0;
+      const seen = new Set(WATCHLIST.map(x => x.code));
+      cands.forEach(c => {{
+        if (!seen.has(c.code)) {{
+          seen.add(c.code);
+          WATCHLIST.push({{ code: c.code, name: c.name || c.code }});
+          added += 1;
+        }}
+      }});
+      saveWatchlist();
+      showWlToast(added > 0 ? `★ 현재 화면 ${{added}}종목 추가 완료 (총 ${{WATCHLIST.length}}종목)` : `현재 화면 종목이 이미 모두 담겨 있습니다 (총 ${{WATCHLIST.length}}종목)`);
+      if (openAfter) openWatchlistModal();
+    }}
+
+    function _todayStampYmd() {{
+      const d = new Date();
+      return `${{d.getFullYear()}}${{String(d.getMonth() + 1).padStart(2, '0')}}${{String(d.getDate()).padStart(2, '0')}}`;
+    }}
+
+    function _triggerBlobDownload(blob, filename) {{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {{
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }}, 250);
+    }}
+
+    function downloadHeroXls() {{
+      if (!WATCHLIST.length) return;
+      // Excel 97-2003 호환 순수 바이너리 BIFF2 (.xls): A열에 6자리 종목코드를 TEXT(LABEL) 셀로 저장하여 앞자리 '0' 보존
+      const chunks = [];
+      const pushU16 = (arr, v) => {{ arr.push(v & 0xFF, (v >> 8) & 0xFF); }};
+      // BOF record (opcode 0x0009, len 4, ver 0x0002, worksheet 0x0010)
+      const bof = [];
+      pushU16(bof, 0x0009); pushU16(bof, 4); pushU16(bof, 0x0002); pushU16(bof, 0x0010);
+      chunks.push(new Uint8Array(bof));
+      WATCHLIST.forEach((item, rIdx) => {{
+        const cd = String(item.code).padStart(6, '0');
+        const rec = [];
+        // LABEL record (opcode 0x0004): row(2) + col(2) + rgbAttr(3) + cch(1) + ASCII bytes
+        pushU16(rec, 0x0004);
+        pushU16(rec, 8 + cd.length);
+        pushU16(rec, rIdx);
+        pushU16(rec, 0);
+        rec.push(0, 0, 0, cd.length);
+        for (let i = 0; i < cd.length; i++) rec.push(cd.charCodeAt(i) & 0x7F);
+        chunks.push(new Uint8Array(rec));
+      }});
+      // EOF record (opcode 0x000A, len 0)
+      const eof = [];
+      pushU16(eof, 0x000A); pushU16(eof, 0);
+      chunks.push(new Uint8Array(eof));
+
+      const blob = new Blob(chunks, {{ type: 'application/vnd.ms-excel' }});
+      _triggerBlobDownload(blob, `영웅문_관심종목_${{_todayStampYmd()}}_${{WATCHLIST.length}}종목.xls`);
+      showWlToast(`📥 영웅문 엑셀(.xls) ${{WATCHLIST.length}}종목 다운로드 완료`);
+    }}
+
+    function downloadHeroTxt() {{
+      if (!WATCHLIST.length) return;
+      // 순수 ASCII 6자리 종목코드 줄바꿈 (ANSI / EUC-KR / UTF-8 100% 동일 호환)
+      const content = WATCHLIST.map(x => String(x.code).padStart(6, '0')).join('\\r\\n') + '\\r\\n';
+      const blob = new Blob([content], {{ type: 'text/plain;charset=ascii' }});
+      _triggerBlobDownload(blob, `영웅문_관심종목_${{_todayStampYmd()}}_${{WATCHLIST.length}}종목.txt`);
+      showWlToast(`📄 영웅문 텍스트(.txt) ${{WATCHLIST.length}}종목 다운로드 완료`);
+    }}
+
+    function copyHeroCodes() {{
+      if (!WATCHLIST.length) return;
+      const txt = WATCHLIST.map(x => String(x.code).padStart(6, '0')).join('\\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {{
+        navigator.clipboard.writeText(txt).then(() => {{
+          showWlToast(`📋 종목코드 ${{WATCHLIST.length}}개 클립보드에 복사 완료`);
+        }}).catch(() => {{
+          prompt('아래 종목코드를 복사하세요 (Ctrl+C):', txt);
+        }});
+      }} else {{
+        prompt('아래 종목코드를 복사하세요 (Ctrl+C):', txt);
+      }}
     }}
 
     function positionTip(e) {{
