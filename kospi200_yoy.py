@@ -3831,6 +3831,69 @@ def build_web_dashboard(here):
     .rep-3m-badge.hi {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }}
     .rep-3m-badge.mid {{ background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }}
     .rep-3m-badge.low {{ background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }}
+    .live-quote-box {{
+      position: fixed;
+      z-index: 9999;
+      display: none;
+      width: 248px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+      padding: 10px 12px;
+      pointer-events: none;
+      color: #0f172a;
+    }}
+    .lq-head {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
+    }}
+    .lq-name {{ font-size: 13px; font-weight: 800; color: #0f172a; }}
+    .lq-stat {{
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #15803d;
+    }}
+    .lq-stat.closed {{ background: #f1f5f9; color: #64748b; }}
+    .lq-price-row {{
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      margin-bottom: 5px;
+    }}
+    .lq-price {{ font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }}
+    .lq-chg {{ font-size: 12.5px; font-weight: 800; }}
+    .lq-up {{ color: #dc2626; }}
+    .lq-down {{ color: #2563eb; }}
+    .lq-flat {{ color: #475569; }}
+    .lq-ohl {{
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: #64748b;
+      padding: 4px 0 6px;
+      border-top: 1px dashed #e2e8f0;
+    }}
+    .lq-chart {{
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+      border: 1px solid #f1f5f9;
+      background: #fafafa;
+    }}
+    .lq-foot {{
+      margin-top: 4px;
+      font-size: 10px;
+      color: #94a3b8;
+      text-align: right;
+    }}
     .flow-view {{
       display: none;
       flex: 1;
@@ -4595,6 +4658,7 @@ def build_web_dashboard(here):
   </div>
 
   <div class="tooltip-box" id="tooltipBox"></div>
+  <div class="live-quote-box" id="liveQuoteBox"></div>
 
   <script>
     const DB = {json_payload};
@@ -5258,7 +5322,7 @@ def build_web_dashboard(here):
         {{ key: 'private', label: '사모펀드', short: '사모' }},
       ];
       const fmtEok = (v) => `${{v > 0 ? '+' : ''}}${{Math.round(v).toLocaleString('ko-KR')}}억`;
-      const jumpAttr = (cd) => `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')" title="네이버 금융에서 보기"`;
+      const jumpAttr = (cd) => `data-live-code="${{cd}}" onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')"`;
       const getMcapPct = (cd, amt) => {{
         const mc = Number(mcapMap[cd]);
         return (mc && mc > 0) ? ((Number(amt) || 0) / mc * 100.0) : null;
@@ -5680,7 +5744,7 @@ def build_web_dashboard(here):
         const unit = currentFlowMode === 'DAILY' ? '일' : '주';
         const mktLbl = mktF || 'KOSPI+KOSDAQ';
         const fmtEok = (v) => `${{v > 0 ? '+' : ''}}${{Math.round(v).toLocaleString('ko-KR')}}억`;
-        const stockJumpAttr = (cd) => `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')" title="네이버 금융에서 보기"`;
+        const stockJumpAttr = (cd) => `data-live-code="${{cd}}" onclick="window.open('https://finance.naver.com/item/main.naver?code=${{cd}}','_blank')"`;
 
         // 1) 3주체별 순유입/순유출 계산 (상위 매수합 - 상위 매도합)
         const netByInv = {{}};
@@ -5853,19 +5917,19 @@ def build_web_dashboard(here):
         if (coBuys.length && sideF !== 'SELL') {{
           ovHtml += `<div class="flow-overlap-title">🔥 공동 순매수 핵심 종목 (2~3개 주체 동시 매수 · ${{coBuys.length}}종목)</div><div class="flow-overlap-chips">` +
             coBuys.slice(0, 14).map(x => {{
-              const act = `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              const act = `data-live-code="${{x.code}}" onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
               const mp = getMcapPct(x.code, x.total);
               const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#b91c1c;">(시총 ${{mp > 0 ? '+' : ''}}${{mp.toFixed(2)}}%)</span>` : '';
-              return `<span class="flow-ov-chip" ${{act}} title="네이버 금융에서 보기">${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
+              return `<span class="flow-ov-chip" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#dc2626;">+${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px; color:#9a3412;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         if (coSells.length && sideF !== 'BUY') {{
           ovHtml += `<div class="flow-overlap-title" style="color:#1e40af; margin-top:4px;">❄️ 공동 순매도 주의 종목 (2~3개 주체 동시 매도 · ${{coSells.length}}종목)</div><div class="flow-overlap-chips">` +
             coSells.slice(0, 10).map(x => {{
-              const act = `onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
+              const act = `data-live-code="${{x.code}}" onclick="window.open('https://finance.naver.com/item/main.naver?code=${{x.code}}','_blank')"`;
               const mp = getMcapPct(x.code, x.total);
               const mpTxt = (mp !== null) ? ` <span style="font-size:10.5px; color:#1d4ed8;">(시총 ${{mp.toFixed(2)}}%)</span>` : '';
-              return `<span class="flow-ov-chip sell" ${{act}} title="네이버 금융에서 보기">${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
+              return `<span class="flow-ov-chip sell" ${{act}}>${{escapeHtml(x.name)}} <span style="color:#2563eb;">${{Math.round(x.total).toLocaleString('ko-KR')}}억</span>${{mpTxt}} <span style="font-size:10.5px;">(${{x.who.join('+')}})</span></span>`;
             }}).join('') + `</div>`;
         }}
         ovHtml += `</div>`;
@@ -5949,7 +6013,7 @@ def build_web_dashboard(here):
             const links = `<a class="ext-link naver" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank" title="네이버 금융">N</a><a class="ext-link fng" href="https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{r.code}}" target="_blank" title="에프엔가이드">Fn</a>${{scrBtn}}`;
             return `<tr>
               <td>${{idx + 1}}</td>
-              <td><a class="flow-ins-link" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank" title="네이버 금융에서 보기">${{escapeHtml(r.name)}}</a>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
+              <td><a class="flow-ins-link" data-live-code="${{r.code}}" href="https://finance.naver.com/item/main.naver?code=${{r.code}}" target="_blank">${{escapeHtml(r.name)}}</a>${{passTag}}${{mTag}}${{coTag}} ${{links}}</td>
               <td class="${{isBuy ? 'flow-amt-up' : 'flow-amt-down'}}">${{amtStr}}</td>
               <td ${{mpTip}}>${{mpCell}}</td>
               <td class="${{chgCls}}" style="font-weight:${{hasChg && Math.abs(chgNum) >= 5 ? '800' : '600'}};">${{chgStr}}</td>
@@ -6242,7 +6306,7 @@ def build_web_dashboard(here):
             return `<tr class="${{chg === '상향' ? 'row-up' : ''}}">
               <td class="ctr" style="color:#94a3b8; font-weight:700; width:34px;">${{idx + 1}}</td>
               <td style="white-space:nowrap;">
-                <a class="rep-sheet-link" href="https://finance.naver.com/item/main.naver?code=${{r.stock_code}}" target="_blank" style="text-decoration:none;" title="네이버 금융에서 보기">${{escapeHtml(r.stock_name || '-')}}</a>
+                <a class="rep-sheet-link" data-live-code="${{r.stock_code}}" href="https://finance.naver.com/item/main.naver?code=${{r.stock_code}}" target="_blank" style="text-decoration:none;">${{escapeHtml(r.stock_name || '-')}}</a>
                 ${{miniTags.join('')}}
                 <span style="font-size:10.5px; color:#94a3b8; margin-left:2px;">${{escapeHtml(r.stock_code || '')}}</span>
               </td>
@@ -6337,7 +6401,7 @@ def build_web_dashboard(here):
         return `<div class="rep-card ${{hlCls}}" id="rep-card-item-${{idx}}" data-stock-code="${{r.stock_code}}">
           <div class="rep-card-head">
             <div class="rep-stock-title">
-              <a class="rep-stock-name" href="${{naverUrl}}" target="_blank" style="text-decoration:none; color:inherit;" title="네이버 금융에서 보기" onmouseover="this.style.color='#2563eb';this.style.textDecoration='underline'" onmouseout="this.style.color='inherit';this.style.textDecoration='none'">${{escapeHtml(r.stock_name || '기업명')}}</a>
+              <a class="rep-stock-name" data-live-code="${{r.stock_code}}" href="${{naverUrl}}" target="_blank" style="text-decoration:none; color:inherit;" onmouseover="this.style.color='#2563eb';this.style.textDecoration='underline'" onmouseout="this.style.color='inherit';this.style.textDecoration='none'">${{escapeHtml(r.stock_name || '기업명')}}</a>
               <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
               <span class="rep-pill chg-${{chg}}" ${{prevTpTip}}>${{chgText}}</span>
               ${{cnt3m > 0 ? `<span class="rep-3m-badge ${{cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low')}}" title="최근 3개월(90일) 발간 리포트 횟수">📚 3개월 ${{cnt3m}}회</span>` : ''}}
@@ -6773,6 +6837,153 @@ def build_web_dashboard(here):
       bindTooltips();
     }}
 
+    const LIVE_QUOTE_CACHE = {{}};
+    let liveQuoteTimer = null;
+    let activeLiveCode = '';
+    let liveJsonpSeq = 0;
+
+    function fetchNaverLiveQuote(code) {{
+      const cd = String(code || '').trim().padStart(6, '0');
+      const cached = LIVE_QUOTE_CACHE[cd];
+      if (cached && (Date.now() - cached.ts) < 20000) {{
+        return Promise.resolve(cached.data);
+      }}
+      return new Promise((resolve) => {{
+        const cbName = '__nvLiveCb_' + (++liveJsonpSeq);
+        let done = false;
+        const scr = document.createElement('script');
+        const finish = (val) => {{
+          if (done) return;
+          done = true;
+          try {{ delete window[cbName]; }} catch (e) {{ window[cbName] = undefined; }}
+          if (scr.parentNode) scr.parentNode.removeChild(scr);
+          if (val) LIVE_QUOTE_CACHE[cd] = {{ ts: Date.now(), data: val }};
+          resolve(val);
+        }};
+        window[cbName] = (res) => {{
+          try {{
+            const d = res && res.result && res.result.areas && res.result.areas[0] && res.result.areas[0].datas && res.result.areas[0].datas[0];
+            if (d && d.nv !== undefined) {{
+              const rf = String(d.rf || '3');
+              const isDown = (rf === '4' || rf === '5');
+              const isUp = (rf === '1' || rf === '2');
+              const sign = isDown ? -1 : (isUp ? 1 : 0);
+              finish({{
+                cd,
+                nm: d.nm || '',
+                nv: Number(d.nv) || 0,
+                cv: sign * Math.abs(Number(d.cv) || 0),
+                cr: sign * Math.abs(Number(d.cr) || 0),
+                ov: Number(d.ov) || 0,
+                hv: Number(d.hv) || 0,
+                lv: Number(d.lv) || 0,
+                ms: d.ms || '',
+                rf,
+              }});
+              return;
+            }}
+          }} catch (e) {{}}
+          finish(null);
+        }};
+        scr.onerror = () => finish(null);
+        scr.src = `https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:${{cd}}&_callback=${{cbName}}`;
+        document.head.appendChild(scr);
+        setTimeout(() => finish(null), 4500);
+      }});
+    }}
+
+    function positionLiveQuote(e) {{
+      const box = document.getElementById('liveQuoteBox');
+      if (!box) return;
+      let x = e.clientX + 16;
+      let y = e.clientY + 16;
+      if (x + 260 > window.innerWidth) x = Math.max(10, e.clientX - 264);
+      if (y + 220 > window.innerHeight) y = Math.max(10, e.clientY - 224);
+      box.style.left = x + 'px';
+      box.style.top = y + 'px';
+    }}
+
+    function renderLiveQuoteBox(cd, fallbackName, q) {{
+      const box = document.getElementById('liveQuoteBox');
+      if (!box || activeLiveCode !== cd) return;
+      if (!q) {{
+        const info = STOCK_LOOKUP[cd];
+        if (info && info.price) {{
+          const rt = Number(info.rate);
+          const cls = !isNaN(rt) ? (rt > 0 ? 'lq-up' : (rt < 0 ? 'lq-down' : 'lq-flat')) : 'lq-flat';
+          const rtStr = !isNaN(rt) ? `${{rt > 0 ? '+' : ''}}${{rt.toFixed(2)}}%` : '';
+          box.innerHTML = `
+            <div class="lq-head"><span class="lq-name">${{escapeHtml(fallbackName || cd)}} (${{cd}})</span><span class="lq-stat closed">저장시세</span></div>
+            <div class="lq-price-row"><span class="lq-price ${{cls}}">${{Math.round(info.price).toLocaleString('ko-KR')}}원</span><span class="lq-chg ${{cls}}">${{rtStr}}</span></div>
+            <img class="lq-chart" src="https://ssl.pstatic.net/imgfinance/chart/item/area/day/${{cd}}.png" alt="일봉차트" />
+            <div class="lq-foot">클릭 시 네이버 금융 열기</div>
+          `;
+        }} else {{
+          box.innerHTML = `<div class="lq-head"><span class="lq-name">${{escapeHtml(fallbackName || cd)}} (${{cd}})</span></div><div style="font-size:11.5px; color:#64748b;">실시간 시세를 불러오지 못했습니다.</div><div class="lq-foot">클릭 시 네이버 금융 열기</div>`;
+        }}
+        return;
+      }}
+      const cls = q.cr > 0 ? 'lq-up' : (q.cr < 0 ? 'lq-down' : 'lq-flat');
+      const arrow = q.rf === '1' ? '▲▲' : (q.rf === '2' ? '▲' : (q.rf === '4' ? '▼▼' : (q.rf === '5' ? '▼' : '-')));
+      const cvStr = `${{arrow}} ${{Math.abs(q.cv).toLocaleString('ko-KR')}}`;
+      const crStr = `(${{q.cr > 0 ? '+' : ''}}${{q.cr.toFixed(2)}}%)`;
+      const isOpen = (q.ms === 'OPEN');
+      const stBadge = `<span class="lq-stat ${{isOpen ? '' : 'closed'}}">${{isOpen ? '● 장중 실시간' : '장마감'}}</span>`;
+      const chartTs = Math.floor(Date.now() / 60000);
+      box.innerHTML = `
+        <div class="lq-head"><span class="lq-name">${{escapeHtml(q.nm || fallbackName || cd)}} <span style="font-size:10.5px; color:#94a3b8; font-weight:600;">${{cd}}</span></span>${{stBadge}}</div>
+        <div class="lq-price-row">
+          <span class="lq-price ${{cls}}">${{q.nv.toLocaleString('ko-KR')}}원</span>
+          <span class="lq-chg ${{cls}}">${{cvStr}} ${{crStr}}</span>
+        </div>
+        <div class="lq-ohl">
+          <span>시 ${{q.ov ? q.ov.toLocaleString('ko-KR') : '-'}}</span>
+          <span style="color:#dc2626;">고 ${{q.hv ? q.hv.toLocaleString('ko-KR') : '-'}}</span>
+          <span style="color:#2563eb;">저 ${{q.lv ? q.lv.toLocaleString('ko-KR') : '-'}}</span>
+        </div>
+        <img class="lq-chart" src="https://ssl.pstatic.net/imgfinance/chart/item/area/day/${{cd}}.png?t=${{chartTs}}" alt="실시간 차트" />
+        <div class="lq-foot">네이버 금융 실시간 · 클릭 시 새 탭 열기</div>
+      `;
+    }}
+
+    function bindLiveQuotes() {{
+      const box = document.getElementById('liveQuoteBox');
+      if (!box) return;
+      document.querySelectorAll('[data-live-code]').forEach(el => {{
+        if (el._lqBound) return;
+        el._lqBound = true;
+        el.addEventListener('mouseenter', (e) => {{
+          const cd = String(el.getAttribute('data-live-code') || '').trim();
+          if (!cd) return;
+          activeLiveCode = cd;
+          const nm = (el.textContent || '').trim().split(' ')[0];
+          clearTimeout(liveQuoteTimer);
+          const cached = LIVE_QUOTE_CACHE[cd.padStart(6, '0')];
+          if (cached && (Date.now() - cached.ts) < 20000) {{
+            box.style.display = 'block';
+            positionLiveQuote(e);
+            renderLiveQuoteBox(cd.padStart(6, '0'), nm, cached.data);
+          }} else {{
+            liveQuoteTimer = setTimeout(() => {{
+              if (activeLiveCode !== cd) return;
+              box.innerHTML = `<div class="lq-head"><span class="lq-name">${{escapeHtml(nm || cd)}} (${{cd}})</span><span class="lq-stat closed">조회중...</span></div><div style="font-size:11.5px; color:#64748b; padding:6px 0;">네이버 금융 실시간 시세 불러오는 중...</div>`;
+              box.style.display = 'block';
+              positionLiveQuote(e);
+              fetchNaverLiveQuote(cd).then(q => renderLiveQuoteBox(cd.padStart(6, '0'), nm, q));
+            }}, 110);
+          }}
+        }});
+        el.addEventListener('mousemove', (e) => {{
+          if (box.style.display === 'block') positionLiveQuote(e);
+        }});
+        el.addEventListener('mouseleave', () => {{
+          clearTimeout(liveQuoteTimer);
+          activeLiveCode = '';
+          box.style.display = 'none';
+        }});
+      }});
+    }}
+
     function bindTooltips() {{
       const tipBox = document.getElementById('tooltipBox');
       document.querySelectorAll('[data-tip]').forEach(el => {{
@@ -6786,6 +6997,7 @@ def build_web_dashboard(here):
         el.onmousemove = (e) => positionTip(e);
         el.onmouseleave = () => {{ tipBox.style.display = 'none'; }};
       }});
+      bindLiveQuotes();
     }}
 
     function positionTip(e) {{
