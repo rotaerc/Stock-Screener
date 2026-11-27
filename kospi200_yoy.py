@@ -3091,16 +3091,13 @@ def build_web_dashboard(here):
       white-space: nowrap;
       cursor: pointer;
     }}
-    .brand-dot {{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
+    .brand-icon {{
+      width: 26px;
+      height: 26px;
       border-radius: 7px;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      font-size: 13px;
+      display: block;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(30, 58, 138, 0.22);
     }}
     .top-date-chip {{
       font-size: 11.5px;
@@ -5096,7 +5093,7 @@ def build_web_dashboard(here):
       <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="좌측 메뉴 접기/펼치기">☰</button>
       <button class="menu-toggle-btn" id="navBackBtn" onclick="window.history.back()" title="이전 페이지로 돌아가기 (브라우저 뒤로가기 동일)" style="width:auto; padding:0 9px; font-size:12px; font-weight:800; color:#334155; gap:3px;">← 뒤로</button>
       <div class="brand-logo" onclick="selectHomeView()" title="수급 브리핑 메인 화면으로 이동">
-        <span class="brand-dot">📊</span>
+        <img src="favicon.svg" alt="R" class="brand-icon" />
         <span>STOCK SCREENER</span>
       </div>
       <span class="top-date-chip" id="topDateChip"></span>
