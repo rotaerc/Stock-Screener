@@ -2309,36 +2309,36 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
 
     try:
         collected = []
-        if lookback_days > 0:
-            seen_idx = set()
-            for pg in range(1, 6):
-                url_pg = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page={pg}"
-                pg_items = parse_page(url_pg)
-                if not pg_items:
-                    break
-                added = 0
-                for it in pg_items:
-                    key = it.get("report_idx") or f"{it['date']}_{it['stock_code']}_{it['title']}"
-                    if key not in seen_idx and start_str <= it["date"] <= today_str:
-                        seen_idx.add(key)
-                        collected.append(it)
-                        added += 1
-                if len(pg_items) < 80 or added == 0:
-                    break
-        else:
-            # 직전 영업일(전일 18시 이후 신규분 포착) ~ 금일 함께 조회
-            url_range = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page=1"
-            collected = [it for it in parse_page(url_range) if start_str <= it["date"] <= today_str]
-            # 주말·장전 등으로 범위 내 리포트가 아예 없으면 가장 최근 올라온 날짜 리포트 사용
-            if not collected:
-                latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
-                if latest_items:
-                    latest_dt = latest_items[0]["date"]
-                    collected = [it for it in latest_items if it["date"] == latest_dt]
-
-        if not collected and not by_date:
-            print("  [알림] 한경 컨센서스에서 리포트를 찾지 못해 기존 캐시를 유지합니다.")
-            return _load_hankyung_reports(here)
+        try:
+            if lookback_days > 0:
+                seen_idx = set()
+                for pg in range(1, 6):
+                    url_pg = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page={pg}"
+                    pg_items = parse_page(url_pg)
+                    if not pg_items:
+                        break
+                    added = 0
+                    for it in pg_items:
+                        key = it.get("report_idx") or f"{it['date']}_{it['stock_code']}_{it['title']}"
+                        if key not in seen_idx and start_str <= it["date"] <= today_str:
+                            seen_idx.add(key)
+                            collected.append(it)
+                            added += 1
+                    if len(pg_items) < 80 or added == 0:
+                        break
+            else:
+                # 직전 영업일(전일 18시 이후 신규분 포착) ~ 금일 함께 조회
+                url_range = f"{base_list_url}&sdate={start_str}&edate={today_str}&pagenum=80&now_page=1"
+                collected = [it for it in parse_page(url_range) if start_str <= it["date"] <= today_str]
+                # 주말·장전 등으로 범위 내 리포트가 아예 없으면 가장 최근 올라온 날짜 리포트 사용
+                if not collected:
+                    latest_items = parse_page(f"{base_list_url}&pagenum=40&now_page=1")
+                    if latest_items:
+                        latest_dt = latest_items[0]["date"]
+                        collected = [it for it in latest_items if it["date"] == latest_dt]
+        except Exception as e_hk:
+            print(f"  [경고] 한경 컨센서스 일시 장애({e_hk}) → 네이버 증권 리포트 수집은 계속 진행합니다.")
+            collected = []
 
         grouped_new = {}
         for it in collected:
