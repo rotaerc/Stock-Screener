@@ -3171,8 +3171,10 @@
       const upCnt = reps.filter(r => r.target_change === '상향').length;
       const newCnt = reps.filter(r => r.target_change === '신규').length;
       const downCnt = reps.filter(r => r.target_change === '하향').length;
+      const repUpd = (REPORTS_DATA && REPORTS_DATA.updatedAt) ? REPORTS_DATA.updatedAt : '-';
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">📅 ${dateLabel}</span>
+        <span class="meta-pill">🕒 업데이트: ${repUpd}</span>
         <span class="meta-pill">📄 총 ${reps.length}건</span>
         <span class="meta-pill up clickable" onclick="selectReportsView('', '상향')">▲ 목표가 상향 ${upCnt}건</span>
         <span class="meta-pill clickable" style="background:#ede9fe; color:#6d28d9; border-color:#c4b5fd;" onclick="selectReportsView('', '신규')">★ 신규 ${newCnt}건</span>
@@ -3434,10 +3436,11 @@
               <td class="ctr"><span class="rep-3m-badge ${c3Cls}" title="최근 3개월(90일) 동안 해당 종목에 발간된 증권사 리포트 수">${c3Txt}</span></td>
             </tr>`;
           }).join('');
+          const repUpdTxt = (REPORTS_DATA && REPORTS_DATA.updatedAt) ? ` · 🕒 ${REPORTS_DATA.updatedAt} 업데이트` : '';
           sheetBox.innerHTML = `
             <div class="rep-sheet-card">
               <div class="rep-sheet-head">
-                <div class="rep-sheet-title">📋 오늘의 리포트 한눈에 보기 (장표 · ${dateTag} · 총 ${items.length}건)</div>
+                <div class="rep-sheet-title">📋 오늘의 리포트 한눈에 보기 (장표 · ${dateTag} · 총 ${items.length}건${repUpdTxt})</div>
                 <div style="display:flex; gap:8px; font-size:11.5px; font-weight:700; color:#475569;">
                   <span style="color:#dc2626;">▲ 목표가 상향 ${upN}건</span>
                   <span style="color:#6d28d9;">★ 신규 ${newN}건</span>
