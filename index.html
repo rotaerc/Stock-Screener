@@ -2102,7 +2102,7 @@
           <div class="flow-mode-group">
             <button class="flow-mode-btn active" id="btnFlowDaily" onclick="selectFlowView('DAILY', 'ALL')">📅 일간 수급 (1년)</button>
             <button class="flow-mode-btn" id="btnFlowWeekly" onclick="selectFlowView('WEEKLY', 'ALL')">📆 주간 수급 (1년)</button>
-            <button class="flow-mode-btn" id="btnFlowPrivateTop50" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">💼 사모 시총비중 TOP50</button>
+            <button class="flow-mode-btn" id="btnFlowPrivateTop50" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">💼 사모 시총대비 수급</button>
           </div>
           <div class="flow-mode-group" id="flowMarketTabs">
             <button class="flow-mode-btn active" id="btnFlowMktAll" onclick="setFlowMarket('')">전체</button>
@@ -2647,7 +2647,7 @@
             <span class="nav-item-left"><span>📆</span><span>주간 수급</span></span>
           </button>
           <button class="nav-item ${currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab === 'PRIVATE_TOP50' ? 'active' : ''}" onclick="selectFlowView('DAILY', 'PRIVATE_TOP50')">
-            <span class="nav-item-left"><span>💼</span><span>사모 시총비중 TOP50</span></span>
+            <span class="nav-item-left"><span>💼</span><span>사모 시총대비 수급</span></span>
           </button>
         </div>
         <div class="nav-divider"></div>
