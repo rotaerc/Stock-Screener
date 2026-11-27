@@ -2323,6 +2323,49 @@ def _extract_pdf_price_info(text):
     return cur_price, upside_pct
 
 
+def _norm_report_broker(b):
+    s = re.sub(r"\s+", "", str(b or "")).lower()
+    s = re.sub(r"(투자증권|금융투자|증권|리서치|센터)$", "", s)
+    return s
+
+
+def _norm_report_title(t):
+    return re.sub(r"[^0-9a-zA-Z가-힣]", "", str(t or "")).lower()
+
+
+def _dedup_reports_list(rep_list):
+    """
+    같은 날 한경·네이버 리포트가 겹칠 경우 '먼저 읽은 1건'만 유지합니다.
+    (종목코드 + 정규화 증권사 동일, 또는 종목코드 + 정규화 제목 동일/포함 시 중복 제거)
+    """
+    if not isinstance(rep_list, list):
+        return []
+    out = []
+    seen_broker = set()
+    seen_titles = {}
+    for r in rep_list:
+        if not isinstance(r, dict):
+            continue
+        cd = str(r.get("stock_code") or "").strip().zfill(6)
+        nb = _norm_report_broker(r.get("broker"))
+        nt = _norm_report_title(r.get("title"))
+        if cd and nb and (cd, nb) in seen_broker:
+            continue
+        if cd and nt:
+            prev_ts = seen_titles.get(cd) or []
+            if any(
+                pt and (nt == pt or (min(len(nt), len(pt)) >= 8 and (nt in pt or pt in nt)))
+                for pt in prev_ts
+            ):
+                continue
+        out.append(r)
+        if cd and nb:
+            seen_broker.add((cd, nb))
+        if cd and nt:
+            seen_titles.setdefault(cd, []).append(nt)
+    return out
+
+
 def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
     """
     한경 컨센서스(https://consensus.hankyung.com/analysis/list?skinType=business)에서
@@ -2537,15 +2580,10 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 dt_final.append(it)
                 existing_by_idx[idx] = it
                 time.sleep(0.15)
-            # 기존 해당 날짜에 이미 저장된 한경/네이버 리포트(예: 전일 18시 이후 편입분) 보존하며 병합
-            prev_hk_keep = [
-                r for r in by_date.get(dt_key, [])
-                if not str(r.get("report_idx", "")).startswith("naver_")
-                and str(r.get("report_idx", "")) not in seen_hk_idx
-            ]
-            prev_naver_for_dt = [r for r in by_date.get(dt_key, []) if str(r.get("report_idx", "")).startswith("naver_")]
-            by_date[dt_key] = dt_final + prev_hk_keep + prev_naver_for_dt
-            print(f"  - [{dt_key}] 한경 리포트 {len(dt_final) + len(prev_hk_keep)}건 정리 완료")
+            # 기존 해당 날짜에 먼저 읽혀 저장된 한경/네이버 리포트를 우선 보존하고 신규 비겹침분만 추가
+            prev_existing = _dedup_reports_list(by_date.get(dt_key, []))
+            by_date[dt_key] = _dedup_reports_list(prev_existing + dt_final)
+            print(f"  - [{dt_key}] 한경 리포트 반영 완료 (중복제거 후 {len(by_date[dt_key])}건)")
 
         # ---------------------------------------------------------------------
         # ★ 네이버 증권(stock.naver.com/research/company) 비겹침 리포트 추가 병합
@@ -2631,23 +2669,27 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                     nv_by_dt.setdefault(disp_dt, []).append(item)
 
                 for dt_key, nv_items in sorted(nv_by_dt.items(), reverse=True):
-                    # 해당 날짜의 기존 한경 리포트 목록 + 기존 보존 네이버 리포트 기준
-                    hk_list = [r for r in by_date.get(dt_key, []) if not str(r.get("report_idx", "")).startswith("naver_")]
-                    for r in hk_list:
+                    # 해당 날짜의 기존 리포트(먼저 읽은 순서 유지)를 기준으로 중복 제거
+                    existing_day = _dedup_reports_list(by_date.get(dt_key, []))
+                    for r in existing_day:
                         if not r.get("source"):
-                            r["source"] = "한경"
+                            r["source"] = "네이버" if str(r.get("report_idx", "")).startswith("naver_") else "한경"
 
                     seen_broker_keys = {
-                        (str(r.get("stock_code") or "").zfill(6), _norm_broker(r.get("broker")))
-                        for r in hk_list
+                        (str(r.get("stock_code") or "").zfill(6), _norm_report_broker(r.get("broker")))
+                        for r in existing_day
                     }
                     seen_titles = [
-                        (str(r.get("stock_code") or "").zfill(6), _norm_title(r.get("title")))
-                        for r in hk_list
+                        (str(r.get("stock_code") or "").zfill(6), _norm_report_title(r.get("title")))
+                        for r in existing_day
                     ]
+                    existing_nv_idxs = {
+                        str(r.get("report_idx") or "")
+                        for r in existing_day
+                        if str(r.get("report_idx") or "").startswith("naver_")
+                    }
 
                     nv_added = []
-                    seen_nv_idx = set()
                     for nv in nv_items:
                         rid = str(nv.get("researchId") or "").strip()
                         st_code = str(nv.get("itemCode") or "").strip().zfill(6)
@@ -2657,16 +2699,21 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         if not rid or not st_code:
                             continue
 
-                        nb = _norm_broker(broker)
-                        nt = _norm_title(title)
-                        # 한경(또는 이미 추가된 네이버 리포트)과 종목+증권사 또는 종목+제목이 겹치면 제외
-                        if (st_code, nb) in seen_broker_keys:
-                            continue
-                        if nt and any(sc == st_code and st and (nt in st or st in nt) for sc, st in seen_titles):
+                        nv_idx = f"naver_{rid}"
+                        if nv_idx in existing_nv_idxs:
                             continue
 
-                        nv_idx = f"naver_{rid}"
-                        seen_nv_idx.add(nv_idx)
+                        nb = _norm_report_broker(broker)
+                        nt = _norm_report_title(title)
+                        # 먼저 읽은 리포트(한경 또는 기존 네이버)와 종목+증권사 또는 종목+제목이 겹치면 제외
+                        if (st_code, nb) in seen_broker_keys:
+                            continue
+                        if nt and any(
+                            sc == st_code and st and (nt == st or (min(len(nt), len(st)) >= 8 and (nt in st or st in nt)))
+                            for sc, st in seen_titles
+                        ):
+                            continue
+
                         cached_nv = existing_by_idx.get(nv_idx)
                         if cached_nv and cached_nv.get("summary"):
                             cached_nv["source"] = "네이버"
@@ -2760,14 +2807,8 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         seen_titles.append((st_code, nt))
                         time.sleep(0.08)
 
-                    # 기존에 dt_key에 이미 편입돼 있던 네이버 리포트(예: 전일 18시 이후 편입분)도 누락 없이 유지
-                    prev_nv_keep = [
-                        r for r in by_date.get(dt_key, [])
-                        if str(r.get("report_idx", "")).startswith("naver_")
-                        and str(r.get("report_idx", "")) not in seen_nv_idx
-                    ]
-                    by_date[dt_key] = hk_list + nv_added + prev_nv_keep
-                    print(f"  - [{dt_key}] 네이버 비겹침 리포트 +{len(nv_added) + len(prev_nv_keep)}건 병합 (총 {len(by_date[dt_key])}건)")
+                    by_date[dt_key] = _dedup_reports_list(existing_day + nv_added)
+                    print(f"  - [{dt_key}] 네이버 비겹침 리포트 +{len(nv_added)}건 병합 (중복제거 후 총 {len(by_date[dt_key])}건)")
         except Exception as e_nv:
             print(f"  [경고] 네이버 리포트 병합 중 오류(한경 데이터는 정상 유지): {e_nv}")
 
@@ -2781,7 +2822,25 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 for lst in by_date.values() if isinstance(lst, list)
                 for r in lst if r.get("stock_code")
             }
-            seen_3m_keys = {}  # code -> set of (date, norm_broker)
+            # 모든 날짜 리스트 먼저 중복 제거 (한경·네이버 겹침 시 먼저 읽은 1건만 유지)
+            for _dk in list(by_date.keys()):
+                if isinstance(by_date[_dk], list):
+                    by_date[_dk] = _dedup_reports_list(by_date[_dk])
+
+            seen_3m_entries = {}  # code -> list of (date, norm_broker, norm_title)
+            def _add_3m_unique(cd, wdt, brk, ttl):
+                nb = _norm_report_broker(brk)
+                nt = _norm_report_title(ttl)
+                lst_e = seen_3m_entries.setdefault(cd, [])
+                for ed, eb, et in lst_e:
+                    if nb and eb and nb == eb:
+                        if ed == wdt:
+                            return
+                        # 18시 롤오버/등록 시차(±1~2일)로 같은 증권사+같은 제목이 겹칠 때도 1회만 카운트
+                        if nt and et and (nt == et or (min(len(nt), len(et)) >= 8 and (nt in et or et in nt))):
+                            return
+                lst_e.append((wdt, nb, nt))
+
             # 1) 저장된 한경/네이버 리포트 중 최근 90일 반영
             for dt_k, lst in by_date.items():
                 if not isinstance(lst, list):
@@ -2792,7 +2851,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         continue
                     cd = str(r.get("stock_code") or "").strip().zfill(6)
                     if cd in target_codes_3m:
-                        seen_3m_keys.setdefault(cd, set()).add((orig_d, _norm_broker(r.get("broker"))))
+                        _add_3m_unique(cd, orig_d, r.get("broker"), r.get("title"))
 
             # 2) 네이버 리서치 최근 90일 전체 페이지 병렬 스캔 (약 2~3초)
             def _fetch_nv_page_3m(pg_num):
@@ -2827,22 +2886,22 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                                 continue
                             cd = str(item.get("itemCode") or "").strip().zfill(6)
                             if cd in target_codes_3m:
-                                seen_3m_keys.setdefault(cd, set()).add((wdt, _norm_broker(item.get("brokerName"))))
+                                _add_3m_unique(cd, wdt, item.get("brokerName"), item.get("title"))
                     if reached_cutoff:
                         break
 
             for cd in target_codes_3m:
-                cnt_val = len(seen_3m_keys.get(cd) or ())
+                cnt_val = len(seen_3m_entries.get(cd) or ())
                 if cnt_val > 0:
                     report_counts_3m[cd] = cnt_val
             print(f"  - [3개월 발간통계] {len(target_codes_3m)}종목 최근 90일 리포트 발간 횟수 집계 완료")
         except Exception as e_3m:
             print(f"  [경고] 최근 3개월 발간 횟수 집계 중 오류(기존값 유지): {e_3m}")
 
-        # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리)
+        # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리 + 날짜별 최종 중복 제거)
         cutoff_str = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
         pruned_by_date = {
-            d: lst for d, lst in sorted(by_date.items(), reverse=True)
+            d: _dedup_reports_list(lst) for d, lst in sorted(by_date.items(), reverse=True)
             if d >= cutoff_str and isinstance(lst, list) and len(lst) > 0
         }
         sorted_dates = sorted(pruned_by_date.keys(), reverse=True)
@@ -2885,7 +2944,14 @@ def _load_hankyung_reports(here):
                 dt = data.get("date") or ""
                 reps = data.get("reports") or []
                 data["byDate"] = {dt: reps} if (dt and reps) else {}
+            data["byDate"] = {
+                k: _dedup_reports_list(v) for k, v in data["byDate"].items()
+                if isinstance(v, list) and len(v) > 0
+            }
             data["dates"] = sorted(data["byDate"].keys(), reverse=True)
+            if data["dates"]:
+                data["date"] = data["dates"][0]
+                data["reports"] = data["byDate"][data["date"]]
             return data
         except Exception:
             pass
