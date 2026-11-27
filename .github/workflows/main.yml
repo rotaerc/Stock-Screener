@@ -94,14 +94,23 @@ jobs:
         env:
           TZ: Asia/Seoul
           RUN_MODE: ${{ steps.resolve_mode.outputs.mode }}
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
         run: |
           if [ "$RUN_MODE" = "reports" ]; then
             echo "▶ [리포트 전용] 한경·네이버 기업 리포트 수집 및 index.html 갱신"
             python kospi200_yoy.py --reports --no-push
           elif [ "$RUN_MODE" = "screener" ]; then
+            if [ -n "$KOSIS_API_KEY" ]; then
+              echo "▶ [통계청 KOSIS] 반도체 재고순환지표 갱신"
+              python kosis_semicon.py --no-push || true
+            fi
             echo "▶ [스크리너 전용] 코스피/코스닥 200 수집 및 index.html 갱신"
             python kospi200_yoy.py --screener --no-push
           else
+            if [ -n "$KOSIS_API_KEY" ]; then
+              echo "▶ [통계청 KOSIS] 반도체 재고순환지표 갱신"
+              python kosis_semicon.py --no-push || true
+            fi
             echo "▶ [전체] 스크리너 + 기업 리포트 모두 수집 및 index.html 갱신"
             python kospi200_yoy.py --no-push
           fi
@@ -112,7 +121,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html hankyung_reports.json op_estimate_history.json op_baseline.json investor_flow.json kospi_top200_latest.xlsx kosdaq_top200_latest.xlsx
+          git add index.html hankyung_reports.json op_estimate_history.json op_baseline.json investor_flow.json semicon_cycle.json kospi_top200_latest.xlsx kosdaq_top200_latest.xlsx
           if ! git diff --staged --quiet; then
             if [ "$RUN_MODE" = "reports" ]; then
               MSG="Auto-update corporate reports"

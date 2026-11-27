@@ -2911,6 +2911,21 @@ def _load_investor_flow(here):
     return {"updatedAt": "", "latestDate": "", "latestWeek": "", "dates": [], "weeks": [], "byDate": {}, "byWeek": {}}
 
 
+def _load_semicon_cycle(here):
+    json_path = os.path.join(here, "semicon_cycle.json")
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data.setdefault("series", [])
+                data.setdefault("source", {})
+                return data
+        except Exception:
+            pass
+    return {"updatedAt": "", "hasKosisData": False, "latestMonth": "", "source": {}, "series": []}
+
+
 def build_web_dashboard(here):
     """
     최신 KOSPI / KOSDAQ 통합 엑셀(.xlsx) 파일 및 한경 기업 리포트(hankyung_reports.json)를 읽어
@@ -2935,6 +2950,9 @@ def build_web_dashboard(here):
     flow_data = _load_investor_flow(here)
     print(f"  - [수급동향] 키움 수급 로드 완료: 일간 {len(flow_data.get('dates', []))}일 / 주간 {len(flow_data.get('weeks', []))}주 (최신: {flow_data.get('latestDate') or '-'})")
 
+    semicon_data = _load_semicon_cycle(here)
+    print(f"  - [반도체사이클] 통계청 재고순환 로드: {len(semicon_data.get('series', []))}개월 (통계청 최신월: {semicon_data.get('latestMonth') or '미연동'})")
+
     op_hist_raw = _load_op_estimate_history(here)
     op_hist_compact = {
         "quarter": op_hist_raw.get("quarter", _current_quarter_ym()),
@@ -2958,6 +2976,7 @@ def build_web_dashboard(here):
     reports_payload = json.dumps(reports_data, ensure_ascii=False).replace("</", "<\\/")
     op_hist_payload = json.dumps(op_hist_compact, ensure_ascii=False).replace("</", "<\\/")
     flow_payload = json.dumps(flow_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    semicon_payload = json.dumps(semicon_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -4568,6 +4587,169 @@ def build_web_dashboard(here):
       font-size: 12px;
       color: #0f172a;
     }}
+    .semicon-view {{
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }}
+    .semicon-view.active {{ display: flex; }}
+    .semi-body-wrap {{
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+    .semi-kpi-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .semi-kpi-card {{
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 11px 14px;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+    .semi-kpi-label {{
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }}
+    .semi-kpi-val {{
+      font-size: 20px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }}
+    .semi-kpi-val.up {{ color: #dc2626; }}
+    .semi-kpi-val.down {{ color: #2563eb; }}
+    .semi-kpi-sub {{
+      font-size: 11px;
+      color: #475569;
+      font-weight: 600;
+    }}
+    .semi-phase-badge {{
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+    }}
+    .semi-phase-badge.recover {{ background: #dcfce7; color: #15803d; border: 1px solid #86efac; }}
+    .semi-phase-badge.expand {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }}
+    .semi-phase-badge.slowdown {{ background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }}
+    .semi-phase-badge.contract {{ background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }}
+    .semi-chart-card {{
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .semi-chart-head {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+    .semi-chart-title {{
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .semi-legend {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+    }}
+    .semi-leg-dot {{
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }}
+    .semi-split-grid {{
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 12px;
+    }}
+    .semi-svg-wrap {{
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }}
+    .semi-svg-wrap svg {{
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+    }}
+    .semi-tbl-wrap {{
+      max-height: 300px;
+      overflow: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }}
+    .semi-tbl {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }}
+    .semi-tbl th {{
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 800;
+      padding: 7px 8px;
+      border-bottom: 1px solid #cbd5e1;
+      text-align: right;
+      white-space: nowrap;
+      z-index: 2;
+    }}
+    .semi-tbl th.ctr, .semi-tbl td.ctr {{ text-align: center; }}
+    .semi-tbl td {{
+      padding: 6px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+      white-space: nowrap;
+      color: #1e293b;
+      font-weight: 600;
+    }}
+    .semi-tbl tbody tr:hover td {{ background: #f8fafc; }}
+    @media (max-width: 1080px) {{
+      .semi-kpi-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .semi-split-grid {{ grid-template-columns: 1fr; }}
+    }}
+    @media (max-width: 600px) {{
+      .semi-kpi-grid {{ grid-template-columns: 1fr; }}
+    }}
     @media (max-width: 1180px) {{
       .flow-cols-grid {{ grid-template-columns: 1fr; }}
     }}
@@ -4835,6 +5017,31 @@ def build_web_dashboard(here):
         <div class="flow-cols-grid" id="flowGrid"></div>
       </div>
     </div>
+
+    <div class="semicon-view" id="semiconView">
+      <div class="controls-panel" style="margin-bottom:10px;">
+        <div class="filter-left">
+          <div class="flow-mode-group" id="semiRangeTabs">
+            <button class="flow-mode-btn" id="btnSemiR3" onclick="setSemiconRange(36)">3년</button>
+            <button class="flow-mode-btn active" id="btnSemiR5" onclick="setSemiconRange(60)">5년</button>
+            <button class="flow-mode-btn" id="btnSemiR10" onclick="setSemiconRange(120)">10년</button>
+            <button class="flow-mode-btn" id="btnSemiRAll" onclick="setSemiconRange(0)">전체</button>
+          </div>
+          <div class="flow-mode-group" id="semiOverlayTabs">
+            <button class="flow-mode-btn active" id="btnSemiOvSam" onclick="setSemiconOverlay('SAMSUNG')">🔵 삼성전자</button>
+            <button class="flow-mode-btn" id="btnSemiOvHyn" onclick="setSemiconOverlay('HYNIX')">🟣 SK하이닉스</button>
+            <button class="flow-mode-btn" id="btnSemiOvBoth" onclick="setSemiconOverlay('BOTH')">📊 둘 다 (지수화)</button>
+            <button class="flow-mode-btn" id="btnSemiOvNone" onclick="setSemiconOverlay('NONE')">주가 숨김</button>
+          </div>
+        </div>
+        <div class="group-right">
+          <a class="rep-btn" href="https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1F02001&conn_path=I2" target="_blank">🏛️ 통계청 KOSIS 원문</a>
+          <a class="rep-btn" href="https://finance.naver.com/item/main.naver?code=005930" target="_blank" data-live-code="005930">삼성전자</a>
+          <a class="rep-btn" href="https://finance.naver.com/item/main.naver?code=000660" target="_blank" data-live-code="000660">SK하이닉스</a>
+        </div>
+      </div>
+      <div class="semi-body-wrap" id="semiconBodyWrap"></div>
+    </div>
     </main>
   </div>
 
@@ -4846,6 +5053,7 @@ def build_web_dashboard(here):
     const REPORTS_DATA = {reports_payload};
     const OP_HIST = {op_hist_payload};
     const FLOW_DATA = {flow_payload};
+    const SEMICON_DATA = {semicon_payload};
     const OP_HIST_STOCKS = (OP_HIST && OP_HIST.stocks) ? OP_HIST.stocks : {{}};
     const marketKeys = Object.keys(DB);
     let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
@@ -4998,6 +5206,8 @@ def build_web_dashboard(here):
         repViewMode: currentReportViewMode,
         repDate: currentReportDate,
         repChange: document.getElementById('repChangeSelect') ? document.getElementById('repChangeSelect').value : '',
+        semiRange: currentSemiconRange,
+        semiOverlay: currentSemiconOverlay,
         search: document.getElementById('searchInput') ? document.getElementById('searchInput').value : '',
       }};
     }}
@@ -5053,11 +5263,16 @@ def build_web_dashboard(here):
           document.getElementById('searchInput').value = st.search;
         }}
 
+        if (st.semiRange !== undefined) currentSemiconRange = Number(st.semiRange) || 0;
+        if (st.semiOverlay) currentSemiconOverlay = st.semiOverlay;
+
         if (st.view === 'HOME') {{
           selectHomeView(st.flowMode || 'DAILY');
         }} else if (st.view === 'FLOW') {{
           selectFlowView(st.flowMode || 'DAILY');
           setFlowMarket(st.flowMarket || '');
+        }} else if (st.view === 'SEMICON') {{
+          selectSemiconView();
         }} else if (st.view === 'REPORTS') {{
           selectReportsView('', st.repChange || '', st.repViewMode || 'SHEET');
         }} else {{
@@ -5286,6 +5501,14 @@ def build_web_dashboard(here):
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
+          <div class="nav-section-title">반도체 사이클 (통계청)</div>
+          <button class="nav-item ${{currentViewMode === 'SEMICON' ? 'active' : ''}}" onclick="selectSemiconView()">
+            <span class="nav-item-left"><span>🔄</span><span>반도체 재고순환</span></span>
+            <span class="nav-badge" style="${{(SEMICON_DATA && SEMICON_DATA.hasKosisData) ? 'background:#dcfce7; color:#15803d;' : 'background:#fef3c7; color:#92400e;'}}">${{(SEMICON_DATA && SEMICON_DATA.latestMonth) ? SEMICON_DATA.latestMonth.slice(2) : '설정'}}</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
           <div class="nav-section-title">한국 스크리너</div>
           ${{mktItems}}
         </div>
@@ -5344,6 +5567,7 @@ def build_web_dashboard(here):
       const showRep = (!showScreener && currentViewMode === 'REPORTS');
       const showFlow = (!showScreener && currentViewMode === 'FLOW');
       const showHome = (!showScreener && currentViewMode === 'HOME');
+      const showSemi = (!showScreener && currentViewMode === 'SEMICON');
       document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
@@ -5353,6 +5577,537 @@ def build_web_dashboard(here):
       if (fv) fv.classList.toggle('active', showFlow);
       const hv = document.getElementById('homeView');
       if (hv) hv.classList.toggle('active', showHome);
+      const sv = document.getElementById('semiconView');
+      if (sv) sv.classList.toggle('active', showSemi);
+    }}
+
+    let currentSemiconRange = 60; // 최근 60개월(5년), 0=전체
+    let currentSemiconOverlay = 'SAMSUNG'; // 'SAMSUNG' | 'HYNIX' | 'BOTH' | 'NONE'
+
+    function selectSemiconView() {{
+      closeMobileNav();
+      currentViewMode = 'SEMICON';
+      setScreenerVisibility(false);
+      updateSemiconButtons();
+      renderSidebar();
+      renderSemiconView();
+      pushNavHistory();
+    }}
+
+    function setSemiconRange(months) {{
+      currentSemiconRange = months;
+      updateSemiconButtons();
+      renderSemiconView();
+      pushNavHistory();
+    }}
+
+    function setSemiconOverlay(ov) {{
+      currentSemiconOverlay = ov;
+      updateSemiconButtons();
+      renderSemiconView();
+      pushNavHistory();
+    }}
+
+    function updateSemiconButtons() {{
+      const rMap = {{ btnSemiR3: 36, btnSemiR5: 60, btnSemiR10: 120, btnSemiRAll: 0 }};
+      Object.keys(rMap).forEach(id => {{
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', currentSemiconRange === rMap[id]);
+      }});
+      const oMap = {{ btnSemiOvSam: 'SAMSUNG', btnSemiOvHyn: 'HYNIX', btnSemiOvBoth: 'BOTH', btnSemiOvNone: 'NONE' }};
+      Object.keys(oMap).forEach(id => {{
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', currentSemiconOverlay === oMap[id]);
+      }});
+    }}
+
+    function _semiPhaseCls(ph) {{
+      if (ph === '회복기') return 'recover';
+      if (ph === '확장기') return 'expand';
+      if (ph && ph.includes('둔화')) return 'slowdown';
+      return 'contract';
+    }}
+
+    function _semiFmtSigned(v, suffix = '%') {{
+      if (v === null || v === undefined || isNaN(Number(v))) return '-';
+      const n = Number(v);
+      return `${{n > 0 ? '+' : ''}}${{n.toFixed(1)}}${{suffix}}`;
+    }}
+
+    function renderSemiconView() {{
+      const wrap = document.getElementById('semiconBodyWrap');
+      if (!wrap) return;
+      const sd = SEMICON_DATA || {{ series: [], hasKosisData: false, source: {{}} }};
+      const allSeries = Array.isArray(sd.series) ? sd.series : [];
+      const hasKosis = Boolean(sd.hasKosisData);
+      const src = sd.source || {{}};
+
+      document.getElementById('pageTitle').textContent = '반도체 재고순환지표 · 삼전·하이닉스';
+      document.getElementById('pageSubtitle').textContent = hasKosis
+        ? `통계청(KOSIS) ${{src.tblNm || '광업제조업동향조사'}} · 반도체 출하증가율(YoY) − 재고증가율(YoY) · 삼성전자/SK하이닉스 주가 비교`
+        : '통계청(KOSIS) 반도체 출하·재고 지수 연동 대기 · 삼성전자·SK하이닉스 월봉 주가 비교';
+
+      const kosisRows = allSeries.filter(r => r.cycle !== null && r.cycle !== undefined);
+      const latestK = kosisRows.length ? kosisRows[kosisRows.length - 1] : null;
+      const prevK = kosisRows.length >= 2 ? kosisRows[kosisRows.length - 2] : null;
+      const latestP = allSeries.length ? allSeries[allSeries.length - 1] : null;
+
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">🏛️ 통계청 KOSIS (${{src.tblId || 'DT_1F02001'}})</span>
+        <span class="meta-pill">📅 통계 최신월: ${{sd.latestMonth || '연동 대기'}}</span>
+        <span class="meta-pill">🕒 업데이트: ${{sd.updatedAt || '-'}}</span>
+        ${{latestK && latestK.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(latestK.phase)}}">현재 국면: ${{escapeHtml(latestK.phase)}}</span>` : ''}}
+      `;
+
+      const sliceByRange = (arr) => (currentSemiconRange > 0 && arr.length > currentSemiconRange) ? arr.slice(arr.length - currentSemiconRange) : arr;
+      const activeRows = hasKosis ? sliceByRange(kosisRows) : sliceByRange(allSeries.filter(r => r.samsung || r.hynix));
+
+      let setupHtml = '';
+      if (!hasKosis) {{
+        setupHtml = `
+          <div class="flow-empty-guide" style="margin:0; max-width:none; border-color:#86efac; background:#f0fdf4;">
+            <h3 style="color:#166534;">🏛️ 통계청(KOSIS) 반도체 재고순환 데이터 연동 안내 (1회 설정 · 무료)</h3>
+            <p style="margin:0 0 8px;">삼성전자·SK하이닉스 월봉 주가는 이미 수집되어 있으며, 통계청 공식 Open API 키만 등록하면 <b>2015년~최신 반도체 출하·재고·생산 지수 및 재고순환지표·4사분면 시계</b>가 자동으로 그려집니다.</p>
+            <ol style="margin:0; padding-left:20px;">
+              <li><a href="https://kosis.kr/openapi/" target="_blank" style="color:#15803d; font-weight:800;">KOSIS 공유서비스 Open API (kosis.kr/openapi)</a> 무료 회원가입 → 인증키 즉시 발급 (고정 IP 불필요)</li>
+              <li>폴더의 <code>.env</code> 파일에 <code>KOSIS_API_KEY=발급받은_인증키</code> 한 줄 추가 (GitHub 자동 갱신 원할 시 GitHub Secrets에도 동일 등록)</li>
+              <li><code>반도체재고순환_업데이트.bat</code> 또는 <code>python kosis_semicon.py</code> 실행 → 자동 수집 및 웹 반영 완료!</li>
+            </ol>
+            <p style="margin:8px 0 0; font-size:12px; color:#475569;">※ API 키 없이 KOSIS 웹에서 직접 내려받은 엑셀/CSV를 쓰려면: <code>python kosis_semicon.py --import 파일.xlsx</code></p>
+          </div>
+        `;
+      }}
+
+      // KPI 4종 카드
+      const cycDelta = (latestK && prevK && latestK.cycle !== null && prevK.cycle !== null)
+        ? (latestK.cycle - prevK.cycle) : null;
+      const kpiHtml = `
+        <div class="semi-kpi-grid">
+          <div class="semi-kpi-card">
+            <div class="semi-kpi-label">
+              <span>🔄 재고순환지표 (출하YoY − 재고YoY)</span>
+              ${{latestK && latestK.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(latestK.phase)}}">${{escapeHtml(latestK.phase)}}</span>` : ''}}
+            </div>
+            <div class="semi-kpi-val ${{latestK ? (latestK.cycle >= 0 ? 'up' : 'down') : ''}}">${{latestK ? _semiFmtSigned(latestK.cycle, '%p') : '연동 대기'}}</div>
+            <div class="semi-kpi-sub">${{latestK ? `${{latestK.ym}} 기준${{cycDelta !== null ? ` · 전월비 ${{cycDelta >= 0 ? '▲' : '▼'}}${{Math.abs(cycDelta).toFixed(1)}}%p` : ''}}` : 'KOSIS 키 등록 시 자동 산출'}}</div>
+          </div>
+          <div class="semi-kpi-card">
+            <div class="semi-kpi-label"><span>📦 반도체 출하증가율 (YoY)</span></div>
+            <div class="semi-kpi-val ${{latestK && latestK.shipYoY !== null ? (latestK.shipYoY >= 0 ? 'up' : 'down') : ''}}">${{latestK ? _semiFmtSigned(latestK.shipYoY, '%') : '-'}}</div>
+            <div class="semi-kpi-sub">${{latestK && latestK.shipIdx !== null ? `출하지수(2020=100): ${{latestK.shipIdx.toFixed(1)}}` : '광업제조업동향조사 원지수'}}</div>
+          </div>
+          <div class="semi-kpi-card">
+            <div class="semi-kpi-label"><span>🏭 반도체 재고증가율 (YoY)</span></div>
+            <div class="semi-kpi-val ${{latestK && latestK.invYoY !== null ? (latestK.invYoY >= 0 ? 'down' : 'up') : ''}}">${{latestK ? _semiFmtSigned(latestK.invYoY, '%') : '-'}}</div>
+            <div class="semi-kpi-sub">${{latestK && latestK.invIdx !== null ? `재고지수: ${{latestK.invIdx.toFixed(1)}} · 재고율 ${{latestK.invRatio !== null ? latestK.invRatio.toFixed(1) + '%' : '-'}}` : '재고 감소(−)는 업황 개선 신호'}}</div>
+          </div>
+          <div class="semi-kpi-card">
+            <div class="semi-kpi-label"><span>💹 삼전 · SK하이닉스 월말 종가</span><span>${{latestP ? latestP.ym : ''}}</span></div>
+            <div style="display:flex; flex-direction:column; gap:2px; margin-top:2px;">
+              <div style="font-size:13px; font-weight:800; color:#1d4ed8;">
+                <a href="https://finance.naver.com/item/main.naver?code=005930" target="_blank" data-live-code="005930" style="color:#1d4ed8; text-decoration:none;">삼성전자</a>:
+                ${{latestP && latestP.samsung ? latestP.samsung.toLocaleString('ko-KR') + '원' : '-'}}
+              </div>
+              <div style="font-size:13px; font-weight:800; color:#7c3aed;">
+                <a href="https://finance.naver.com/item/main.naver?code=000660" target="_blank" data-live-code="000660" style="color:#7c3aed; text-decoration:none;">SK하이닉스</a>:
+                ${{latestP && latestP.hynix ? latestP.hynix.toLocaleString('ko-KR') + '원' : '-'}}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const ovLegend = currentSemiconOverlay === 'SAMSUNG'
+        ? `<span><span class="semi-leg-dot" style="background:#2563eb;"></span>삼성전자 (우축, 원)</span>`
+        : currentSemiconOverlay === 'HYNIX'
+        ? `<span><span class="semi-leg-dot" style="background:#7c3aed;"></span>SK하이닉스 (우축, 원)</span>`
+        : currentSemiconOverlay === 'BOTH'
+        ? `<span><span class="semi-leg-dot" style="background:#2563eb;"></span>삼성전자 (시작=100)</span><span><span class="semi-leg-dot" style="background:#7c3aed;"></span>SK하이닉스 (시작=100)</span>`
+        : '';
+
+      const heroTitle = hasKosis
+        ? '📈 반도체 재고순환지표 (출하YoY − 재고YoY) vs 주가 추이'
+        : '📈 삼성전자 · SK하이닉스 월봉 주가 추이 (통계청 재고순환 오버레이 대기)';
+
+      const heroCard = `
+        <div class="semi-chart-card">
+          <div class="semi-chart-head">
+            <div class="semi-chart-title">${{heroTitle}}</div>
+            <div class="semi-legend">
+              ${{hasKosis ? `<span><span class="semi-leg-dot" style="background:#0f766e;"></span>재고순환지표 (좌축, %p)</span>` : ''}}
+              ${{ovLegend}}
+              <span style="color:#94a3b8; font-weight:600;">· 그래프에 마우스를 올리면 월별 상세 수치 표시</span>
+            </div>
+          </div>
+          <div class="semi-svg-wrap" id="semiHeroChartBox"></div>
+        </div>
+      `;
+
+      const splitCards = hasKosis ? `
+        <div class="semi-split-grid">
+          <div class="semi-chart-card">
+            <div class="semi-chart-head">
+              <div class="semi-chart-title">📊 반도체 출하증가율 vs 재고증가율 (YoY, %)</div>
+              <div class="semi-legend">
+                <span><span class="semi-leg-dot" style="background:#dc2626;"></span>출하증가율(YoY)</span>
+                <span><span class="semi-leg-dot" style="background:#2563eb;"></span>재고증가율(YoY)</span>
+              </div>
+            </div>
+            <div class="semi-svg-wrap" id="semiShipInvChartBox"></div>
+          </div>
+          <div class="semi-chart-card">
+            <div class="semi-chart-head">
+              <div class="semi-chart-title">🧭 재고순환 시계 (최근 24개월 4국면 궤적)</div>
+              <div class="semi-legend">
+                <span>X: 재고YoY · Y: 출하YoY</span>
+              </div>
+            </div>
+            <div class="semi-svg-wrap" id="semiClockChartBox"></div>
+          </div>
+        </div>
+      ` : '';
+
+      const tblRows = [...activeRows].reverse().slice(0, 60).map(r => {{
+        const pBadge = r.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(r.phase)}}">${{escapeHtml(r.phase)}}</span>` : '-';
+        const cCls = (r.cycle !== null && r.cycle !== undefined) ? (r.cycle >= 0 ? 'pct-up' : 'pct-down') : '';
+        const sCls = (r.shipYoY !== null && r.shipYoY !== undefined) ? (r.shipYoY >= 0 ? 'pct-up' : 'pct-down') : '';
+        const iCls = (r.invYoY !== null && r.invYoY !== undefined) ? (r.invYoY >= 0 ? 'pct-down' : 'pct-up') : '';
+        return `<tr>
+          <td class="ctr" style="font-weight:800; color:#334155;">${{r.ym}}</td>
+          <td class="ctr">${{pBadge}}</td>
+          <td class="${{cCls}}" style="font-weight:800;">${{_semiFmtSigned(r.cycle, '%p')}}</td>
+          <td class="${{sCls}}">${{_semiFmtSigned(r.shipYoY, '%')}}</td>
+          <td class="${{iCls}}">${{_semiFmtSigned(r.invYoY, '%')}}</td>
+          <td>${{r.shipIdx !== null && r.shipIdx !== undefined ? r.shipIdx.toFixed(1) : '-'}}</td>
+          <td>${{r.invIdx !== null && r.invIdx !== undefined ? r.invIdx.toFixed(1) : '-'}}</td>
+          <td>${{r.invRatio !== null && r.invRatio !== undefined ? r.invRatio.toFixed(1) + '%' : '-'}}</td>
+          <td style="color:#1d4ed8;">${{r.samsung ? r.samsung.toLocaleString('ko-KR') : '-'}}</td>
+          <td style="color:#7c3aed;">${{r.hynix ? r.hynix.toLocaleString('ko-KR') : '-'}}</td>
+        </tr>`;
+      }}).join('');
+
+      const tableCard = `
+        <div class="semi-chart-card">
+          <div class="semi-chart-head">
+            <div class="semi-chart-title">📋 월별 반도체 출하·재고·재고순환 원본 데이터 (최근 ${{Math.min(activeRows.length, 60)}}개월)</div>
+            <div style="font-size:11px; color:#64748b; font-weight:600;">기준년 2020=100 · 재고순환지표 = 출하YoY − 재고YoY · 재고율 = 재고지수 ÷ 출하지수 × 100</div>
+          </div>
+          <div class="semi-tbl-wrap">
+            <table class="semi-tbl">
+              <thead>
+                <tr>
+                  <th class="ctr">년월</th>
+                  <th class="ctr">국면</th>
+                  <th>재고순환지표</th>
+                  <th>출하YoY</th>
+                  <th>재고YoY</th>
+                  <th>출하지수</th>
+                  <th>재고지수</th>
+                  <th>재고율</th>
+                  <th>삼성전자(원)</th>
+                  <th>SK하이닉스(원)</th>
+                </tr>
+              </thead>
+              <tbody>${{tblRows || '<tr><td colspan="10" class="ctr" style="padding:18px; color:#94a3b8;">표시할 데이터가 없습니다.</td></tr>'}}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      wrap.innerHTML = setupHtml + kpiHtml + heroCard + splitCards + tableCard;
+
+      if (activeRows.length >= 2) {{
+        drawSemiHeroChart(document.getElementById('semiHeroChartBox'), activeRows, hasKosis, currentSemiconOverlay);
+        if (hasKosis) {{
+          drawSemiShipInvChart(document.getElementById('semiShipInvChartBox'), activeRows);
+          drawSemiClockChart(document.getElementById('semiClockChartBox'), kosisRows.slice(-24));
+        }}
+      }}
+      bindLiveQuotes();
+    }}
+
+    function drawSemiHeroChart(container, rows, hasKosis, overlayMode) {{
+      if (!container || !rows.length) return;
+      const W = 960, H = 310;
+      const padL = 56, padR = 68, padT = 18, padB = 34;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const n = rows.length;
+      const xOf = (i) => padL + (n <= 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+
+      // 좌축: 재고순환지표 (없으면 삼성전자 기준)
+      const cycVals = rows.map(r => r.cycle).filter(v => v !== null && v !== undefined);
+      let lMin = hasKosis && cycVals.length ? Math.min(0, ...cycVals) : 0;
+      let lMax = hasKosis && cycVals.length ? Math.max(0, ...cycVals) : 100;
+      const lPad = Math.max(8, (lMax - lMin) * 0.12);
+      lMin -= lPad; lMax += lPad;
+      const yL = (v) => padT + (1 - (v - lMin) / (lMax - lMin)) * plotH;
+      const yZero = yL(0);
+
+      // 우축: 주가 오버레이
+      const effOv = (!hasKosis && overlayMode === 'NONE') ? 'BOTH' : overlayMode;
+      const firstSam = (rows.find(r => r.samsung) || {{}}).samsung || 1;
+      const firstHyn = (rows.find(r => r.hynix) || {{}}).hynix || 1;
+      let rSeries = [];
+      if (effOv === 'SAMSUNG') {{
+        rSeries = [{{ key: 'samsung', label: '삼성전자', color: '#2563eb', vals: rows.map(r => r.samsung || null), isIdx: false }}];
+      }} else if (effOv === 'HYNIX') {{
+        rSeries = [{{ key: 'hynix', label: 'SK하이닉스', color: '#7c3aed', vals: rows.map(r => r.hynix || null), isIdx: false }}];
+      }} else if (effOv === 'BOTH') {{
+        rSeries = [
+          {{ key: 'samsung', label: '삼성전자', color: '#2563eb', vals: rows.map(r => r.samsung ? (r.samsung / firstSam * 100) : null), isIdx: true }},
+          {{ key: 'hynix', label: 'SK하이닉스', color: '#7c3aed', vals: rows.map(r => r.hynix ? (r.hynix / firstHyn * 100) : null), isIdx: true }},
+        ];
+      }}
+      const allR = rSeries.flatMap(s => s.vals.filter(v => v !== null));
+      let rMin = allR.length ? Math.min(...allR) : 0;
+      let rMax = allR.length ? Math.max(...allR) : 100;
+      const rPad = Math.max(1, (rMax - rMin) * 0.1);
+      rMin = Math.max(0, rMin - rPad); rMax += rPad;
+      const yR = (v) => padT + (1 - (v - rMin) / (rMax - rMin)) * plotH;
+
+      // Grid & Labels
+      let gridHtml = '';
+      for (let g = 0; g <= 4; g++) {{
+        const frac = g / 4;
+        const y = padT + frac * plotH;
+        gridHtml += `<line x1="${{padL}}" y1="${{y.toFixed(1)}}" x2="${{W - padR}}" y2="${{y.toFixed(1)}}" stroke="#e2e8f0" stroke-width="1"/>`;
+        if (hasKosis) {{
+          const lv = lMax - frac * (lMax - lMin);
+          gridHtml += `<text x="${{padL - 8}}" y="${{(y + 4).toFixed(1)}}" text-anchor="end" font-size="10.5" fill="#475569" font-weight="600">${{lv.toFixed(0)}}%p</text>`;
+        }}
+        if (allR.length) {{
+          const rv = rMax - frac * (rMax - rMin);
+          const rLbl = rSeries[0].isIdx ? rv.toFixed(0) : (rv >= 10000 ? `${{(rv / 10000).toFixed(1)}}만` : Math.round(rv).toLocaleString('ko-KR'));
+          gridHtml += `<text x="${{W - padR + 8}}" y="${{(y + 4).toFixed(1)}}" text-anchor="start" font-size="10.5" fill="#64748b" font-weight="600">${{rLbl}}</text>`;
+        }}
+      }}
+      if (hasKosis) {{
+        gridHtml += `<line x1="${{padL}}" y1="${{yZero.toFixed(1)}}" x2="${{W - padR}}" y2="${{yZero.toFixed(1)}}" stroke="#64748b" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+      }}
+
+      // X-axis labels
+      const xStep = Math.max(1, Math.ceil(n / 10));
+      let xLblHtml = '';
+      for (let i = 0; i < n; i += xStep) {{
+        xLblHtml += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="#64748b" font-weight="600">${{rows[i].ym}}</text>`;
+      }}
+      if ((n - 1) % xStep !== 0) {{
+        xLblHtml += `<text x="${{xOf(n - 1).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="#0f172a" font-weight="700">${{rows[n - 1].ym}}</text>`;
+      }}
+
+      // Cycle path + shaded positive/negative areas
+      let cycleHtml = '';
+      if (hasKosis) {{
+        const pts = rows.map((r, i) => (r.cycle !== null && r.cycle !== undefined) ? [xOf(i), yL(r.cycle)] : null).filter(Boolean);
+        if (pts.length >= 2) {{
+          const lineD = pts.map((p, idx) => `${{idx === 0 ? 'M' : 'L'}}${{p[0].toFixed(1)}},${{p[1].toFixed(1)}}`).join(' ');
+          const areaD = `${{lineD}} L${{pts[pts.length - 1][0].toFixed(1)}},${{yZero.toFixed(1)}} L${{pts[0][0].toFixed(1)}},${{yZero.toFixed(1)}} Z`;
+          cycleHtml = `
+            <defs>
+              <clipPath id="semiPosClip"><rect x="${{padL}}" y="${{padT}}" width="${{plotW}}" height="${{Math.max(0, yZero - padT).toFixed(1)}}"/></clipPath>
+              <clipPath id="semiNegClip"><rect x="${{padL}}" y="${{yZero.toFixed(1)}}" width="${{plotW}}" height="${{Math.max(0, padT + plotH - yZero).toFixed(1)}}"/></clipPath>
+            </defs>
+            <path d="${{areaD}}" fill="rgba(16, 185, 129, 0.16)" clip-path="url(#semiPosClip)"/>
+            <path d="${{areaD}}" fill="rgba(37, 99, 235, 0.13)" clip-path="url(#semiNegClip)"/>
+            <path d="${{lineD}}" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round"/>
+          `;
+        }}
+      }}
+
+      // Stock overlay paths
+      let priceHtml = '';
+      rSeries.forEach(s => {{
+        let dStr = '';
+        let started = false;
+        s.vals.forEach((v, i) => {{
+          if (v === null || v === undefined) {{ started = false; return; }}
+          dStr += `${{started ? 'L' : 'M'}}${{xOf(i).toFixed(1)}},${{yR(v).toFixed(1)}} `;
+          started = true;
+        }});
+        if (dStr) {{
+          priceHtml += `<path d="${{dStr}}" fill="none" stroke="${{s.color}}" stroke-width="2.1" stroke-linejoin="round" opacity="0.9"/>`;
+        }}
+      }});
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${{W}} ${{H}}" preserveAspectRatio="xMidYMid meet">
+          ${{gridHtml}}
+          ${{cycleHtml}}
+          ${{priceHtml}}
+          ${{xLblHtml}}
+          <line id="semiHeroCross" x1="0" y1="${{padT}}" x2="0" y2="${{padT + plotH}}" stroke="#334155" stroke-width="1" stroke-dasharray="3 3" style="display:none;"/>
+          <circle id="semiHeroDotL" cx="0" cy="0" r="4.5" fill="#0f766e" stroke="#fff" stroke-width="2" style="display:none;"/>
+          <circle id="semiHeroDotR0" cx="0" cy="0" r="4" fill="#2563eb" stroke="#fff" stroke-width="1.8" style="display:none;"/>
+          <circle id="semiHeroDotR1" cx="0" cy="0" r="4" fill="#7c3aed" stroke="#fff" stroke-width="1.8" style="display:none;"/>
+          <rect id="semiHeroHit" x="${{padL}}" y="${{padT}}" width="${{plotW}}" height="${{plotH}}" fill="transparent" style="cursor:crosshair;"/>
+        </svg>
+      `;
+
+      const svg = container.querySelector('svg');
+      const hit = container.querySelector('#semiHeroHit');
+      const cross = container.querySelector('#semiHeroCross');
+      const dotL = container.querySelector('#semiHeroDotL');
+      const dotR0 = container.querySelector('#semiHeroDotR0');
+      const dotR1 = container.querySelector('#semiHeroDotR1');
+      const tipBox = document.getElementById('tooltipBox');
+
+      hit.onmousemove = (e) => {{
+        const rect = svg.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width * W;
+        let idx = Math.round((relX - padL) / plotW * (n - 1));
+        idx = Math.max(0, Math.min(n - 1, idx));
+        const r = rows[idx];
+        const cx = xOf(idx);
+        cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = '';
+        if (hasKosis && r.cycle !== null && r.cycle !== undefined) {{
+          dotL.setAttribute('cx', cx); dotL.setAttribute('cy', yL(r.cycle)); dotL.style.display = '';
+        }} else dotL.style.display = 'none';
+        [dotR0, dotR1].forEach((dot, si) => {{
+          if (rSeries[si] && rSeries[si].vals[idx] !== null) {{
+            dot.setAttribute('cx', cx); dot.setAttribute('cy', yR(rSeries[si].vals[idx]));
+            dot.setAttribute('fill', rSeries[si].color); dot.style.display = '';
+          }} else dot.style.display = 'none';
+        }});
+        const lines = [`[${{r.ym}}] ${{r.phase ? `국면: ${{r.phase}}` : '월별 데이터'}}`];
+        if (hasKosis) {{
+          lines.push(`• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}`);
+          lines.push(`• 출하 YoY: ${{_semiFmtSigned(r.shipYoY, '%')}} / 재고 YoY: ${{_semiFmtSigned(r.invYoY, '%')}}`);
+          if (r.invRatio !== null && r.invRatio !== undefined) lines.push(`• 재고율(재고/출하): ${{r.invRatio.toFixed(1)}}%`);
+        }}
+        if (r.samsung) lines.push(`• 삼성전자 종가: ${{r.samsung.toLocaleString('ko-KR')}}원`);
+        if (r.hynix) lines.push(`• SK하이닉스 종가: ${{r.hynix.toLocaleString('ko-KR')}}원`);
+        tipBox.textContent = lines.join('\\n');
+        tipBox.style.display = 'block';
+        positionTip(e);
+      }};
+      hit.onmouseleave = () => {{
+        cross.style.display = 'none'; dotL.style.display = 'none';
+        dotR0.style.display = 'none'; dotR1.style.display = 'none';
+        tipBox.style.display = 'none';
+      }};
+    }}
+
+    function drawSemiShipInvChart(container, rows) {{
+      if (!container || !rows.length) return;
+      const W = 540, H = 260;
+      const padL = 48, padR = 16, padT = 16, padB = 32;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const n = rows.length;
+      const xOf = (i) => padL + (n <= 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+      const vals = rows.flatMap(r => [r.shipYoY, r.invYoY]).filter(v => v !== null && v !== undefined);
+      let yMin = Math.min(0, ...vals), yMax = Math.max(0, ...vals);
+      const pad = Math.max(6, (yMax - yMin) * 0.12);
+      yMin -= pad; yMax += pad;
+      const yOf = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+      let grid = '';
+      for (let g = 0; g <= 4; g++) {{
+        const f = g / 4, y = padT + f * plotH, v = yMax - f * (yMax - yMin);
+        grid += `<line x1="${{padL}}" y1="${{y.toFixed(1)}}" x2="${{W - padR}}" y2="${{y.toFixed(1)}}" stroke="#e2e8f0" stroke-width="1"/>`;
+        grid += `<text x="${{padL - 6}}" y="${{(y + 3.5).toFixed(1)}}" text-anchor="end" font-size="10" fill="#64748b" font-weight="600">${{v.toFixed(0)}}%</text>`;
+      }}
+      grid += `<line x1="${{padL}}" y1="${{yOf(0).toFixed(1)}}" x2="${{W - padR}}" y2="${{yOf(0).toFixed(1)}}" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+
+      const mkPath = (field) => {{
+        let d = '', st = false;
+        rows.forEach((r, i) => {{
+          const v = r[field];
+          if (v === null || v === undefined) {{ st = false; return; }}
+          d += `${{st ? 'L' : 'M'}}${{xOf(i).toFixed(1)}},${{yOf(v).toFixed(1)}} `;
+          st = true;
+        }});
+        return d;
+      }};
+      const xStep = Math.max(1, Math.ceil(n / 6));
+      let xLbl = '';
+      for (let i = 0; i < n; i += xStep) {{
+        xLbl += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 9}}" text-anchor="middle" font-size="10" fill="#64748b" font-weight="600">${{rows[i].ym}}</text>`;
+      }}
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${{W}} ${{H}}" preserveAspectRatio="xMidYMid meet">
+          ${{grid}}
+          <path d="${{mkPath('shipYoY')}}" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="${{mkPath('invYoY')}}" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round"/>
+          ${{xLbl}}
+          <line id="siCross" x1="0" y1="${{padT}}" x2="0" y2="${{padT + plotH}}" stroke="#334155" stroke-width="1" stroke-dasharray="3 3" style="display:none;"/>
+          <circle id="siDotS" cx="0" cy="0" r="4" fill="#dc2626" stroke="#fff" stroke-width="1.8" style="display:none;"/>
+          <circle id="siDotI" cx="0" cy="0" r="4" fill="#2563eb" stroke="#fff" stroke-width="1.8" style="display:none;"/>
+          <rect id="siHit" x="${{padL}}" y="${{padT}}" width="${{plotW}}" height="${{plotH}}" fill="transparent" style="cursor:crosshair;"/>
+        </svg>
+      `;
+      const svg = container.querySelector('svg');
+      const hit = container.querySelector('#siHit');
+      const cross = container.querySelector('#siCross');
+      const dotS = container.querySelector('#siDotS');
+      const dotI = container.querySelector('#siDotI');
+      const tipBox = document.getElementById('tooltipBox');
+      hit.onmousemove = (e) => {{
+        const rect = svg.getBoundingClientRect();
+        let idx = Math.round(((e.clientX - rect.left) / rect.width * W - padL) / plotW * (n - 1));
+        idx = Math.max(0, Math.min(n - 1, idx));
+        const r = rows[idx], cx = xOf(idx);
+        cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = '';
+        if (r.shipYoY !== null) {{ dotS.setAttribute('cx', cx); dotS.setAttribute('cy', yOf(r.shipYoY)); dotS.style.display = ''; }} else dotS.style.display = 'none';
+        if (r.invYoY !== null) {{ dotI.setAttribute('cx', cx); dotI.setAttribute('cy', yOf(r.invYoY)); dotI.style.display = ''; }} else dotI.style.display = 'none';
+        tipBox.textContent = `[${{r.ym}}] ${{r.phase || ''}}\\n• 출하증가율(YoY): ${{_semiFmtSigned(r.shipYoY, '%')}}\\n• 재고증가율(YoY): ${{_semiFmtSigned(r.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}`;
+        tipBox.style.display = 'block';
+        positionTip(e);
+      }};
+      hit.onmouseleave = () => {{
+        cross.style.display = 'none'; dotS.style.display = 'none'; dotI.style.display = 'none'; tipBox.style.display = 'none';
+      }};
+    }}
+
+    function drawSemiClockChart(container, rows) {{
+      if (!container || !rows.length) return;
+      const pts = rows.filter(r => r.shipYoY !== null && r.invYoY !== null);
+      if (!pts.length) return;
+      const W = 420, H = 260;
+      const padL = 44, padR = 18, padT = 16, padB = 30;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const xs = pts.map(p => p.invYoY), ys = pts.map(p => p.shipYoY);
+      const maxAbsX = Math.max(20, ...xs.map(Math.abs)) * 1.15;
+      const maxAbsY = Math.max(20, ...ys.map(Math.abs)) * 1.15;
+      const xOf = (v) => padL + ((v + maxAbsX) / (2 * maxAbsX)) * plotW;
+      const yOf = (v) => padT + (1 - (v + maxAbsY) / (2 * maxAbsY)) * plotH;
+      const x0 = xOf(0), y0 = yOf(0);
+
+      const polyD = pts.map((p, i) => `${{i === 0 ? 'M' : 'L'}}${{xOf(p.invYoY).toFixed(1)}},${{yOf(p.shipYoY).toFixed(1)}}`).join(' ');
+      const dotsHtml = pts.map((p, i) => {{
+        const isLast = (i === pts.length - 1);
+        const cx = xOf(p.invYoY), cy = yOf(p.shipYoY);
+        const op = (0.3 + 0.7 * (i / Math.max(1, pts.length - 1))).toFixed(2);
+        const r = isLast ? 6 : (i >= pts.length - 6 ? 4 : 3);
+        const col = isLast ? '#dc2626' : '#0f766e';
+        const tip = `[${{p.ym}}] ${{p.phase || ''}}\\n• 출하YoY: ${{_semiFmtSigned(p.shipYoY, '%')}}\\n• 재고YoY: ${{_semiFmtSigned(p.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(p.cycle, '%p')}}`;
+        const halo = isLast ? `<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="10.5" fill="rgba(220,38,38,0.18)"/>` : '';
+        const lbl = (isLast || i === 0 || i % 6 === 0)
+          ? `<text x="${{(cx + 7).toFixed(1)}}" y="${{(cy - 5).toFixed(1)}}" font-size="${{isLast ? '10.5' : '9'}}" font-weight="${{isLast ? '800' : '600'}}" fill="${{isLast ? '#b91c1c' : '#475569'}}">${{p.ym.slice(2)}}</text>`
+          : '';
+        return `${{halo}}<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="${{r}}" fill="${{col}}" fill-opacity="${{op}}" stroke="#fff" stroke-width="1.2" data-tip="${{escapeHtml(tip)}}" style="cursor:pointer;"/>${{lbl}}`;
+      }}).join('');
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${{W}} ${{H}}" preserveAspectRatio="xMidYMid meet">
+          <rect x="${{padL}}" y="${{padT}}" width="${{(x0 - padL).toFixed(1)}}" height="${{(y0 - padT).toFixed(1)}}" fill="rgba(22,163,74,0.06)"/>
+          <rect x="${{x0.toFixed(1)}}" y="${{padT}}" width="${{(W - padR - x0).toFixed(1)}}" height="${{(y0 - padT).toFixed(1)}}" fill="rgba(239,68,68,0.05)"/>
+          <rect x="${{x0.toFixed(1)}}" y="${{y0.toFixed(1)}}" width="${{(W - padR - x0).toFixed(1)}}" height="${{(padT + plotH - y0).toFixed(1)}}" fill="rgba(249,115,22,0.06)"/>
+          <rect x="${{padL}}" y="${{y0.toFixed(1)}}" width="${{(x0 - padL).toFixed(1)}}" height="${{(padT + plotH - y0).toFixed(1)}}" fill="rgba(37,99,235,0.06)"/>
+          <line x1="${{padL}}" y1="${{y0.toFixed(1)}}" x2="${{W - padR}}" y2="${{y0.toFixed(1)}}" stroke="#94a3b8" stroke-width="1.2"/>
+          <line x1="${{x0.toFixed(1)}}" y1="${{padT}}" x2="${{x0.toFixed(1)}}" y2="${{padT + plotH}}" stroke="#94a3b8" stroke-width="1.2"/>
+          <line x1="${{padL}}" y1="${{padT + plotH}}" x2="${{W - padR}}" y2="${{padT}}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="${{padL + 6}}" y="${{padT + 13}}" font-size="9.5" font-weight="800" fill="#15803d">① 회복기 (출하↑ 재고↓)</text>
+          <text x="${{W - padR - 6}}" y="${{padT + 13}}" text-anchor="end" font-size="9.5" font-weight="800" fill="#b91c1c">② 확장기 (출하↑ 재고↑)</text>
+          <text x="${{W - padR - 6}}" y="${{padT + plotH - 6}}" text-anchor="end" font-size="9.5" font-weight="800" fill="#c2410c">③ 둔화·후퇴 (출하↓ 재고↑)</text>
+          <text x="${{padL + 6}}" y="${{padT + plotH - 6}}" font-size="9.5" font-weight="800" fill="#1d4ed8">④ 수축기 (출하↓ 재고↓)</text>
+          <path d="${{polyD}}" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-opacity="0.65" stroke-linejoin="round"/>
+          ${{dotsHtml}}
+          <text x="${{(padL + plotW / 2).toFixed(1)}}" y="${{H - 7}}" text-anchor="middle" font-size="10" fill="#475569" font-weight="700">← 재고 감소 | 재고증가율 (YoY, %) | 재고 증가 →</text>
+        </svg>
+      `;
+      bindTooltips();
     }}
 
     let currentFlowMode = 'DAILY';
@@ -7528,11 +8283,13 @@ def auto_push_to_github(here, commit_msg=None):
         upload_targets = [
             "kospi200_yoy.py",
             "kiwoom_flow.py",
+            "kosis_semicon.py",
             "index.html",
             "hankyung_reports.json",
             "op_estimate_history.json",
             "op_baseline.json",
             "investor_flow.json",
+            "semicon_cycle.json",
             "favicon.svg",
             "favicon.png",
             "favicon.ico",
