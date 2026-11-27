@@ -2629,6 +2629,74 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
         except Exception as e_nv:
             print(f"  [경고] 네이버 리포트 병합 중 오류(한경 데이터는 정상 유지): {e_nv}")
 
+        # 최근 3개월(90일) 종목별 리포트 발간 횟수 집계 (네이버 90일 전체 + 한경 저장분 통합 중복제거)
+        report_counts_3m = dict(old_data.get("reportCounts3m") or {}) if "old_data" in locals() and isinstance(old_data, dict) else {}
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            cutoff_90d = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+            target_codes_3m = {
+                str(r.get("stock_code") or "").strip().zfill(6)
+                for lst in by_date.values() if isinstance(lst, list)
+                for r in lst if r.get("stock_code")
+            }
+            seen_3m_keys = {}  # code -> set of (date, norm_broker)
+            # 1) 저장된 한경/네이버 리포트 중 최근 90일 반영
+            for dt_k, lst in by_date.items():
+                if not isinstance(lst, list):
+                    continue
+                for r in lst:
+                    orig_d = str(r.get("orig_date") or r.get("date") or dt_k)
+                    if orig_d < cutoff_90d:
+                        continue
+                    cd = str(r.get("stock_code") or "").strip().zfill(6)
+                    if cd in target_codes_3m:
+                        seen_3m_keys.setdefault(cd, set()).add((orig_d, _norm_broker(r.get("broker"))))
+
+            # 2) 네이버 리서치 최근 90일 전체 페이지 병렬 스캔 (약 2~3초)
+            def _fetch_nv_page_3m(pg_num):
+                try:
+                    rr = requests.get(
+                        f"https://m.stock.naver.com/api/research/company?page={pg_num}&pageSize=100",
+                        headers=hdr,
+                        timeout=12,
+                    )
+                    if rr.status_code == 200:
+                        arr_p = rr.json()
+                        return arr_p if isinstance(arr_p, list) else []
+                except Exception:
+                    pass
+                return []
+
+            reached_cutoff = False
+            with ThreadPoolExecutor(max_workers=8) as ex:
+                for base_pg in range(1, 65, 8):
+                    batch = list(range(base_pg, min(base_pg + 8, 65)))
+                    results = list(ex.map(_fetch_nv_page_3m, batch))
+                    for arr_p in results:
+                        if not arr_p:
+                            reached_cutoff = True
+                            continue
+                        for item in arr_p:
+                            wdt = str(item.get("writeDate") or "").strip()
+                            if not wdt or len(wdt) < 10:
+                                continue
+                            if wdt < cutoff_90d:
+                                reached_cutoff = True
+                                continue
+                            cd = str(item.get("itemCode") or "").strip().zfill(6)
+                            if cd in target_codes_3m:
+                                seen_3m_keys.setdefault(cd, set()).add((wdt, _norm_broker(item.get("brokerName"))))
+                    if reached_cutoff:
+                        break
+
+            for cd in target_codes_3m:
+                cnt_val = len(seen_3m_keys.get(cd) or ())
+                if cnt_val > 0:
+                    report_counts_3m[cd] = cnt_val
+            print(f"  - [3개월 발간통계] {len(target_codes_3m)}종목 최근 90일 리포트 발간 횟수 집계 완료")
+        except Exception as e_3m:
+            print(f"  [경고] 최근 3개월 발간 횟수 집계 중 오류(기존값 유지): {e_3m}")
+
         # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리)
         cutoff_str = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
         pruned_by_date = {
@@ -2638,6 +2706,11 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
         sorted_dates = sorted(pruned_by_date.keys(), reverse=True)
         latest_date = sorted_dates[0] if sorted_dates else today_str
         latest_reports = pruned_by_date.get(latest_date, [])
+        active_codes_60d = {
+            str(r.get("stock_code") or "").strip().zfill(6)
+            for lst in pruned_by_date.values() for r in lst if r.get("stock_code")
+        }
+        pruned_counts_3m = {cd: report_counts_3m[cd] for cd in sorted(active_codes_60d) if cd in report_counts_3m}
 
         payload = {
             "date": latest_date,
@@ -2647,6 +2720,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             "dates": sorted_dates,
             "byDate": pruned_by_date,
             "reports": latest_reports,
+            "reportCounts3m": pruned_counts_3m,
         }
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -3681,6 +3755,82 @@ def build_web_dashboard(here):
       border-color: #bfdbfe;
     }}
     .rep-btn.scr:hover {{ background: #dbeafe; }}
+    .rep-sheet-card {{
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.05);
+    }}
+    .rep-sheet-head {{
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+      border-bottom: 1px solid #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }}
+    .rep-sheet-title {{
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .rep-sheet-wrap {{
+      overflow-x: auto;
+    }}
+    .rep-sheet-tbl {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.2px;
+    }}
+    .rep-sheet-tbl th {{
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 800;
+      font-size: 11.5px;
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }}
+    .rep-sheet-tbl th.num, .rep-sheet-tbl td.num {{ text-align: right; }}
+    .rep-sheet-tbl th.ctr, .rep-sheet-tbl td.ctr {{ text-align: center; }}
+    .rep-sheet-tbl td {{
+      padding: 7px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+      vertical-align: middle;
+    }}
+    .rep-sheet-tbl tbody tr:hover td {{ background: #f8fafc; }}
+    .rep-sheet-tbl tbody tr.row-up td {{ background: #fff7f8; }}
+    .rep-sheet-tbl tbody tr.row-up:hover td {{ background: #ffeef0; }}
+    .rep-sheet-link {{
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+    }}
+    .rep-sheet-link:hover {{ color: #2563eb; text-decoration: underline; }}
+    .rep-tp-up {{ color: #dc2626; font-weight: 800; white-space: nowrap; }}
+    .rep-tp-down {{ color: #2563eb; font-weight: 800; white-space: nowrap; }}
+    .rep-tp-new {{ color: #6d28d9; font-weight: 800; white-space: nowrap; }}
+    .rep-tp-old {{ color: #94a3b8; font-weight: 600; text-decoration: line-through; margin-right: 3px; font-size: 11.5px; }}
+    .rep-3m-badge {{
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+    .rep-3m-badge.hi {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }}
+    .rep-3m-badge.mid {{ background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }}
+    .rep-3m-badge.low {{ background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }}
     .flow-view {{
       display: none;
       flex: 1;
@@ -4351,6 +4501,7 @@ def build_web_dashboard(here):
           </select>
           <select id="repSortSelect" class="select-box" style="font-weight:700; color:#1e293b;" onchange="renderReportsGrid()">
             <option value="priority" selected>정렬: 목표가상향율순 → 예상이익상향 → 괴리율순</option>
+            <option value="cnt3m">정렬: 최근 3개월 발간 많은순</option>
             <option value="gap">정렬: 괴리율 높은순</option>
             <option value="estUp">정렬: 예상이익 상향 우선</option>
             <option value="latest">정렬: 원문 등록순</option>
@@ -4358,12 +4509,17 @@ def build_web_dashboard(here):
           <span id="repCountLabel" style="font-weight:700; color:#475569;"></span>
         </div>
         <div class="group-right">
-          <span style="font-size:11px; color:#64748b; font-weight:600;">🗓️ 최대 60일 보관</span>
+          <div class="flow-mode-group">
+            <button class="flow-mode-btn active" id="btnRepViewBoth" onclick="setReportViewMode('BOTH')">📋 장표+카드</button>
+            <button class="flow-mode-btn" id="btnRepViewSheet" onclick="setReportViewMode('SHEET')">📋 장표만</button>
+            <button class="flow-mode-btn" id="btnRepViewCards" onclick="setReportViewMode('CARDS')">🗂️ 카드만</button>
+          </div>
           <a class="rep-btn" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">🌐 한경 원문</a>
           <a class="rep-btn" href="https://stock.naver.com/research/company" target="_blank">💚 네이버 리서치</a>
         </div>
       </div>
       <div class="reports-grid-wrap" id="reportsGridWrap">
+        <div id="reportsSummarySheet"></div>
         <div class="reports-grid" id="reportsGrid"></div>
       </div>
     </div>
@@ -5768,7 +5924,7 @@ def build_web_dashboard(here):
       renderSidebar();
       renderReportsGrid();
       if (focusCode) {{
-        const targetEl = document.getElementById('rep-card-' + focusCode);
+        const targetEl = document.querySelector(`[data-stock-code="${{focusCode}}"]`);
         if (targetEl) targetEl.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
       }}
     }}
@@ -5810,6 +5966,39 @@ def build_web_dashboard(here):
       }};
     }}
 
+    let currentReportViewMode = 'BOTH'; // 'BOTH' | 'SHEET' | 'CARDS'
+    const REPORT_COUNTS_3M = (REPORTS_DATA && REPORTS_DATA.reportCounts3m) ? REPORTS_DATA.reportCounts3m : {{}};
+
+    function getReportCount3m(code) {{
+      const cd = String(code || '').trim();
+      if (!cd) return 0;
+      if (REPORT_COUNTS_3M[cd] !== undefined && REPORT_COUNTS_3M[cd] !== null) return Number(REPORT_COUNTS_3M[cd]) || 0;
+      return (REPORTS_BY_CODE[cd] || []).length;
+    }}
+
+    function setReportViewMode(mode) {{
+      currentReportViewMode = mode || 'BOTH';
+      const b1 = document.getElementById('btnRepViewBoth');
+      const b2 = document.getElementById('btnRepViewSheet');
+      const b3 = document.getElementById('btnRepViewCards');
+      if (b1) b1.classList.toggle('active', currentReportViewMode === 'BOTH');
+      if (b2) b2.classList.toggle('active', currentReportViewMode === 'SHEET');
+      if (b3) b3.classList.toggle('active', currentReportViewMode === 'CARDS');
+      renderReportsGrid();
+    }}
+
+    function scrollToReportCard(cardId) {{
+      if (currentReportViewMode === 'SHEET') {{
+        setReportViewMode('BOTH');
+      }}
+      const el = document.getElementById(cardId);
+      if (el) {{
+        el.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+        el.classList.add('highlight');
+        setTimeout(() => el.classList.remove('highlight'), 2200);
+      }}
+    }}
+
     function renderReportsGrid() {{
       const q = document.getElementById('repSearchInput').value.trim().toLowerCase();
       const brokerF = document.getElementById('repBrokerSelect').value;
@@ -5818,7 +6007,7 @@ def build_web_dashboard(here):
       const isGlobalSearch = q.length > 0 && currentReportDate !== 'ALL';
       const reps = isGlobalSearch ? getAllStoredReportsList() : getActiveReportsList();
 
-      let items = reps.map((r, origIdx) => ({{ r, origIdx, meta: computeReportRankMeta(r) }})).filter(({{ r }}) => {{
+      let items = reps.map((r, origIdx) => ({{ r, origIdx, meta: computeReportRankMeta(r), cnt3m: getReportCount3m(r.stock_code) }})).filter(({{ r }}) => {{
         if (brokerF && r.broker !== brokerF) return false;
         if (chgF && r.target_change !== chgF) return false;
         if (q) {{
@@ -5847,6 +6036,11 @@ def build_web_dashboard(here):
           if (dd !== 0) return dd;
           return a.origIdx - b.origIdx;
         }});
+      }} else if (sortMode === 'cnt3m') {{
+        items.sort((a, b) => {{
+          if (b.cnt3m !== a.cnt3m) return b.cnt3m - a.cnt3m;
+          return gapVal(b.meta) - gapVal(a.meta);
+        }});
       }} else if (sortMode === 'gap') {{
         items.sort((a, b) => {{
           const dg = gapVal(b.meta) - gapVal(a.meta);
@@ -5866,13 +6060,127 @@ def build_web_dashboard(here):
       }} else {{
         countEl.textContent = `표시: ${{items.length}} / ${{reps.length}}건`;
       }}
+      const sheetBox = document.getElementById('reportsSummarySheet');
       const grid = document.getElementById('reportsGrid');
       if (!items.length) {{
+        if (sheetBox) sheetBox.innerHTML = '';
+        grid.style.display = 'grid';
         grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#64748b; background:#fff; border-radius:10px; border:1px solid #e2e8f0;">조건에 맞는 기업 리포트가 없습니다.</div>`;
         return;
       }}
 
-      grid.innerHTML = items.map(({{ r, meta }}) => {{
+      // 1장의 장표 (한눈에 보기 요약 테이블)
+      if (sheetBox) {{
+        if (currentReportViewMode === 'CARDS') {{
+          sheetBox.innerHTML = '';
+        }} else {{
+          const upN = items.filter(x => x.r.target_change === '상향').length;
+          const newN = items.filter(x => x.r.target_change === '신규').length;
+          const dnN = items.filter(x => x.r.target_change === '하향').length;
+          const dateTag = isGlobalSearch
+            ? `전체 검색 결과`
+            : (currentReportDate === 'ALL' ? `최근 ${{REPORT_DATES.length}}일 전체` : `${{currentReportDate || REPORTS_DATA.date || '-'}} 발간`);
+          const sheetRows = items.map(({{ r, meta, cnt3m }}, idx) => {{
+            const {{ info, tpNum, hasTp, gap }} = meta;
+            const chg = r.target_change || '유지';
+            const tpPct = meta.tpChgPct;
+            const prevTp = (r.prev_target_price && !isNaN(Number(r.prev_target_price))) ? Math.round(Number(r.prev_target_price)) : null;
+            const curTp = hasTp ? Math.round(tpNum) : null;
+            let tpHtml = '<span style="color:#94a3b8;">미제시</span>';
+            if (chg === '상향') {{
+              const pctStr = tpPct !== null ? ` (+${{Math.abs(tpPct).toFixed(1)}}%)` : '';
+              if (prevTp && curTp) {{
+                tpHtml = `<span class="rep-tp-old">${{prevTp.toLocaleString('ko-KR')}}</span><span class="rep-tp-up">→ ${{curTp.toLocaleString('ko-KR')}}원${{pctStr}}</span>`;
+              }} else if (curTp) {{
+                tpHtml = `<span class="rep-tp-up">▲ ${{curTp.toLocaleString('ko-KR')}}원${{pctStr || ' (상향)'}}</span>`;
+              }} else {{
+                tpHtml = `<span class="rep-tp-up">▲ 목표가 상향</span>`;
+              }}
+            }} else if (chg === '하향') {{
+              const pctStr = tpPct !== null ? ` (-${{Math.abs(tpPct).toFixed(1)}}%)` : '';
+              if (prevTp && curTp) {{
+                tpHtml = `<span class="rep-tp-old">${{prevTp.toLocaleString('ko-KR')}}</span><span class="rep-tp-down">→ ${{curTp.toLocaleString('ko-KR')}}원${{pctStr}}</span>`;
+              }} else if (curTp) {{
+                tpHtml = `<span class="rep-tp-down">▼ ${{curTp.toLocaleString('ko-KR')}}원${{pctStr || ' (하향)'}}</span>`;
+              }} else {{
+                tpHtml = `<span class="rep-tp-down">▼ 목표가 하향</span>`;
+              }}
+            }} else if (chg === '신규') {{
+              tpHtml = curTp ? `<span class="rep-tp-new">★ ${{curTp.toLocaleString('ko-KR')}}원 (신규)</span>` : `<span class="rep-tp-new">★ 신규편입</span>`;
+            }} else if (curTp) {{
+              tpHtml = `<span style="font-weight:700; color:#334155;">${{curTp.toLocaleString('ko-KR')}}원</span> <span style="font-size:10.5px; color:#94a3b8;">(${{escapeHtml(chg)}})</span>`;
+            }}
+            const gapHtml = (gap !== null && !isNaN(gap))
+              ? `<span class="${{gap >= 0 ? 'pct-up' : 'pct-down'}}" style="font-weight:800;">${{gap >= 0 ? '+' : ''}}${{gap.toFixed(1)}}%</span>`
+              : '<span style="color:#cbd5e1;">-</span>';
+            const c3Cls = cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low');
+            const c3Txt = cnt3m > 0 ? `${{cnt3m >= 10 ? '🔥 ' : ''}}${{cnt3m}}회` : '-';
+            const cardDomId = `rep-card-item-${{idx}}`;
+            const miniTags = [];
+            if (info && info.passed) miniTags.push('<span style="color:#15803d; font-weight:800; font-size:10.5px;">★</span>');
+            if (info && info.hasEstUp) miniTags.push('<span style="color:#dc2626; font-weight:800; font-size:10px;">▲</span>');
+            if (r.after18) miniTags.push('<span style="background:#ede9fe; color:#6d28d9; font-size:9.5px; font-weight:700; padding:0 4px; border-radius:3px; margin-left:3px;">18시↑</span>');
+            const srcTag = r.source === '네이버'
+              ? '<span style="background:#dcfce7; color:#15803d; font-size:9.5px; font-weight:800; padding:0 4px; border-radius:3px; margin-left:4px;">N</span>'
+              : '<span style="background:#fef3c7; color:#92400e; font-size:9.5px; font-weight:800; padding:0 4px; border-radius:3px; margin-left:4px;">한</span>';
+            const pdfMini = r.pdf_url ? ` <a href="${{r.pdf_url}}" target="_blank" style="font-size:10.5px; color:#b91c1c; font-weight:700; text-decoration:none; margin-left:4px;" title="원문 PDF 열기">[PDF]</a>` : '';
+            return `<tr class="${{chg === '상향' ? 'row-up' : ''}}">
+              <td class="ctr" style="color:#94a3b8; font-weight:700; width:34px;">${{idx + 1}}</td>
+              <td style="white-space:nowrap;">
+                <span class="rep-sheet-link" onclick="scrollToReportCard('${{cardDomId}}')" title="클릭하면 아래 상세 요약 카드로 이동">${{escapeHtml(r.stock_name || '-')}}</span>
+                ${{miniTags.join('')}}
+                <span style="font-size:10.5px; color:#94a3b8; margin-left:2px;">${{escapeHtml(r.stock_code || '')}}</span>
+              </td>
+              <td>
+                <span class="rep-sheet-link" style="font-weight:600;" onclick="scrollToReportCard('${{cardDomId}}')">${{escapeHtml(r.title || '-')}}</span>${{pdfMini}}
+              </td>
+              <td style="white-space:nowrap; color:#334155; font-weight:600;">${{escapeHtml(r.broker || '-')}}${{srcTag}}</td>
+              <td class="num">${{tpHtml}}</td>
+              <td class="num">${{gapHtml}}</td>
+              <td class="ctr"><span class="rep-3m-badge ${{c3Cls}}" title="최근 3개월(90일) 동안 해당 종목에 발간된 증권사 리포트 수">${{c3Txt}}</span></td>
+            </tr>`;
+          }}).join('');
+          sheetBox.innerHTML = `
+            <div class="rep-sheet-card">
+              <div class="rep-sheet-head">
+                <div class="rep-sheet-title">📋 오늘의 리포트 한눈에 보기 (장표 · ${{dateTag}} · 총 ${{items.length}}건)</div>
+                <div style="display:flex; gap:8px; font-size:11.5px; font-weight:700; color:#475569;">
+                  <span style="color:#dc2626;">▲ 목표가 상향 ${{upN}}건</span>
+                  <span style="color:#6d28d9;">★ 신규 ${{newN}}건</span>
+                  <span style="color:#2563eb;">▼ 하향 ${{dnN}}건</span>
+                  <span style="color:#64748b;">· 행 클릭 시 아래 상세 요약으로 이동</span>
+                </div>
+              </div>
+              <div class="rep-sheet-wrap">
+                <table class="rep-sheet-tbl">
+                  <thead>
+                    <tr>
+                      <th class="ctr">#</th>
+                      <th>종목명</th>
+                      <th>리포트 제목</th>
+                      <th>증권사</th>
+                      <th class="num">목표가 변동 (이전 → 변경)</th>
+                      <th class="num">괴리율</th>
+                      <th class="ctr">최근 3개월 발간</th>
+                    </tr>
+                  </thead>
+                  <tbody>${{sheetRows}}</tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }}
+      }}
+
+      if (currentReportViewMode === 'SHEET') {{
+        grid.style.display = 'none';
+        grid.innerHTML = '';
+        bindTooltips();
+        return;
+      }}
+      grid.style.display = 'grid';
+
+      grid.innerHTML = items.map(({{ r, meta, cnt3m }}, idx) => {{
         const {{ info, tpNum, hasTp, curPrice, gap }} = meta;
         let upsideHtml = '';
         if (gap !== null && !isNaN(gap)) {{
@@ -5910,16 +6218,17 @@ def build_web_dashboard(here):
         const naverUrl = `https://finance.naver.com/item/main.naver?code=${{r.stock_code}}`;
         const fnUrl = `https://wcomp.fnguide.com/CompanyInfo/Snapshot?c_id=AA&menu_type=01&cmp_cd=${{r.stock_code}}`;
 
-        return `<div class="rep-card ${{hlCls}}" id="rep-card-${{r.stock_code}}">
+        return `<div class="rep-card ${{hlCls}}" id="rep-card-item-${{idx}}" data-stock-code="${{r.stock_code}}">
           <div class="rep-card-head">
             <div class="rep-stock-title">
               <span class="rep-stock-name">${{escapeHtml(r.stock_name || '기업명')}}</span>
               <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
               <span class="rep-pill chg-${{chg}}" ${{prevTpTip}}>${{chgText}}</span>
+              ${{cnt3m > 0 ? `<span class="rep-3m-badge ${{cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low')}}" title="최근 3개월(90일) 발간 리포트 횟수">📚 3개월 ${{cnt3m}}회</span>` : ''}}
               ${{scrBadges.join('')}}
             </div>
             <div class="rep-target-box">
-              <div class="rep-target-price">${{hasTp ? '목표가 ' + Math.round(tpNum).toLocaleString('ko-KR') + '원' : '목표가 미제시'}} <span style="font-size:11.5px; color:#475569;">(${{escapeHtml(r.opinion || '-')}})</span></div>
+              <div class="rep-target-price">${{(r.prev_target_price && hasTp && (chg === '상향' || chg === '하향')) ? `<span class="rep-tp-old">${{Math.round(Number(r.prev_target_price)).toLocaleString('ko-KR')}}</span>→ ` : ''}}${{hasTp ? '목표가 ' + Math.round(tpNum).toLocaleString('ko-KR') + '원' : '목표가 미제시'}} <span style="font-size:11.5px; color:#475569;">(${{escapeHtml(r.opinion || '-')}})</span></div>
               ${{upsideHtml}}
             </div>
           </div>
