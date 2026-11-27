@@ -4367,6 +4367,7 @@ def build_web_dashboard(here):
   <header class="topbar">
     <div class="topbar-left">
       <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="좌측 메뉴 접기/펼치기">☰</button>
+      <button class="menu-toggle-btn" id="navBackBtn" onclick="window.history.back()" title="이전 페이지로 돌아가기 (브라우저 뒤로가기 동일)" style="width:auto; padding:0 9px; font-size:12px; font-weight:800; color:#334155; gap:3px;">← 뒤로</button>
       <div class="brand-logo" onclick="selectHomeView()" title="수급 브리핑 메인 화면으로 이동">
         <span class="brand-dot">📊</span>
         <span>STOCK SCREENER</span>
@@ -4714,11 +4715,100 @@ def build_web_dashboard(here):
       }});
 
       const hasFlowData = FLOW_DATA && ((FLOW_DATA.dates && FLOW_DATA.dates.length > 0) || (FLOW_DATA.weeks && FLOW_DATA.weeks.length > 0));
-      if (hasFlowData) {{
-        selectHomeView('DAILY');
-      }} else {{
-        renderSidebar();
-        selectMarket(currentMarket);
+      isRestoringHistory = true;
+      try {{
+        if (hasFlowData) {{
+          selectHomeView('DAILY');
+        }} else {{
+          renderSidebar();
+          selectMarket(currentMarket);
+        }}
+      }} finally {{
+        isRestoringHistory = false;
+      }}
+      pushNavHistory(true);
+      window.addEventListener('popstate', (e) => {{
+        if (e.state && e.state.view) {{
+          applyNavState(e.state);
+        }}
+      }});
+    }}
+
+    let isRestoringHistory = false;
+    let navHistoryBatchDepth = 0;
+    let lastPushedStateJson = '';
+
+    function captureNavState() {{
+      return {{
+        view: currentViewMode,
+        market: currentMarket,
+        sheetIdx: currentSheetIdx,
+        flowMode: currentFlowMode,
+        flowKey: currentFlowKey,
+        flowMarket: currentFlowMarket,
+        repViewMode: currentReportViewMode,
+        repDate: currentReportDate,
+        repChange: document.getElementById('repChangeSelect') ? document.getElementById('repChangeSelect').value : '',
+        search: document.getElementById('searchInput') ? document.getElementById('searchInput').value : '',
+      }};
+    }}
+
+    function pushNavHistory(replace = false) {{
+      if (isRestoringHistory || navHistoryBatchDepth > 0) return;
+      const st = captureNavState();
+      const key = JSON.stringify(st);
+      if (!replace && key === lastPushedStateJson) return;
+      lastPushedStateJson = key;
+      const hash = '#' + String(st.view || 'home').toLowerCase();
+      try {{
+        if (replace) window.history.replaceState(st, '', hash);
+        else window.history.pushState(st, '', hash);
+      }} catch (e) {{}}
+    }}
+
+    function withSingleHistory(fn) {{
+      navHistoryBatchDepth += 1;
+      try {{
+        fn();
+      }} finally {{
+        navHistoryBatchDepth -= 1;
+      }}
+      pushNavHistory(false);
+    }}
+
+    function applyNavState(st) {{
+      if (!st || !st.view) return;
+      isRestoringHistory = true;
+      try {{
+        if (st.flowMode) currentFlowMode = st.flowMode;
+        if (st.flowKey !== undefined) currentFlowKey = st.flowKey || '';
+        if (st.flowMarket !== undefined) currentFlowMarket = st.flowMarket || '';
+        if (st.repViewMode) currentReportViewMode = st.repViewMode;
+        if (st.repDate) {{
+          currentReportDate = st.repDate;
+          const ds = document.getElementById('repDateSelect');
+          if (ds) ds.value = currentReportDate;
+          refreshReportBrokers();
+          updateReportDateNavButtons();
+        }}
+        if (st.search !== undefined && document.getElementById('searchInput')) {{
+          document.getElementById('searchInput').value = st.search;
+        }}
+
+        if (st.view === 'HOME') {{
+          selectHomeView(st.flowMode || 'DAILY');
+        }} else if (st.view === 'FLOW') {{
+          selectFlowView(st.flowMode || 'DAILY');
+          setFlowMarket(st.flowMarket || '');
+        }} else if (st.view === 'REPORTS') {{
+          selectReportsView('', st.repChange || '', st.repViewMode || 'SHEET');
+        }} else {{
+          currentSheetIdx = typeof st.sheetIdx === 'number' ? st.sheetIdx : 0;
+          selectMarket(st.market || currentMarket);
+        }}
+        lastPushedStateJson = JSON.stringify(captureNavState());
+      }} finally {{
+        isRestoringHistory = false;
       }}
     }}
 
@@ -4846,6 +4936,7 @@ def build_web_dashboard(here):
         updateReportsHeaderAndBadges();
         renderSidebar();
         renderReportsGrid();
+        pushNavHistory();
       }}
     }}
 
@@ -4985,8 +5076,10 @@ def build_web_dashboard(here):
 
     function selectMarketAndSheet(mkt, sheetName) {{
       closeMobileNav();
-      selectMarket(mkt);
-      if (sheetName) selectSheetByName(sheetName);
+      withSingleHistory(() => {{
+        selectMarket(mkt);
+        if (sheetName) selectSheetByName(sheetName);
+      }});
     }}
 
     function setScreenerVisibility(showScreener) {{
@@ -5017,6 +5110,7 @@ def build_web_dashboard(here):
       if (bKP) bKP.classList.toggle('active', currentFlowMarket === 'KOSPI');
       if (bKQ) bKQ.classList.toggle('active', currentFlowMarket === 'KOSDAQ');
       renderFlowView();
+      pushNavHistory();
     }}
 
     function getFlowKeys(mode) {{
@@ -5087,6 +5181,7 @@ def build_web_dashboard(here):
         updateFlowPeriodNavButtons();
         if (currentViewMode === 'HOME') renderHomeView();
         else renderFlowView();
+        pushNavHistory();
       }}
     }}
 
@@ -5099,11 +5194,14 @@ def build_web_dashboard(here):
       if (fs) fs.value = currentFlowKey;
       updateFlowPeriodNavButtons();
       renderHomeView();
+      pushNavHistory();
     }}
 
     function openFlowMarketDetail(mkt) {{
-      selectFlowView(currentFlowMode);
-      setFlowMarket(mkt);
+      withSingleHistory(() => {{
+        selectFlowView(currentFlowMode);
+        setFlowMarket(mkt);
+      }});
     }}
 
     function selectHomeView(mode = null) {{
@@ -5120,6 +5218,7 @@ def build_web_dashboard(here):
       refreshFlowPeriodSelect();
       renderSidebar();
       renderHomeView();
+      pushNavHistory();
     }}
 
     function renderHomeView() {{
@@ -5442,8 +5541,11 @@ def build_web_dashboard(here):
 
     function onFlowPeriodChange() {{
       currentFlowKey = document.getElementById('flowPeriodSelect').value || '';
+      const hs = document.getElementById('homePeriodSelect');
+      if (hs) hs.value = currentFlowKey;
       updateFlowPeriodNavButtons();
       renderFlowView();
+      pushNavHistory();
     }}
 
     function selectFlowView(mode = 'DAILY') {{
@@ -5456,6 +5558,7 @@ def build_web_dashboard(here):
       refreshFlowPeriodSelect();
       renderSidebar();
       renderFlowView();
+      pushNavHistory();
     }}
 
     function renderFlowView() {{
@@ -5933,17 +6036,20 @@ def build_web_dashboard(here):
         const targetEl = document.querySelector(`[data-stock-code="${{focusCode}}"]`);
         if (targetEl) targetEl.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
       }}
+      pushNavHistory();
     }}
 
     function jumpToStockInScreener(code, market) {{
-      selectMarket(market);
-      currentSheetIdx = 0;
-      renderSheetTabs();
-      document.getElementById('searchInput').value = code;
-      document.getElementById('sectorSelect').value = '';
-      document.getElementById('toneSelect').value = '';
-      currentPage = 1;
-      renderTable();
+      withSingleHistory(() => {{
+        selectMarket(market);
+        currentSheetIdx = 0;
+        renderSheetTabs();
+        document.getElementById('searchInput').value = code;
+        document.getElementById('sectorSelect').value = '';
+        document.getElementById('toneSelect').value = '';
+        currentPage = 1;
+        renderTable();
+      }});
     }}
 
     function computeReportRankMeta(r) {{
@@ -5991,6 +6097,7 @@ def build_web_dashboard(here):
       updateReportsHeaderAndBadges();
       renderSidebar();
       renderReportsGrid();
+      pushNavHistory();
     }}
 
     function scrollToReportCard(cardId) {{
@@ -6286,6 +6393,7 @@ def build_web_dashboard(here):
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
+      pushNavHistory();
     }}
 
     function selectSheetByName(targetName) {{
@@ -6316,6 +6424,7 @@ def build_web_dashboard(here):
       renderSheetTabs();
       populateSectorFilter();
       renderTable();
+      pushNavHistory();
     }}
 
     function populateSectorFilter() {{
