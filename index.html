@@ -2745,6 +2745,88 @@
       border: 1px solid #e2e8f0;
     }
     .usm-pop-act:hover { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+    /* ===== GitHub 수동 업데이트 모달 ===== */
+    .gh-upd-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 7px;
+      border: 1px solid #93c5fd;
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.12s;
+    }
+    .gh-upd-btn:hover { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    .gh-upd-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .gh-run-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 11px 12px;
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.12s;
+    }
+    .gh-run-card:hover:not(:disabled) { border-color: #2563eb; background: #eff6ff; transform: translateY(-1px); }
+    .gh-run-card:disabled { opacity: 0.55; cursor: not-allowed; }
+    .gh-run-card-title { font-size: 13px; font-weight: 900; color: #0f172a; }
+    .gh-run-card-sub { font-size: 11px; font-weight: 700; color: #64748b; }
+    .gh-status-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      font-size: 12.5px;
+      color: #1e293b;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .gh-status-box.ok { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .gh-status-box.run { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+    .gh-status-box.err { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    .gh-token-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 11px 12px;
+      background: #fff;
+      font-size: 12px;
+      color: #334155;
+    }
+    .gh-token-row {
+      display: flex;
+      gap: 6px;
+      margin: 7px 0;
+    }
+    .gh-token-input {
+      flex: 1;
+      min-width: 0;
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-family: monospace;
+    }
+    .gh-guide-ol {
+      margin: 7px 0 0;
+      padding-left: 17px;
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.55;
+    }
     @media (max-width: 1280px) {
       .usm-ss-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
@@ -3134,6 +3216,15 @@
         <button class="wl-modal-close" onclick="closeUsThemeModal()" title="닫기">✕</button>
       </div>
       <div class="wl-modal-body" id="usThemeModalBody" style="max-height:78vh; overflow-y:auto;"></div>
+    </div>
+  </div>
+  <div class="wl-modal-backdrop" id="ghUpdateModal" onclick="if(event.target===this)closeGhUpdateModal()">
+    <div class="wl-modal" style="max-width:500px; width:94vw;">
+      <div class="wl-modal-head">
+        <div class="wl-modal-title">🔄 GitHub 즉시 업데이트 실행</div>
+        <button class="wl-modal-close" onclick="closeGhUpdateModal()" title="닫기">✕</button>
+      </div>
+      <div class="wl-modal-body" id="ghUpdateModalBody" style="max-height:80vh; overflow-y:auto;"></div>
     </div>
   </div>
   <div class="wl-modal-backdrop" id="watchlistModal" onclick="if(event.target===this)closeWatchlistModal()">
@@ -3652,8 +3743,9 @@
     function renderDownloadButtons() {
       const box = document.getElementById('dlActions');
       const wlCnt = WATCHLIST.length;
+      const updBtn = `<button class="gh-upd-btn" id="ghUpdateTopBtn" onclick="openGhUpdateModal()" title="폰/PC에서 GitHub Actions 즉시 업데이트 실행">🔄 업데이트</button>`;
       const wlBtn = `<button class="wl-top-btn ${wlCnt > 0 ? 'has-items' : ''}" id="wlTopBtn" onclick="openWatchlistModal()" title="종목 옆 ☆을 눌러 모아둔 뒤 영웅문4 [0130] 관심종목 가져오기 파일로 다운로드">⭐ 영웅문 (<span id="wlTopCnt">${wlCnt}</span>)</button>`;
-      box.innerHTML = wlBtn + marketKeys.map(m => {
+      box.innerHTML = updBtn + wlBtn + marketKeys.map(m => {
         const d = DB[m];
         return `<a class="dl-btn" href="${d.downloadFile}" download="${d.filename}">📥 ${m} 엑셀</a>`;
       }).join('');
@@ -3775,6 +3867,9 @@
         <div class="nav-divider"></div>
         <div class="nav-section">
           <div class="nav-section-title">다운로드 · 원문</div>
+          <button class="nav-item" onclick="closeMobileNav(); openGhUpdateModal();">
+            <span class="nav-item-left"><span>🔄</span><span>즉시 업데이트 실행</span></span>
+          </button>
           ${dlLinks}
           <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
             <span class="nav-item-left"><span>🌐</span><span>한경 컨센서스</span></span>
@@ -4001,8 +4096,272 @@
       const lq = document.getElementById('liveQuoteBox');
       if (lq) lq.style.display = 'none';
     }
+
+    // ================= GitHub Actions 원클릭 수동 업데이트 (브라우저 localStorage PAT) =================
+    const GH_OWNER = 'rotaerc';
+    const GH_REPO = 'Stock-Screener';
+    const GH_WORKFLOW = 'main.yml';
+    const GH_TOKEN_STORAGE_KEY = 'stock_screener_gh_pat_v1';
+    let _ghPollTimer = null;
+    let _ghTriggerStartedAt = 0;
+    let _ghLastRun = null;
+    let _ghStatusMsg = '';
+    let _ghStatusType = ''; // '' | 'run' | 'ok' | 'err'
+    let _ghEditingToken = false;
+
+    function _getGhToken() {
+      try { return (localStorage.getItem(GH_TOKEN_STORAGE_KEY) || '').trim(); } catch (e) { return ''; }
+    }
+
+    function saveGhToken() {
+      const inp = document.getElementById('ghTokenInput');
+      if (!inp) return;
+      const val = inp.value.trim();
+      if (!val) {
+        _ghStatusType = 'err';
+        _ghStatusMsg = '토큰을 입력한 뒤 저장을 눌러주세요.';
+        renderGhUpdateModal();
+        return;
+      }
+      try {
+        localStorage.setItem(GH_TOKEN_STORAGE_KEY, val);
+        _ghEditingToken = false;
+        _ghStatusType = 'ok';
+        _ghStatusMsg = '✅ 토큰이 이 기기 브라우저에 안전하게 저장되었습니다. 이제 위 버튼을 눌러 바로 업데이트할 수 있습니다.';
+      } catch (e) {
+        _ghStatusType = 'err';
+        _ghStatusMsg = '브라우저 저장소(localStorage)에 저장할 수 없습니다 (시크릿 모드 여부 확인).';
+      }
+      renderGhUpdateModal();
+    }
+
+    function clearGhToken() {
+      try { localStorage.removeItem(GH_TOKEN_STORAGE_KEY); } catch (e) {}
+      _ghEditingToken = false;
+      _ghStatusType = '';
+      _ghStatusMsg = '저장된 토큰을 삭제했습니다.';
+      renderGhUpdateModal();
+    }
+
+    function _fmtKstShort(isoStr) {
+      if (!isoStr) return '-';
+      try {
+        const d = new Date(isoStr);
+        const kst = new Date(d.getTime() + 9 * 3600 * 1000);
+        const mm = String(kst.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(kst.getUTCDate()).padStart(2, '0');
+        const hh = String(kst.getUTCHours()).padStart(2, '0');
+        const mi = String(kst.getUTCMinutes()).padStart(2, '0');
+        return `${mm}/${dd} ${hh}:${mi} KST`;
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    async function fetchGhLatestRun() {
+      const tok = _getGhToken();
+      const hdrs = { 'Accept': 'application/vnd.github+json' };
+      if (tok) hdrs['Authorization'] = `Bearer ${tok}`;
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/runs?per_page=1&_t=${Date.now()}`,
+          { headers: hdrs }
+        );
+        if (!res.ok) return null;
+        const j = await res.json();
+        const run = (j.workflow_runs || [])[0] || null;
+        _ghLastRun = run;
+        if (run && _ghTriggerStartedAt > 0) {
+          const createdMs = new Date(run.created_at).getTime();
+          if (createdMs >= _ghTriggerStartedAt - 15000) {
+            if (run.status === 'completed') {
+              clearInterval(_ghPollTimer);
+              _ghPollTimer = null;
+              _ghTriggerStartedAt = 0;
+              if (run.conclusion === 'success') {
+                _ghStatusType = 'ok';
+                _ghStatusMsg = `🎉 업데이트 실행 완료! (GitHub Pages 반영까지 약 20~30초 후 새로고침하시면 최신 데이터가 표시됩니다.)`;
+              } else {
+                _ghStatusType = 'err';
+                _ghStatusMsg = `⚠️ 워크플로가 '${run.conclusion || '실패'}' 상태로 종료되었습니다. 아래 로그 링크에서 확인해 주세요.`;
+              }
+            } else {
+              const sec = Math.max(0, Math.round((Date.now() - createdMs) / 1000));
+              const stKo = run.status === 'in_progress' ? '실행 중' : '대기 중';
+              _ghStatusType = 'run';
+              _ghStatusMsg = `⚙️ GitHub Actions ${stKo}... (${sec}초 경과 · 완료되면 자동 표시됩니다)`;
+            }
+          }
+        }
+        renderGhUpdateModal();
+        return run;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function triggerGhWorkflow(modeVal, label) {
+      const tok = _getGhToken();
+      if (!tok) {
+        _ghEditingToken = true;
+        _ghStatusType = 'err';
+        _ghStatusMsg = '먼저 아래에 GitHub 무료 토큰을 1회 입력·저장해 주세요. (토큰 없이 실행하려면 하단 GitHub Actions 바로가기를 눌러주세요.)';
+        renderGhUpdateModal();
+        return;
+      }
+      _ghStatusType = 'run';
+      _ghStatusMsg = `🚀 [${label}] 업데이트 요청을 GitHub에 전송하는 중...`;
+      renderGhUpdateModal();
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${tok}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json',
+              'X-GitHub-Api-Version': '2022-11-28',
+            },
+            body: JSON.stringify({ ref: 'main', inputs: { mode: modeVal } }),
+          }
+        );
+        if (res.status === 204 || res.ok) {
+          _ghTriggerStartedAt = Date.now();
+          _ghStatusType = 'run';
+          _ghStatusMsg = `✅ [${label}] 실행 요청 완료! GitHub 서버 시작 대기 중... (5초마다 자동 확인)`;
+          renderGhUpdateModal();
+          if (_ghPollTimer) clearInterval(_ghPollTimer);
+          setTimeout(fetchGhLatestRun, 3500);
+          _ghPollTimer = setInterval(fetchGhLatestRun, 5000);
+        } else {
+          let detail = '';
+          try { const j = await res.json(); detail = j.message || ''; } catch (e) {}
+          _ghStatusType = 'err';
+          if (res.status === 401) {
+            _ghStatusMsg = `❌ 토큰 인증 실패 (401). 토큰이 만료되었거나 잘못 복사되었습니다. 토큰을 다시 저장해 주세요.`;
+          } else if (res.status === 403 || res.status === 404) {
+            _ghStatusMsg = `❌ 권한 부족 (${res.status}). 토큰 발급 시 '${GH_REPO}' 저장소의 Actions: Read and write 권한이 선택되었는지 확인해 주세요. ${detail}`;
+          } else {
+            _ghStatusMsg = `❌ 요청 실패 (HTTP ${res.status}): ${detail}`;
+          }
+          renderGhUpdateModal();
+        }
+      } catch (e) {
+        _ghStatusType = 'err';
+        _ghStatusMsg = `❌ 네트워크 오류로 요청하지 못했습니다. 인터넷 연결을 확인해 주세요.`;
+        renderGhUpdateModal();
+      }
+    }
+
+    function renderGhUpdateModal() {
+      const body = document.getElementById('ghUpdateModalBody');
+      if (!body) return;
+      const tok = _getGhToken();
+      const hasTok = !!tok;
+      const maskedTok = hasTok ? (tok.slice(0, 10) + '••••' + tok.slice(-4)) : '';
+      const isRunning = (_ghStatusType === 'run');
+
+      const modes = [
+        { val: '미국 시장만 (30초)', icon: '🌅', title: '미국 모닝 브리핑', sub: '지수·매크로·48테마·뉴스 (약 30초)' },
+        { val: '리포트만 (1~2분)', icon: '📰', title: '기업 리포트만', sub: '한경·네이버 최신 리포트 (약 1~2분)' },
+        { val: '스크리너만 (13분)', icon: '📊', title: '한국 스크리너만', sub: '코스피·코스닥 200 (약 13분)' },
+        { val: '전체 (리포트+스크리너+미국)', icon: '🚀', title: '전체 업데이트', sub: '미국 + 리포트 + 스크리너 전부' },
+      ];
+
+      let lastRunHtml = '';
+      if (_ghLastRun) {
+        const r = _ghLastRun;
+        const stBadge = r.status === 'completed'
+          ? (r.conclusion === 'success' ? '🟢 성공' : `🔴 ${r.conclusion || '실패'}`)
+          : (r.status === 'in_progress' ? '🔵 실행 중' : '🟡 대기 중');
+        lastRunHtml = `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:11.5px; color:#475569; margin-bottom:10px; padding:7px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; flex-wrap:wrap;">
+            <span>최근 실행: <b>${stBadge}</b> (${_fmtKstShort(r.updated_at || r.created_at)})</span>
+            <a href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8; font-weight:800; text-decoration:none;">실행 로그 ↗</a>
+          </div>
+        `;
+      }
+
+      const statusHtml = _ghStatusMsg ? `
+        <div class="gh-status-box ${_ghStatusType}">
+          <div>${escapeHtml(_ghStatusMsg)}</div>
+          ${_ghStatusType === 'ok' && _ghLastRun && _ghLastRun.status === 'completed' ? `<button class="pe-pill-btn active" style="margin-top:8px;" onclick="window.location.reload(true)">🔄 최신 화면 새로고침</button>` : ''}
+        </div>
+      ` : '';
+
+      const tokenBoxHtml = (hasTok && !_ghEditingToken) ? `
+        <div class="gh-token-box" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; background:#f0fdf4; border-color:#bbf7d0;">
+          <span style="font-weight:800; color:#166534;">🔑 이 기기에 토큰 저장됨 <code style="font-weight:600; font-size:11px;">${escapeHtml(maskedTok)}</code></span>
+          <div style="display:flex; gap:6px;">
+            <button class="usm-link-btn" onclick="_ghEditingToken=true; renderGhUpdateModal();">변경</button>
+            <button class="usm-link-btn" style="color:#dc2626;" onclick="clearGhToken()">삭제</button>
+          </div>
+        </div>
+      ` : `
+        <div class="gh-token-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+            <b style="color:#0f172a;">🔑 GitHub 무료 토큰 1회 저장 (내 기기 전용)</b>
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8; font-weight:800; text-decoration:none; font-size:11.5px;">토큰 발급 페이지 열기 ↗</a>
+          </div>
+          <div class="gh-token-row">
+            <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="github_pat_... 붙여넣기" autocomplete="off" />
+            <button class="pe-pill-btn active" onclick="saveGhToken()">저장</button>
+          </div>
+          <ol class="gh-guide-ol">
+            <li>위 <b>토큰 발급 페이지</b>에서 이름 입력 (예: <code>stock-update</code>) · 만료기간 <code>1년</code> 등 선택</li>
+            <li><b>Repository access</b> → <code>Only select repositories</code> → <b>Stock-Screener</b> 선택</li>
+            <li><b>Permissions → Repository permissions → Actions</b> 를 <b>Read and write</b> 로 선택 후 <b>Generate token</b> → 복사해서 위에 붙여넣기</li>
+          </ol>
+          <div style="margin-top:6px; font-size:11px; color:#64748b;">🔒 토큰은 내 폰/PC 브라우저(<code>localStorage</code>)에만 저장되며 코드나 서버에는 저장되지 않습니다.</div>
+        </div>
+      `;
+
+      body.innerHTML = `
+        <div style="font-size:12px; color:#475569; margin-bottom:10px; line-height:1.5;">
+          GitHub 자동 스케줄이 지연될 때 원하는 항목을 누르면 즉시 업데이트가 시작됩니다.
+        </div>
+        <div class="gh-upd-grid">
+          ${modes.map(m => `
+            <button class="gh-run-card" ${isRunning ? 'disabled' : ''} onclick="triggerGhWorkflow('${m.val}', '${m.title}')">
+              <span class="gh-run-card-title">${m.icon} ${m.title}</span>
+              <span class="gh-run-card-sub">${m.sub}</span>
+            </button>
+          `).join('')}
+        </div>
+        ${statusHtml}
+        ${lastRunHtml}
+        ${tokenBoxHtml}
+        <div style="margin-top:11px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; font-size:11.5px;">
+          <a href="https://github.com/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW}" target="_blank" rel="noopener noreferrer" style="color:#475569; font-weight:700; text-decoration:none;">🔗 토큰 없이 GitHub Actions 직접 열기 ↗</a>
+          <button class="usm-link-btn" onclick="fetchGhLatestRun()">상태 새로고침</button>
+        </div>
+      `;
+    }
+
+    function openGhUpdateModal() {
+      const modal = document.getElementById('ghUpdateModal');
+      if (!modal) return;
+      _ghEditingToken = false;
+      renderGhUpdateModal();
+      modal.classList.add('open');
+      fetchGhLatestRun();
+    }
+
+    function closeGhUpdateModal() {
+      const modal = document.getElementById('ghUpdateModal');
+      if (modal) modal.classList.remove('open');
+      if (_ghPollTimer) {
+        clearInterval(_ghPollTimer);
+        _ghPollTimer = null;
+      }
+    }
+
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeUsThemeModal();
+      if (e.key === 'Escape') {
+        closeUsThemeModal();
+        closeGhUpdateModal();
+      }
     });
 
     function renderUsSectorStrengthBoard() {
@@ -7680,10 +8039,6 @@
 
     function positionLiveQuote(e) {
       const box = document.getElementById('liveQuoteBox');
-      if (!box) return;
-      let x = e.clientX + 16;
-      let y = e.clientY + 16;
-      if (x + 260 > window.innerWidth) x = Math.max(10, e.clientX - 264);
       if (y + 220 > window.innerHeight) y = Math.max(10, e.clientY - 224);
       box.style.left = x + 'px';
       box.style.top = y + 'px';
