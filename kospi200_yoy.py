@@ -7071,18 +7071,22 @@ def build_web_dashboard(here):
         <span style="font-size:12px; color:#64748b; font-weight:700;">5일 <b class="${{_usPctCls(item.avgChg5d)}}">${{_usFmtPct(item.avgChg5d)}}</b></span>
       `;
 
-      const krList = String(item.krStocks || '').split('·').map(s => s.trim()).filter(Boolean);
-      const krHtml = krList.length ? `
+      const krItems = (item.krStockList && item.krStockList.length)
+        ? item.krStockList
+        : String(item.krStocks || '').split('·').map(s => ({{ name: s.trim(), code: '' }})).filter(x => x.name);
+      const krHtml = krItems.length ? `
         <div class="usm-kr-box">
-          <div class="usm-kr-title">🇰🇷 한국 증시 연동 · 국내 대표 관련주 (클릭 시 네이버 금융 바로가기)</div>
+          <div class="usm-kr-title">🇰🇷 한국 증시 연동 · 국내 대표 관련주 (클릭 시 네이버 증권 바로가기)</div>
           <div class="usm-kr-chips">
-            ${{krList.map(kn => {{
+            ${{krItems.map(kObj => {{
+              const kn = kObj.name;
               const cleanName = kn.replace(/\\(.*?\\)/g, '').trim();
-              const cd = _findKrCodeByName(cleanName);
+              const cd = kObj.code || _findKrCodeByName(cleanName);
               const href = cd
-                ? `https://finance.naver.com/item/main.naver?code=${{cd}}`
-                : `https://finance.naver.com/search/searchList.naver?query=${{encodeURIComponent(cleanName)}}`;
-              return `<a class="usm-kr-chip" href="${{href}}" target="_blank" rel="noopener noreferrer">${{escapeHtml(kn)}} ↗</a>`;
+                ? `https://stock.naver.com/domestic/stock/${{cd}}/price`
+                : `https://stock.naver.com/search?q=${{encodeURIComponent(cleanName)}}`;
+              const liveAttr = cd ? `data-live-code="${{cd}}"` : '';
+              return `<a class="usm-kr-chip" href="${{href}}" target="_blank" rel="noopener noreferrer" ${{liveAttr}}>${{escapeHtml(kn)}} ↗</a>`;
             }}).join('')}}
           </div>
         </div>

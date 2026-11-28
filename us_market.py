@@ -117,7 +117,7 @@ FEAR_GREED_KO = {
 # 미국 세부 테마·섹터 강도 보드 (48개 테마 · 한국 증시 연동 관련주 매핑 포함)
 # 각 항목: (id, 테마명, 아이콘, 한국 증시 연관 업종/대표주, [(미국티커, 한글/약칭), ...])
 THEME_BASKETS = [
-    ("quantum", "양자컴퓨팅", "⚛️", "아이윈플러스 · 케이씨에스 · 우리로 · 코위버", [
+    ("quantum", "양자컴퓨팅", "⚛️", "엑스게이트 · 케이씨에스 · 우리로 · 코위버", [
         ("IONQ", "아이온큐"), ("RGTI", "리게티"), ("QBTS", "디웨이브"), ("QUBT", "퀀텀컴퓨팅"),
     ]),
     ("space", "우주항공산업", "🚀", "한화에어로스페이스 · 한국항공우주 · 쎄트렉아이 · AP위성", [
@@ -165,7 +165,7 @@ THEME_BASKETS = [
     ("uranium", "우라늄", "🧪", "두산에너빌리티 · 한전KPS · 보성파워텍", [
         ("CCJ", "카메코"), ("UEC", "우라늄에너지"), ("UUUU", "에너지퓨얼스"), ("NXE", "넥스젠"), ("DNN", "데니슨마인즈"),
     ]),
-    ("fuel_cell", "연료전지/수소", "💧", "두산퓨얼셀 · 에스퓨얼셀 · 범한퓨얼셀 · 일진하이솔루스", [
+    ("fuel_cell", "연료전지/수소", "💧", "두산퓨얼셀 · 비나텍 · 범한퓨얼셀 · 일진하이솔루스", [
         ("BE", "블룸에너지"), ("PLUG", "플러그파워"), ("FCEL", "퓨얼셀에너지"), ("BLDP", "발라드파워"),
     ]),
     ("renewable", "신재생/태양광", "☀️", "한화솔루션 · OCI홀딩스 · HD현대에너지솔루션", [
@@ -180,16 +180,16 @@ THEME_BASKETS = [
     ("autonomy", "자율주행", "🚘", "현대오토에버 · 퓨런티어 · 모바일어플라이언스 · 에스오에스랩", [
         ("MBLY", "모빌아이"), ("AUR", "오로라"), ("TSLA", "테슬라"), ("OUST", "아우스터"), ("INVZ", "이노비즈"),
     ]),
-    ("drone", "드론/UAM", "🚁", "한화시스템 · 베셀 · 제이씨현시스템 · 네온테크", [
+    ("drone", "드론/UAM", "🚁", "한화시스템 · 베셀 · 제이씨현시스템 · 퍼스텍", [
         ("JOBY", "조비에비에이션"), ("ACHR", "아처에비에이션"), ("AVAV", "에어로바이런먼트"), ("KTOS", "크라토스"), ("RCAT", "레드캣"),
     ]),
-    ("defense", "방산/군수", "🛡️", "한화에어로스페이스 · LIG넥스원 · 현대로템 · 풍산", [
+    ("defense", "방산/군수", "🛡️", "한화에어로스페이스 · LIG디펜스앤에어로스페이스 · 현대로템 · 풍산", [
         ("LMT", "록히드마틴"), ("RTX", "RTX"), ("NOC", "노스롭그루먼"), ("GD", "제너럴다이내믹스"), ("LHX", "L3해리스"), ("PLTR", "팔란티어"),
     ]),
     ("network", "네트워크/통신장비", "📡", "이수페타시스 · 다산네트웍스 · 케이엠더블유 · RFHIC", [
         ("ANET", "아리스타"), ("CSCO", "시스코"), ("CIEN", "시에나"), ("ERIC", "에릭슨"), ("NOK", "노키아"), ("UI", "유비퀴티"),
     ]),
-    ("ai_sw", "AI 소프트웨어", "💻", "NAVER · 더존비즈온 · 솔트룩스 · 코난테크놀로지 · 한글과컴퓨터", [
+    ("ai_sw", "AI 소프트웨어", "💻", "NAVER · 이스트소프트 · 솔트룩스 · 코난테크놀로지 · 한컴", [
         ("PLTR", "팔란티어"), ("MSFT", "마이크로소프트"), ("ORCL", "오라클"), ("CRM", "세일즈포스"), ("NOW", "서비스나우"), ("SNOW", "스노우플레이크"), ("APP", "앱러빈"),
     ]),
     ("ev", "전기차", "🚗", "현대차 · 기아 · LG에너지솔루션 · 포스코퓨처엠", [
@@ -207,7 +207,7 @@ THEME_BASKETS = [
     ("biotech", "바이오텍/신약", "🧬", "알테오젠 · HLB · 리가켐바이오 · 에이비엘바이오 · 올릭스", [
         ("VRTX", "버텍스"), ("REGN", "리제네론"), ("GILD", "길리어드"), ("MRNA", "모더나"), ("CRSP", "크리스퍼"), ("BIIB", "바이오젠"),
     ]),
-    ("gold", "금 (Gold)", "🥇", "고려아연 · 엘컴텍 · 아이티센 · KRX금현물", [
+    ("gold", "금 (Gold)", "🥇", "고려아연 · 엘컴텍 · 아이티센 · ACE KRX금현물", [
         ("NEM", "뉴몬트"), ("AEM", "애그니코이글"), ("WPM", "휘튼귀금속"), ("KGC", "킨로스골드"), ("AU", "앵글로골드"), ("GFI", "골드필즈"),
     ]),
     ("silver", "은 (Silver)", "🥈", "고려아연 · 영풍 · 풍산", [
@@ -237,7 +237,7 @@ THEME_BASKETS = [
     ("bank", "은행/금융", "🏦", "KB금융 · 신한지주 · 하나금융지주 · 우리금융 · 메리츠금융", [
         ("JPM", "JP모건"), ("BAC", "BOA"), ("WFC", "웰스파고"), ("C", "씨티그룹"), ("GS", "골드만삭스"), ("MS", "모건스탠리"),
     ]),
-    ("machinery", "산업재/기계", "⚙️", "HD현대인프라코어 · 두산밥캣 · HD현대건설기계 · 진성티이씨", [
+    ("machinery", "산업재/기계", "⚙️", "HD건설기계 · 두산밥캣 · 진성티이씨 · 디와이파워", [
         ("CAT", "캐터필러"), ("DE", "디어"), ("URI", "유나이티드렌탈"), ("CMI", "커민스"), ("PH", "파커하니핀"),
     ]),
     ("airline_casino", "항공/여행/카지노", "✈️", "대한항공 · 파라다이스 · 롯데관광개발 · 하나투어 · GKL", [
@@ -246,7 +246,7 @@ THEME_BASKETS = [
     ("cruise", "크루즈/조선해운", "🚢", "HD한국조선해양 · 한화오션 · 삼성중공업 · HMM", [
         ("RCL", "로얄캐리비안"), ("CCL", "카니발"), ("NCLH", "노르웨이지안"), ("ZIM", "짐인테그레이티드"),
     ]),
-    ("retail", "소매유통/소비재", "🛒", "이마트 · BGF리테일 · 신세계 · 쿠팡(CPNG)", [
+    ("retail", "소매유통/소비재", "🛒", "이마트 · BGF리테일 · 신세계 · GS리테일", [
         ("WMT", "월마트"), ("COST", "코스트코"), ("AMZN", "아마존"), ("TGT", "타겟"), ("HD", "홈디포"), ("CPNG", "쿠팡"),
     ]),
     ("homebuild", "주택건설/건자재", "🏠", "현대건설 · GS건설 · DL이앤씨 · LX하우시스 · KCC", [
@@ -925,6 +925,50 @@ def fetch_yahoo_stock_news(symbol):
         return symbol, None
 
 
+KR_CODE_OVERRIDES = {
+    "ACE KRX금현물": "411060",
+    "LIG디펜스앤에어로스페이스": "079550",
+    "한컴": "030520",
+    "HD건설기계": "267270",
+    "이수스페셜티": "457190",
+    "아이티센": "031820",
+    "우리금융": "316140",
+    "메리츠금융": "138040",
+}
+
+
+def fetch_kr_stock_code(name):
+    """네이버 증권 자동완성 API로 한국 관련주 6자리 종목코드 조회"""
+    clean = re.sub(r"\(.*?\)", "", str(name or "")).strip()
+    if not clean:
+        return name, None
+    if clean in KR_CODE_OVERRIDES:
+        return name, KR_CODE_OVERRIDES[clean]
+    try:
+        r = requests.get(
+            "https://ac.stock.naver.com/ac",
+            params={"q": clean, "target": "stock"},
+            headers={"User-Agent": UA},
+            timeout=7,
+        )
+        if r.status_code != 200:
+            return name, None
+        items = (r.json() or {}).get("items") or []
+        norm_clean = clean.replace(" ", "").upper()
+        for it in items:
+            cd = str(it.get("code") or "")
+            if it.get("nationCode") == "KOR" and re.fullmatch(r"\d{6}", cd):
+                if str(it.get("name") or "").replace(" ", "").upper() == norm_clean:
+                    return name, cd
+        for it in items:
+            cd = str(it.get("code") or "")
+            if it.get("nationCode") == "KOR" and re.fullmatch(r"\d{6}", cd):
+                return name, cd
+        return name, None
+    except Exception:
+        return name, None
+
+
 def build_morning_briefing(major_indices, macro_indicators, fear_greed, big_tech, sector_etfs):
     """수집된 미국 마감 지수·매크로·심리·섹터 데이터를 기반으로 한국어 아침 시황 브리핑 자동 생성"""
     idx_map = {x["symbol"]: x for x in major_indices}
@@ -1114,13 +1158,21 @@ def collect_us_market(here=HERE):
     )
     all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms) | set(morning_syms))
 
-    print(f"[2/3] Yahoo Finance 일봉 + 종목뉴스 + 테마 한국어뉴스 + CNN 공포탐욕 병렬 조회 중 (총 {len(all_fetch_syms)}티커)...")
+    kr_names = sorted({
+        p.strip()
+        for _tid, _tnm, _ico, kr, _mems in THEME_BASKETS
+        for p in str(kr or "").split("·")
+        if p.strip()
+    })
+
+    print(f"[2/3] Yahoo Finance 일봉 + 종목뉴스 + 테마 한국어뉴스 + 한국 관련주 코드 + CNN 공포탐욕 병렬 조회 중 (총 {len(all_fetch_syms)}티커)...")
     yahoo_stats = {}
     stock_news_map = {}
     theme_news_map = {}
+    kr_code_map = {}
     fear_greed = None
     morning_news = []
-    with ThreadPoolExecutor(max_workers=22) as ex:
+    with ThreadPoolExecutor(max_workers=24) as ex:
         fut_fg = ex.submit(fetch_cnn_fear_greed)
         fut_news = ex.submit(fetch_us_morning_news, 10)
         futs_chart = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
@@ -1129,6 +1181,7 @@ def collect_us_market(here=HERE):
             ex.submit(fetch_theme_kr_news, tid, THEME_NEWS_QUERIES.get(tid, f"{tname} 미국 주가"), 3)
             for tid, tname, _ico, _kr, _mems in THEME_BASKETS
         ]
+        futs_kr = [ex.submit(fetch_kr_stock_code, nm) for nm in kr_names]
         for fut in as_completed(futs_chart):
             sym, st = fut.result()
             if st:
@@ -1141,6 +1194,10 @@ def collect_us_market(here=HERE):
             tid, tlist = fut.result()
             if tlist:
                 theme_news_map[tid] = tlist
+        for fut in as_completed(futs_kr):
+            nm, cd = fut.result()
+            if cd:
+                kr_code_map[nm] = cd
         try:
             fear_greed = fut_fg.result()
         except Exception:
@@ -1153,6 +1210,7 @@ def collect_us_market(here=HERE):
         f"  - Yahoo 일봉: {len(yahoo_stats)}/{len(all_fetch_syms)}개 · "
         f"종목뉴스: {len(stock_news_map)}/{len(theme_syms)}개 · "
         f"테마 한국어뉴스: {len(theme_news_map)}/{len(THEME_BASKETS)}개 · "
+        f"한국 관련주 코드: {len(kr_code_map)}/{len(kr_names)}개 · "
         f"CNN 공포탐욕: {fear_greed['score'] if fear_greed else 'N/A'}"
     )
 
@@ -1375,11 +1433,17 @@ def collect_us_market(here=HERE):
         avg5d = round(sum(c5_vals) / len(c5_vals), 2) if c5_vals else None
         up_cnt = sum(1 for v in c1_vals if v > 0)
         dn_cnt = sum(1 for v in c1_vals if v < 0)
+        kr_items = []
+        for p in str(kr_stocks or "").split("·"):
+            nm = p.strip()
+            if nm:
+                kr_items.append({"name": nm, "code": kr_code_map.get(nm) or ""})
         sector_strength_out.append({
             "id": tid,
             "name": tname,
             "icon": ticon,
             "krStocks": kr_stocks,
+            "krStockList": kr_items,
             "avgChg1d": avg1d,
             "avgChg5d": avg5d,
             "upCount": up_cnt,
