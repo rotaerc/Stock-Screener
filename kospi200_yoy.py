@@ -3001,6 +3001,23 @@ def _load_semicon_cycle(here):
     return {"updatedAt": "", "hasKosisData": False, "latestMonth": "", "source": {}, "series": []}
 
 
+def _load_us_market(here):
+    json_path = os.path.join(here, "us_market.json")
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data.setdefault("indices", [])
+                data.setdefault("sectorEtfs", [])
+                data.setdefault("sectorFlows", [])
+                data.setdefault("stocks", [])
+                return data
+        except Exception:
+            pass
+    return {"updatedAt": "", "tradeDate": "", "universeCount": 0, "indices": [], "sectorEtfs": [], "sectorFlows": [], "stocks": [], "summary": {}}
+
+
 def build_web_dashboard(here):
     """
     최신 KOSPI / KOSDAQ 통합 엑셀(.xlsx) 파일 및 한경 기업 리포트(hankyung_reports.json)를 읽어
@@ -3027,6 +3044,9 @@ def build_web_dashboard(here):
 
     semicon_data = _load_semicon_cycle(here)
     print(f"  - [반도체사이클] 통계청 재고순환 로드: {len(semicon_data.get('series', []))}개월 (통계청 최신월: {semicon_data.get('latestMonth') or '미연동'})")
+
+    us_data = _load_us_market(here)
+    print(f"  - [미국시장] 미국 거래대금·섹터 로드: {len(us_data.get('stocks', []))}종목 · 섹터ETF {len(us_data.get('sectorEtfs', []))}개 (거래일: {us_data.get('tradeDate') or '-'})")
 
     op_hist_raw = _load_op_estimate_history(here)
     op_hist_compact = {
@@ -3071,6 +3091,7 @@ def build_web_dashboard(here):
     }
     flow_payload = json.dumps(flow_inline, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     semicon_payload = json.dumps(semicon_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    us_payload = json.dumps(us_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     html_content = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -5184,6 +5205,131 @@ def build_web_dashboard(here):
       transition: opacity 0.18s, transform 0.18s;
     }}
     .wl-toast.show {{ opacity: 1; transform: translateX(-50%) translateY(0); }}
+    .us-view {{
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+    }}
+    .us-view.active {{ display: flex; }}
+    .us-body-wrap {{
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+    .us-idx-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .us-idx-card {{
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 10px 13px;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+    .us-idx-top {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+    }}
+    .us-idx-price {{
+      font-size: 18px;
+      font-weight: 900;
+      color: #0f172a;
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }}
+    .us-idx-sub {{
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+    .us-etf-grid {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 7px;
+    }}
+    .us-etf-tile {{
+      border-radius: 8px;
+      padding: 8px 9px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }}
+    .us-etf-tile:hover {{ transform: translateY(-1px); box-shadow: 0 3px 10px rgba(15,23,42,0.08); }}
+    .us-etf-tile.active {{ outline: 2px solid #1d4ed8; outline-offset: 1px; }}
+    .us-etf-tile.up2 {{ background: #fee2e2; border-color: #fca5a5; color: #991b1b; }}
+    .us-etf-tile.up1 {{ background: #fef2f2; border-color: #fecaca; color: #b91c1c; }}
+    .us-etf-tile.flat {{ background: #f8fafc; border-color: #e2e8f0; color: #334155; }}
+    .us-etf-tile.dn1 {{ background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }}
+    .us-etf-tile.dn2 {{ background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }}
+    .us-sig-badge {{
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+    .us-sig-badge.accum {{ background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }}
+    .us-sig-badge.dist {{ background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }}
+    .us-sig-badge.surge {{ background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }}
+    .us-rvol-hi {{
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fcd34d;
+      font-weight: 900;
+    }}
+    .us-flow-row {{
+      display: grid;
+      grid-template-columns: 115px 1fr 110px;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      padding: 4px 0;
+    }}
+    .us-flow-bar-track {{
+      height: 11px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+    }}
+    @media (max-width: 1150px) {{
+      .us-etf-grid {{ grid-template-columns: repeat(4, minmax(0, 1fr)); }}
+    }}
+    @media (max-width: 900px) {{
+      .us-idx-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .us-etf-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+    }}
+    @media (max-width: 600px) {{
+      .us-idx-grid {{ grid-template-columns: 1fr; }}
+      .us-etf-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .us-flow-row {{ grid-template-columns: 1fr; gap: 3px; }}
+    }}
     @media (max-width: 1080px) {{
       .semi-kpi-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .semi-split-grid {{ grid-template-columns: 1fr; }}
@@ -5485,6 +5631,38 @@ def build_web_dashboard(here):
       </div>
       <div class="semi-body-wrap" id="semiconBodyWrap"></div>
     </div>
+
+    <div class="us-view" id="usMarketView">
+      <div class="controls-panel" style="margin-bottom:10px;">
+        <div class="filter-left">
+          <div class="flow-mode-group" id="usSubTabs">
+            <button class="flow-mode-btn active" id="btnUsTabVol" onclick="setUsTab('VOLUME')">🔥 거래대금 TOP</button>
+            <button class="flow-mode-btn" id="btnUsTabSurge" onclick="setUsTab('SURGE')">⚡ 거래량 급증 · 매집</button>
+            <button class="flow-mode-btn" id="btnUsTabSector" onclick="setUsTab('SECTOR')">🧭 섹터 자금 흐름</button>
+          </div>
+          <select id="usSectorSelect" class="select-box" onchange="setUsSector(this.value)">
+            <option value="">전체 섹터</option>
+          </select>
+          <input type="text" id="usSearchInput" class="search-input" style="width:175px;" placeholder="🔍 티커 / 종목명 / 산업..." oninput="renderUsMarketView()" />
+          <select id="usSortSelect" class="select-box" style="font-weight:700; color:#1e293b;" onchange="renderUsMarketView()">
+            <option value="dollarVol" selected>정렬: 거래대금순 ($B)</option>
+            <option value="rvol">정렬: 거래량 배수(RVOL)순</option>
+            <option value="chg1d">정렬: 일간 등락률순</option>
+            <option value="chg5d">정렬: 주간(5일) 등락률순</option>
+            <option value="chg1m">정렬: 1개월 등락률순</option>
+            <option value="turnover">정렬: 시총 회전율(%)순</option>
+          </select>
+        </div>
+        <div class="group-right">
+          <div class="flow-mode-group" title="섹터 ETF 히트맵 수익률 기준">
+            <button class="flow-mode-btn active" id="btnUsEtf1D" onclick="setUsEtfPeriod('1D')">1일</button>
+            <button class="flow-mode-btn" id="btnUsEtf5D" onclick="setUsEtfPeriod('5D')">5일</button>
+            <button class="flow-mode-btn" id="btnUsEtf1M" onclick="setUsEtfPeriod('1M')">1개월</button>
+          </div>
+        </div>
+      </div>
+      <div class="us-body-wrap" id="usMarketBodyWrap"></div>
+    </div>
     </main>
   </div>
 
@@ -5524,6 +5702,7 @@ def build_web_dashboard(here):
     const OP_HIST = {op_hist_payload};
     const FLOW_DATA = {flow_payload};
     const SEMICON_DATA = {semicon_payload};
+    const US_DATA = {us_payload};
     const OP_HIST_STOCKS = (OP_HIST && OP_HIST.stocks) ? OP_HIST.stocks : {{}};
     const marketKeys = Object.keys(DB);
     let currentViewMode = 'SCREENER'; // 'SCREENER' | 'REPORTS'
@@ -5770,6 +5949,9 @@ def build_web_dashboard(here):
         repChange: document.getElementById('repChangeSelect') ? document.getElementById('repChangeSelect').value : '',
         semiRange: currentSemiconRange,
         semiOverlay: currentSemiconOverlay,
+        usTab: currentUsTab,
+        usSector: currentUsSector,
+        usEtfPeriod: currentUsEtfPeriod,
         search: document.getElementById('searchInput') ? document.getElementById('searchInput').value : '',
       }};
     }}
@@ -5829,6 +6011,9 @@ def build_web_dashboard(here):
 
         if (st.semiRange !== undefined) currentSemiconRange = Number(st.semiRange) || 0;
         if (st.semiOverlay) currentSemiconOverlay = st.semiOverlay;
+        if (st.usTab) currentUsTab = st.usTab;
+        if (st.usSector !== undefined) currentUsSector = st.usSector || '';
+        if (st.usEtfPeriod) currentUsEtfPeriod = st.usEtfPeriod;
 
         if (st.view === 'HOME') {{
           selectHomeView(st.flowMode || 'DAILY');
@@ -5837,6 +6022,8 @@ def build_web_dashboard(here):
           setFlowMarket(st.flowMarket || '');
         }} else if (st.view === 'SEMICON') {{
           selectSemiconView();
+        }} else if (st.view === 'US') {{
+          selectUsMarketView(st.usTab || 'VOLUME');
         }} else if (st.view === 'REPORTS') {{
           selectReportsView('', st.repChange || '', st.repViewMode || 'SHEET');
         }} else {{
@@ -6109,6 +6296,13 @@ def build_web_dashboard(here):
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
+          <div class="nav-section-title">미국 시장</div>
+          <button class="nav-item ${{currentViewMode === 'US' ? 'active' : ''}}" onclick="selectUsMarketView('VOLUME')">
+            <span class="nav-item-left"><span>🇺🇸</span><span>미국 거래대금 · 섹터</span></span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
           <div class="nav-section-title">다운로드 · 원문</div>
           ${{dlLinks}}
           <a class="nav-item" href="https://consensus.hankyung.com/analysis/list?skinType=business" target="_blank">
@@ -6136,6 +6330,7 @@ def build_web_dashboard(here):
       const showFlow = (!showScreener && currentViewMode === 'FLOW');
       const showHome = (!showScreener && currentViewMode === 'HOME');
       const showSemi = (!showScreener && currentViewMode === 'SEMICON');
+      const showUs = (!showScreener && currentViewMode === 'US');
       document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
@@ -6147,6 +6342,285 @@ def build_web_dashboard(here):
       if (hv) hv.classList.toggle('active', showHome);
       const sv = document.getElementById('semiconView');
       if (sv) sv.classList.toggle('active', showSemi);
+      const uv = document.getElementById('usMarketView');
+      if (uv) uv.classList.toggle('active', showUs);
+    }}
+
+    // ================= 미국 거래대금 · 모멘텀 · 섹터 자금 흐름 =================
+    let currentUsTab = 'VOLUME'; // 'VOLUME' | 'SURGE' | 'SECTOR'
+    let currentUsSector = '';
+    let currentUsEtfPeriod = '1D'; // '1D' | '5D' | '1M'
+
+    function populateUsSectorSelect() {{
+      const sel = document.getElementById('usSectorSelect');
+      if (!sel || !US_DATA) return;
+      const secs = (US_DATA.sectorFlows || []).map(x => ({{ k: x.sector, lbl: x.sectorKo || x.sector }}));
+      sel.innerHTML = `<option value="">전체 섹터</option>` + secs.map(s => `<option value="${{escapeHtml(s.k)}}">${{escapeHtml(s.lbl)}}</option>`).join('');
+      sel.value = currentUsSector;
+    }}
+
+    function selectUsMarketView(tab = null) {{
+      closeMobileNav();
+      currentViewMode = 'US';
+      if (tab) currentUsTab = tab;
+      setScreenerVisibility(false);
+      populateUsSectorSelect();
+      updateUsControlButtons();
+      renderSidebar();
+      renderUsMarketView();
+      pushNavHistory();
+    }}
+
+    function setUsTab(tab) {{
+      currentUsTab = tab || 'VOLUME';
+      const sortSel = document.getElementById('usSortSelect');
+      if (sortSel) {{
+        if (currentUsTab === 'SURGE') sortSel.value = 'rvol';
+        else if (currentUsTab === 'VOLUME') sortSel.value = 'dollarVol';
+      }}
+      updateUsControlButtons();
+      renderUsMarketView();
+      pushNavHistory();
+    }}
+
+    function setUsSector(sec) {{
+      currentUsSector = (currentUsSector === sec && sec !== '') ? '' : (sec || '');
+      const sel = document.getElementById('usSectorSelect');
+      if (sel) sel.value = currentUsSector;
+      renderUsMarketView();
+    }}
+
+    function setUsEtfPeriod(p) {{
+      currentUsEtfPeriod = p || '1D';
+      updateUsControlButtons();
+      renderUsMarketView();
+    }}
+
+    function updateUsControlButtons() {{
+      const bV = document.getElementById('btnUsTabVol');
+      const bS = document.getElementById('btnUsTabSurge');
+      const bSec = document.getElementById('btnUsTabSector');
+      if (bV) bV.classList.toggle('active', currentUsTab === 'VOLUME');
+      if (bS) bS.classList.toggle('active', currentUsTab === 'SURGE');
+      if (bSec) bSec.classList.toggle('active', currentUsTab === 'SECTOR');
+      const e1 = document.getElementById('btnUsEtf1D');
+      const e5 = document.getElementById('btnUsEtf5D');
+      const em = document.getElementById('btnUsEtf1M');
+      if (e1) e1.classList.toggle('active', currentUsEtfPeriod === '1D');
+      if (e5) e5.classList.toggle('active', currentUsEtfPeriod === '5D');
+      if (em) em.classList.toggle('active', currentUsEtfPeriod === '1M');
+    }}
+
+    function _usFmtPct(v) {{
+      if (v === null || v === undefined || isNaN(Number(v))) return '-';
+      const n = Number(v);
+      return `${{n > 0 ? '+' : ''}}${{n.toFixed(2)}}%`;
+    }}
+
+    function _usPctCls(v) {{
+      if (v === null || v === undefined || isNaN(Number(v))) return '';
+      return Number(v) > 0 ? 'pct-up' : (Number(v) < 0 ? 'pct-down' : '');
+    }}
+
+    function renderUsMarketView() {{
+      const wrap = document.getElementById('usMarketBodyWrap');
+      if (!wrap) return;
+      const ud = US_DATA || {{ indices: [], sectorEtfs: [], sectorFlows: [], stocks: [], summary: {{}} }};
+      const stocks = ud.stocks || [];
+      const sum = ud.summary || {{}};
+      const tabTitle = currentUsTab === 'SURGE'
+        ? '미국 거래량 급증 · 기관 매집 시그널'
+        : (currentUsTab === 'SECTOR' ? '미국 섹터 ETF · 자금 쏠림 분석' : '미국 거래대금 · 모멘텀 TOP');
+
+      document.getElementById('pageTitle').textContent = `🇺🇸 ${{tabTitle}}`;
+      document.getElementById('pageSubtitle').textContent = `Nasdaq · Yahoo Finance 통합 · 미국 시총 상위 대형주 거래대금($B) · 20일 평균 대비 거래량 배수(RVOL) · 12개 섹터 자금 흐름`;
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">📅 미국 거래일: ${{ud.tradeDate || '-'}}</span>
+        <span class="meta-pill">🕒 업데이트: ${{ud.updatedAt || '-'}}</span>
+        <span class="meta-pill up clickable" onclick="setUsTab('SURGE')">🔥 매집 시그널 ${{sum.accumCount || 0}}종목</span>
+        <span class="meta-pill down clickable" onclick="setUsTab('SURGE')">⚠️ 대량 매도 ${{sum.distCount || 0}}종목</span>
+        <span class="meta-pill">⚡ RVOL 1.5배↑ ${{sum.surgeCount || 0}}종목</span>
+      `;
+
+      if (!stocks.length) {{
+        wrap.innerHTML = `<div class="flow-empty-guide"><h3>🇺🇸 미국 시장 데이터가 아직 수집되지 않았습니다</h3><p><code>python us_market.py</code> 실행 시 미국 전체 상장주 거래대금·RVOL·섹터 자금 흐름이 자동 반영됩니다.</p></div>`;
+        return;
+      }}
+
+      // 1) 4대 지수/반도체 ETF KPI 카드
+      const idxHtml = `
+        <div class="us-idx-grid">
+          ${{(ud.indices || []).map(x => `
+            <div class="us-idx-card">
+              <div class="us-idx-top">
+                <span><a href="https://www.tradingview.com/symbols/${{x.symbol}}/" target="_blank" style="color:#0f172a; text-decoration:none;">${{x.symbol}}</a> · ${{escapeHtml(x.label)}}</span>
+                <span style="font-size:10.5px; color:#64748b; font-weight:700;">RVOL ${{x.rvol ? x.rvol.toFixed(2) + 'x' : '-'}}</span>
+              </div>
+              <div class="us-idx-price">
+                <span>$${{x.price ? x.price.toFixed(2) : '-'}}</span>
+                <span class="${{_usPctCls(x.chg1d)}}" style="font-size:14px;">${{_usFmtPct(x.chg1d)}}</span>
+              </div>
+              <div class="us-idx-sub">
+                <span>5일 <b class="${{_usPctCls(x.chg5d)}}">${{_usFmtPct(x.chg5d)}}</b></span>
+                <span>1개월 <b class="${{_usPctCls(x.chg1m)}}">${{_usFmtPct(x.chg1m)}}</b></span>
+                <span>대금 $${{x.dollarVolB ? x.dollarVolB.toFixed(1) : '-'}}B</span>
+              </div>
+            </div>
+          `).join('')}}
+        </div>
+      `;
+
+      // 2) 12개 섹터 ETF 히트맵
+      const pField = currentUsEtfPeriod === '5D' ? 'chg5d' : (currentUsEtfPeriod === '1M' ? 'chg1m' : 'chg1d');
+      const pLbl = currentUsEtfPeriod === '5D' ? '5일' : (currentUsEtfPeriod === '1M' ? '1개월' : '1일');
+      const sortedEtfs = [...(ud.sectorEtfs || [])].sort((a, b) => (Number(b[pField]) || -999) - (Number(a[pField]) || -999));
+      const etfCardHtml = `
+        <div class="semi-chart-card">
+          <div class="semi-chart-head">
+            <div class="semi-chart-title">🧭 미국 12개 섹터 · 반도체 ETF 히트맵 (${{pLbl}} 등락률 · 클릭 시 해당 섹터 필터)</div>
+            <div style="font-size:11px; color:#64748b; font-weight:600;">${{currentUsSector ? `선택 섹터: ${{escapeHtml(currentUsSector)}} (다시 클릭하면 해제)` : '전체 섹터 표시 중'}}</div>
+          </div>
+          <div class="us-etf-grid">
+            ${{sortedEtfs.map(e => {{
+              const v = e[pField];
+              const cls = (v === null || v === undefined) ? 'flat'
+                : (v >= 1.5 ? 'up2' : (v > 0.1 ? 'up1' : (v <= -1.5 ? 'dn2' : (v < -0.1 ? 'dn1' : 'flat'))));
+              const isAct = (currentUsSector && currentUsSector === e.sector) ? 'active' : '';
+              return `<div class="us-etf-tile ${{cls}} ${{isAct}}" onclick="setUsSector('${{e.sector}}')" title="${{e.symbol}} (${{e.label}}) · 1일 ${{_usFmtPct(e.chg1d)}} / 5일 ${{_usFmtPct(e.chg5d)}} / 1개월 ${{_usFmtPct(e.chg1m)}} · RVOL ${{e.rvol || '-'}}x">
+                <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800;">
+                  <span>${{e.symbol}}</span>
+                  <span style="opacity:0.85;">${{escapeHtml(e.label)}}</span>
+                </div>
+                <div style="font-size:15px; font-weight:900;">${{_usFmtPct(v)}}</div>
+                <div style="font-size:10px; opacity:0.8; font-weight:700;">RVOL ${{e.rvol ? e.rvol.toFixed(2) + 'x' : '-'}} · $${{e.dollarVolB ? e.dollarVolB.toFixed(1) : '-'}}B</div>
+              </div>`;
+            }}).join('')}}
+          </div>
+        </div>
+      `;
+
+      // 3) 섹터별 자금 쏠림 (상승 거래대금 vs 하락 거래대금)
+      const secFlows = ud.sectorFlows || [];
+      const maxTotVol = Math.max(1, ...secFlows.map(s => s.totalVolB || 0));
+      const secFlowHtml = `
+        <div class="semi-chart-card">
+          <div class="semi-chart-head">
+            <div class="semi-chart-title">💰 미국 전체 중대형주(시총 $2B↑) 섹터별 자금 쏠림 (상승 거래대금 vs 하락 거래대금)</div>
+            <div style="font-size:11px; color:#64748b; font-weight:700;">빨강: 상승 종목 거래대금 · 파랑: 하락 종목 거래대금 · 단위: 십억 달러($B)</div>
+          </div>
+          <div>
+            ${{secFlows.map(sf => {{
+              const tot = Math.max(0.01, sf.totalVolB || 0);
+              const upW = (sf.upVolB / maxTotVol * 100).toFixed(1);
+              const dnW = (sf.downVolB / maxTotVol * 100).toFixed(1);
+              const netCls = sf.netFlowB >= 0 ? 'pct-up' : 'pct-down';
+              const leadTxt = (sf.leaders || []).slice(0, 3).map(l => `${{l.symbol}}($${{l.volB.toFixed(1)}}B, ${{_usFmtPct(l.chg1d)}})`).join(' · ');
+              return `<div class="us-flow-row" style="cursor:pointer;" onclick="setUsSector('${{sf.sector}}')">
+                <div style="font-weight:800; color:#0f172a;">${{escapeHtml(sf.sectorKo)}} <span style="font-size:10px; color:#94a3b8;">(${{sf.count}})</span></div>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <div class="us-flow-bar-track">
+                    <div style="width:${{upW}}%; background:#ef4444; height:100%;" title="상승 거래대금 $${{sf.upVolB.toFixed(2)}}B"></div>
+                    <div style="width:${{dnW}}%; background:#3b82f6; height:100%;" title="하락 거래대금 $${{sf.downVolB.toFixed(2)}}B"></div>
+                  </div>
+                  <div style="font-size:10.5px; color:#64748b;">${{leadTxt}}</div>
+                </div>
+                <div style="text-align:right; font-weight:800;" class="${{netCls}}">
+                  순 ${{sf.netFlowB >= 0 ? '+' : ''}}$${{sf.netFlowB.toFixed(1)}}B
+                  <div style="font-size:10px; color:#64748b; font-weight:600;">상승비율 ${{sf.upRatio.toFixed(0)}}%</div>
+                </div>
+              </div>`;
+            }}).join('')}}
+          </div>
+        </div>
+      `;
+
+      // 4) 핵심 종목 테이블
+      const q = (document.getElementById('usSearchInput') ? document.getElementById('usSearchInput').value : '').trim().toLowerCase();
+      const sortBy = document.getElementById('usSortSelect') ? document.getElementById('usSortSelect').value : 'dollarVol';
+      let list = stocks.filter(s => {{
+        if (currentUsSector && s.sector !== currentUsSector) return false;
+        if (currentUsTab === 'SURGE') {{
+          if (!s.signal && (s.rvol || 0) < 1.35) return false;
+        }}
+        if (q) {{
+          const hay = `${{s.symbol}} ${{s.name}} ${{s.sectorKo}} ${{s.industry}}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }}
+        return true;
+      }});
+      const nv = (v, def = -9999) => (v !== null && v !== undefined && !isNaN(Number(v))) ? Number(v) : def;
+      list.sort((a, b) => {{
+        if (sortBy === 'rvol') return nv(b.rvol) - nv(a.rvol);
+        if (sortBy === 'chg1d') return nv(b.chg1d) - nv(a.chg1d);
+        if (sortBy === 'chg5d') return nv(b.chg5d) - nv(a.chg5d);
+        if (sortBy === 'chg1m') return nv(b.chg1m) - nv(a.chg1m);
+        if (sortBy === 'turnover') return nv(b.turnoverPct) - nv(a.turnoverPct);
+        return nv(b.dollarVolB) - nv(a.dollarVolB);
+      }});
+      if (currentUsTab === 'VOLUME' && !q && !currentUsSector) list = list.slice(0, 60);
+
+      const tblRows = list.map((s, idx) => {{
+        const sigHtml = s.signal === 'ACCUM'
+          ? `<span class="us-sig-badge accum">🔥 강한 매집</span>`
+          : (s.signal === 'DIST' ? `<span class="us-sig-badge dist">⚠️ 대량 매도</span>`
+          : (s.signal === 'SURGE' ? `<span class="us-sig-badge surge">⚡ 거래량 급증</span>` : '<span style="color:#cbd5e1;">-</span>'));
+        const rvolHtml = (s.rvol !== null && s.rvol !== undefined)
+          ? (s.rvol >= 1.5 ? `<span class="us-rvol-hi">${{s.rvol.toFixed(2)}}x</span>` : `${{s.rvol.toFixed(2)}}x`)
+          : '-';
+        return `<tr class="${{s.signal === 'ACCUM' ? 'pe-row-r1' : ''}}">
+          <td class="ctr" style="color:#64748b; font-weight:800;">${{idx + 1}}</td>
+          <td class="lft">
+            <a href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank" style="font-weight:900; color:#1d4ed8; text-decoration:none; margin-right:5px;" title="TradingView 차트 열기">${{s.symbol}}</a>
+            <a href="https://finance.yahoo.com/quote/${{s.symbol}}/" target="_blank" style="color:#0f172a; font-weight:700; text-decoration:none;" title="Yahoo Finance 열기">${{escapeHtml(s.name)}}</a>
+          </td>
+          <td class="lft" style="font-size:11px; color:#475569;">${{escapeHtml(s.sectorKo || s.sector)}}</td>
+          <td style="font-weight:800;">$${{s.price ? s.price.toFixed(2) : '-'}}</td>
+          <td class="${{_usPctCls(s.chg1d)}}" style="font-weight:800;">${{_usFmtPct(s.chg1d)}}</td>
+          <td class="${{_usPctCls(s.chg5d)}}">${{_usFmtPct(s.chg5d)}}</td>
+          <td class="${{_usPctCls(s.chg1m)}}">${{_usFmtPct(s.chg1m)}}</td>
+          <td style="font-weight:800; color:#0f172a;">$${{s.dollarVolB ? s.dollarVolB.toFixed(2) : '-'}}B</td>
+          <td>${{rvolHtml}}</td>
+          <td style="color:#475569;">$${{s.mcapB ? Math.round(s.mcapB).toLocaleString('ko-KR') : '-'}}B <span style="font-size:10px; color:#94a3b8;">(${{s.turnoverPct ? s.turnoverPct.toFixed(1) + '%' : '-'}})</span></td>
+          <td class="ctr">${{sigHtml}}</td>
+        </tr>`;
+      }}).join('');
+
+      const tableCardHtml = `
+        <div class="pe-top50-card" style="border-top-color:#2563eb;">
+          <div class="pe-top50-head" style="background:linear-gradient(135deg,#eff6ff,#f8fafc); border-bottom-color:#bfdbfe;">
+            <div class="pe-top50-title" style="color:#1e3a8a;">
+              <span>🇺🇸 ${{currentUsTab === 'SURGE' ? '거래량 급증 · 기관 매집/이탈 시그널' : '미국 핵심 대형주 거래대금 · 모멘텀'}} (${{list.length}}종목)</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">티커 클릭 → TradingView · 종목명 클릭 → Yahoo Finance</span>
+            </div>
+          </div>
+          <div class="pe-tbl-wrap">
+            <table class="pe-tbl">
+              <thead>
+                <tr>
+                  <th class="ctr" style="width:36px;">#</th>
+                  <th class="lft">티커 · 종목명</th>
+                  <th class="lft">섹터</th>
+                  <th>현재가</th>
+                  <th>일간</th>
+                  <th>5일(주간)</th>
+                  <th>1개월</th>
+                  <th>거래대금</th>
+                  <th title="당일 거래량 ÷ 직전 20영업일 평균 거래량 (1.5배 이상 급증)">거래량 배수</th>
+                  <th>시총 (회전율)</th>
+                  <th class="ctr">수급 시그널</th>
+                </tr>
+              </thead>
+              <tbody>${{tblRows || '<tr><td colspan="11" class="ctr" style="padding:24px; color:#94a3b8;">조건에 맞는 미국 종목이 없습니다.</td></tr>'}}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      if (currentUsTab === 'SECTOR') {{
+        wrap.innerHTML = idxHtml + etfCardHtml + secFlowHtml + tableCardHtml;
+      }} else {{
+        wrap.innerHTML = idxHtml + etfCardHtml + tableCardHtml + secFlowHtml;
+      }}
     }}
 
     let currentSemiconRange = 60; // 최근 60개월(5년), 0=전체
@@ -9607,12 +10081,14 @@ def auto_push_to_github(here, commit_msg=None):
             "kospi200_yoy.py",
             "kiwoom_flow.py",
             "kosis_semicon.py",
+            "us_market.py",
             "index.html",
             "hankyung_reports.json",
             "op_estimate_history.json",
             "op_baseline.json",
             "investor_flow.json",
             "semicon_cycle.json",
+            "us_market.json",
             "favicon.svg",
             "favicon.png",
             "favicon.ico",
