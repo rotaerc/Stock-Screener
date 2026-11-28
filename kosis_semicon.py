@@ -425,22 +425,73 @@ def classify_inventory_phase(ship_yoy, inv_yoy):
     return "수축·조정기"
 
 
+def _next_ym(ym):
+    y, m = int(ym[:4]), int(ym[5:7])
+    return f"{y + 1:04d}-01" if m == 12 else f"{y:04d}-{m + 1:02d}"
+
+
+def _prev_ym(ym):
+    y, m = int(ym[:4]), int(ym[5:7])
+    return f"{y - 1:04d}-12" if m == 1 else f"{y:04d}-{m - 1:02d}"
+
+
 def build_semicon_payload(monthly_kosis, monthly_prices, meta_info):
-    """월별 지수 + 주가를 결합해 YoY, 재고순환지표, 재고율, 4국면을 계산합니다."""
-    all_yms = sorted(set(monthly_kosis.keys()) | set(monthly_prices.keys()))
-    kosis_yms = sorted(monthly_kosis.keys())
-    has_kosis = any(
-        (monthly_kosis[ym].get("shipIdx") is not None and monthly_kosis[ym].get("invIdx") is not None)
-        for ym in kosis_yms
+    """월별 지수 + 주가를 결합해 YoY, 재고순환지표, 재고율, 4국면을 계산하고 다음달까지 10년 월평균 예측치를 산출합니다."""
+    actual_kosis_yms = sorted(
+        ym for ym, v in monthly_kosis.items()
+        if v.get("shipIdx") is not None and v.get("invIdx") is not None
     )
+    has_kosis = bool(actual_kosis_yms)
+    latest_actual_ym = actual_kosis_yms[-1] if actual_kosis_yms else ""
+
+    # 현재월 + 1개월(다음달)까지 미발표 구간에 대해 최근 10년 동월 전월비(MoM%) 평균으로 예측치 자동 연장
+    now_ym = datetime.now().strftime("%Y-%m")
+    forecast_end_ym = _next_ym(now_ym)
+
+    combined_kosis = {ym: dict(v) for ym, v in monthly_kosis.items()}
+    forecast_yms = []
+
+    if latest_actual_ym and latest_actual_ym < forecast_end_ym:
+        # 월별(1~12월) 최근 10개년 확정치 전월비(MoM%) 평균 산출
+        mom_avg = {}
+        for field in ("shipIdx", "invIdx", "prodIdx"):
+            mom_avg[field] = {}
+            for mo in range(1, 13):
+                rates = []
+                for ym in actual_kosis_yms:
+                    if int(ym[5:7]) != mo:
+                        continue
+                    pym = _prev_ym(ym)
+                    cur_v = (monthly_kosis.get(ym) or {}).get(field)
+                    prv_v = (monthly_kosis.get(pym) or {}).get(field)
+                    if cur_v is not None and prv_v is not None and prv_v > 0:
+                        rates.append((cur_v / prv_v) - 1.0)
+                recent_10 = rates[-10:]
+                mom_avg[field][mo] = (sum(recent_10) / len(recent_10)) if recent_10 else 0.0
+
+        cur_ym = _next_ym(latest_actual_ym)
+        while cur_ym <= forecast_end_ym:
+            pym = _prev_ym(cur_ym)
+            mo = int(cur_ym[5:7])
+            prev_rec = combined_kosis.get(pym) or {}
+            fc_rec = {"isForecast": True}
+            for field in ("shipIdx", "invIdx", "prodIdx"):
+                pv = prev_rec.get(field)
+                if pv is not None and pv > 0:
+                    fc_rec[field] = round(pv * (1.0 + mom_avg[field].get(mo, 0.0)), 2)
+            combined_kosis[cur_ym] = fc_rec
+            forecast_yms.append(cur_ym)
+            cur_ym = _next_ym(cur_ym)
+
+    all_yms = sorted(set(combined_kosis.keys()) | set(monthly_prices.keys()))
 
     series = []
     for ym in all_yms:
-        k = monthly_kosis.get(ym) or {}
+        k = combined_kosis.get(ym) or {}
         p = monthly_prices.get(ym) or {}
         y, m = int(ym[:4]), int(ym[5:7])
         prev_ym = f"{y - 1:04d}-{m:02d}"
-        kp = monthly_kosis.get(prev_ym) or {}
+        kp = combined_kosis.get(prev_ym) or {}
 
         ship = k.get("shipIdx")
         inv = k.get("invIdx")
@@ -457,9 +508,9 @@ def build_semicon_payload(monthly_kosis, monthly_prices, meta_info):
         cycle = round(ship_yoy - inv_yoy, 2) if (ship_yoy is not None and inv_yoy is not None) else None
         inv_ratio = round(inv / ship * 100.0, 1) if (inv is not None and ship and ship > 0) else None
         phase = classify_inventory_phase(ship_yoy, inv_yoy)
+        is_fc = bool(k.get("isForecast"))
 
-        # KOSIS 데이터가 있는 경우, 2016-01 이후(YoY 산출 가능 시점) 또는 가격 포함 월 저장
-        series.append({
+        row_obj = {
             "ym": ym,
             "shipIdx": ship,
             "invIdx": inv,
@@ -472,15 +523,20 @@ def build_semicon_payload(monthly_kosis, monthly_prices, meta_info):
             "phase": phase,
             "samsung": p.get("samsung"),
             "hynix": p.get("hynix"),
-        })
+        }
+        if is_fc:
+            row_obj["isForecast"] = True
+        series.append(row_obj)
 
-    valid_cycle_months = [s["ym"] for s in series if s["cycle"] is not None]
-    latest_kosis_ym = valid_cycle_months[-1] if valid_cycle_months else ""
+    valid_actual_months = [s["ym"] for s in series if s["cycle"] is not None and not s.get("isForecast")]
+    latest_kosis_ym = valid_actual_months[-1] if valid_actual_months else ""
 
     return {
         "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "hasKosisData": bool(has_kosis and valid_cycle_months),
+        "hasKosisData": bool(has_kosis and valid_actual_months),
         "latestMonth": latest_kosis_ym,
+        "forecastMonths": forecast_yms,
+        "forecastMethod": "최근 10년 동월 전월비(MoM%) 평균 반영",
         "source": {
             "org": "통계청 (KOSIS 광업제조업동향조사)",
             "tblId": meta_info.get("tblId", ""),
@@ -625,6 +681,8 @@ def main():
                 old = json.load(open(SEMICON_JSON_PATH, encoding="utf-8"))
                 meta_info = old.get("source") or {}
                 for s in old.get("series") or []:
+                    if s.get("isForecast"):
+                        continue
                     if s.get("shipIdx") is not None or s.get("invIdx") is not None:
                         existing[s["ym"]] = {
                             k: s[k] for k in ("shipIdx", "invIdx", "prodIdx") if s.get(k) is not None
@@ -699,13 +757,17 @@ def main():
             "prodLabel": src_info["prod"][1] if src_info.get("prod") else "",
         },
     )
-    valid = [s for s in payload["series"] if s["cycle"] is not None]
+    valid = [s for s in payload["series"] if s["cycle"] is not None and not s.get("isForecast")]
     if valid:
         last = valid[-1]
         print(
-            f"  - 최신월({last['ym']}): 출하YoY {last['shipYoY']:+.2f}% / "
+            f"  - 최신 확정월({last['ym']}): 출하YoY {last['shipYoY']:+.2f}% / "
             f"재고YoY {last['invYoY']:+.2f}% / 재고순환지표 {last['cycle']:+.2f}%p [{last['phase']}]"
         )
+    fcs = [s for s in payload["series"] if s.get("isForecast") and s.get("cycle") is not None]
+    if fcs:
+        fc_txt = ", ".join(f"{x['ym']}(E) {x['cycle']:+.1f}%p" for x in fcs)
+        print(f"  - 10년 월평균 예측치({len(fcs)}개월): {fc_txt}")
     save_and_deploy(payload, skip_push=skip_push)
 
 

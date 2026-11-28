@@ -8278,15 +8278,24 @@ def build_web_dashboard(here):
         : '통계청(KOSIS) 반도체 출하·재고 지수 연동 대기 · 삼성전자·SK하이닉스 월봉 주가 비교';
 
       const kosisRows = allSeries.filter(r => r.cycle !== null && r.cycle !== undefined);
-      const latestK = kosisRows.length ? kosisRows[kosisRows.length - 1] : null;
-      const prevK = kosisRows.length >= 2 ? kosisRows[kosisRows.length - 2] : null;
-      const latestP = allSeries.length ? allSeries[allSeries.length - 1] : null;
+      const actualRows = kosisRows.filter(r => !r.isForecast);
+      const forecastRows = kosisRows.filter(r => Boolean(r.isForecast));
+      const latestK = actualRows.length ? actualRows[actualRows.length - 1] : (kosisRows.length ? kosisRows[kosisRows.length - 1] : null);
+      const prevK = actualRows.length >= 2 ? actualRows[actualRows.length - 2] : null;
+      const latestFc = forecastRows.length ? forecastRows[forecastRows.length - 1] : null;
+      const priceRows = allSeries.filter(r => r.samsung || r.hynix);
+      const latestP = priceRows.length ? priceRows[priceRows.length - 1] : (allSeries.length ? allSeries[allSeries.length - 1] : null);
+
+      const fcRangeTxt = forecastRows.length
+        ? `${{forecastRows[0].ym}} ~ ${{forecastRows[forecastRows.length - 1].ym}}`
+        : '';
 
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">🏛️ 통계청 KOSIS (${{src.tblId || 'DT_1F02001'}})</span>
-        <span class="meta-pill">📅 통계 최신월: ${{sd.latestMonth || '연동 대기'}}</span>
+        <span class="meta-pill">📅 확정 최신월: ${{sd.latestMonth || '연동 대기'}}</span>
+        ${{fcRangeTxt ? `<span class="meta-pill" style="background:#fffbeb; color:#b45309; border-color:#fcd34d;">🔮 예측치(10년 월평균): ${{fcRangeTxt}}</span>` : ''}}
         <span class="meta-pill">🕒 업데이트: ${{sd.updatedAt || '-'}}</span>
-        ${{latestK && latestK.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(latestK.phase)}}">현재 국면: ${{escapeHtml(latestK.phase)}}</span>` : ''}}
+        ${{latestK && latestK.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(latestK.phase)}}">확정 국면: ${{escapeHtml(latestK.phase)}}</span>` : ''}}
       `;
 
       const sliceByRange = (arr) => (currentSemiconRange > 0 && arr.length > currentSemiconRange) ? arr.slice(arr.length - currentSemiconRange) : arr;
@@ -8319,7 +8328,7 @@ def build_web_dashboard(here):
               ${{latestK && latestK.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(latestK.phase)}}">${{escapeHtml(latestK.phase)}}</span>` : ''}}
             </div>
             <div class="semi-kpi-val ${{latestK ? (latestK.cycle >= 0 ? 'up' : 'down') : ''}}">${{latestK ? _semiFmtSigned(latestK.cycle, '%p') : '연동 대기'}}</div>
-            <div class="semi-kpi-sub">${{latestK ? `${{latestK.ym}} 기준${{cycDelta !== null ? ` · 전월비 ${{cycDelta >= 0 ? '▲' : '▼'}}${{Math.abs(cycDelta).toFixed(1)}}%p` : ''}}` : 'KOSIS 키 등록 시 자동 산출'}}</div>
+            <div class="semi-kpi-sub">${{latestK ? `${{latestK.ym}} 확정${{cycDelta !== null ? ` · 전월비 ${{cycDelta >= 0 ? '▲' : '▼'}}${{Math.abs(cycDelta).toFixed(1)}}%p` : ''}}${{latestFc ? ` · ${{latestFc.ym}}(E) ${{_semiFmtSigned(latestFc.cycle, '%p')}}` : ''}}` : 'KOSIS 키 등록 시 자동 산출'}}</div>
           </div>
           <div class="semi-kpi-card">
             <div class="semi-kpi-label"><span>📦 반도체 출하증가율 (YoY)</span></div>
@@ -8364,7 +8373,8 @@ def build_web_dashboard(here):
           <div class="semi-chart-head">
             <div class="semi-chart-title">${{heroTitle}}</div>
             <div class="semi-legend">
-              ${{hasKosis ? `<span><span class="semi-leg-dot" style="background:#0f766e;"></span>재고순환지표 (좌축, %p)</span>` : ''}}
+              ${{hasKosis ? `<span><span class="semi-leg-dot" style="background:#0f766e;"></span>재고순환 확정치 (좌축, %p)</span>` : ''}}
+              ${{forecastRows.length ? `<span><span class="semi-leg-dot" style="background:#d97706;"></span>예측치 (10년 월평균, 점선)</span>` : ''}}
               ${{ovLegend}}
               <span style="color:#94a3b8; font-weight:600;">· 그래프에 마우스를 올리면 월별 상세 수치 표시</span>
             </div>
@@ -8379,17 +8389,18 @@ def build_web_dashboard(here):
             <div class="semi-chart-head">
               <div class="semi-chart-title">📊 반도체 출하증가율 vs 재고증가율 (YoY, %)</div>
               <div class="semi-legend">
-                <span><span class="semi-leg-dot" style="background:#dc2626;"></span>출하증가율(YoY)</span>
-                <span><span class="semi-leg-dot" style="background:#2563eb;"></span>재고증가율(YoY)</span>
+                <span><span class="semi-leg-dot" style="background:#dc2626;"></span>출하YoY</span>
+                <span><span class="semi-leg-dot" style="background:#2563eb;"></span>재고YoY</span>
+                ${{forecastRows.length ? `<span style="color:#b45309; font-weight:800;">⋯ 점선: 예측치</span>` : ''}}
               </div>
             </div>
             <div class="semi-svg-wrap" id="semiShipInvChartBox"></div>
           </div>
           <div class="semi-chart-card">
             <div class="semi-chart-head">
-              <div class="semi-chart-title">🧭 재고순환 시계 (최근 24개월 4국면 궤적)</div>
+              <div class="semi-chart-title">🧭 재고순환 시계 (최근 24개월 + 예측치 궤적)</div>
               <div class="semi-legend">
-                <span>X: 재고YoY · Y: 출하YoY</span>
+                <span>X: 재고YoY · Y: 출하YoY${{forecastRows.length ? ' · 주황 점선: 예측치' : ''}}</span>
               </div>
             </div>
             <div class="semi-svg-wrap" id="semiClockChartBox"></div>
@@ -8398,12 +8409,16 @@ def build_web_dashboard(here):
       ` : '';
 
       const tblRows = [...activeRows].reverse().slice(0, 60).map(r => {{
+        const isFc = Boolean(r.isForecast);
         const pBadge = r.phase ? `<span class="semi-phase-badge ${{_semiPhaseCls(r.phase)}}">${{escapeHtml(r.phase)}}</span>` : '-';
         const cCls = (r.cycle !== null && r.cycle !== undefined) ? (r.cycle >= 0 ? 'pct-up' : 'pct-down') : '';
         const sCls = (r.shipYoY !== null && r.shipYoY !== undefined) ? (r.shipYoY >= 0 ? 'pct-up' : 'pct-down') : '';
         const iCls = (r.invYoY !== null && r.invYoY !== undefined) ? (r.invYoY >= 0 ? 'pct-down' : 'pct-up') : '';
-        return `<tr>
-          <td class="ctr" style="font-weight:800; color:#334155;">${{r.ym}}</td>
+        const ymHtml = isFc
+          ? `${{r.ym}} <span style="display:inline-block; margin-left:3px; padding:1px 5px; border-radius:4px; background:#fef3c7; color:#b45309; border:1px solid #fcd34d; font-size:10px; font-weight:800;">예측치</span>`
+          : r.ym;
+        return `<tr style="${{isFc ? 'background:#fffbeb;' : ''}}">
+          <td class="ctr" style="font-weight:800; color:${{isFc ? '#b45309' : '#334155'}};">${{ymHtml}}</td>
           <td class="ctr">${{pBadge}}</td>
           <td class="${{cCls}}" style="font-weight:800;">${{_semiFmtSigned(r.cycle, '%p')}}</td>
           <td class="${{sCls}}">${{_semiFmtSigned(r.shipYoY, '%')}}</td>
@@ -8522,20 +8537,48 @@ def build_web_dashboard(here):
       const xStep = Math.max(1, Math.ceil(n / 10));
       let xLblHtml = '';
       for (let i = 0; i < n; i += xStep) {{
-        xLblHtml += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="#64748b" font-weight="600">${{rows[i].ym}}</text>`;
+        const isFcLbl = Boolean(rows[i].isForecast);
+        xLblHtml += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="${{isFcLbl ? '#b45309' : '#64748b'}}" font-weight="${{isFcLbl ? '800' : '600'}}">${{rows[i].ym}}${{isFcLbl ? '(E)' : ''}}</text>`;
       }}
       if ((n - 1) % xStep !== 0) {{
-        xLblHtml += `<text x="${{xOf(n - 1).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="#0f172a" font-weight="700">${{rows[n - 1].ym}}</text>`;
+        const lastFc = Boolean(rows[n - 1].isForecast);
+        xLblHtml += `<text x="${{xOf(n - 1).toFixed(1)}}" y="${{H - 10}}" text-anchor="middle" font-size="10.5" fill="${{lastFc ? '#b45309' : '#0f172a'}}" font-weight="800">${{rows[n - 1].ym}}${{lastFc ? '(E)' : ''}}</text>`;
       }}
 
-      // Cycle path + shaded positive/negative areas
+      // Forecast zone background + Cycle path (actual solid + forecast dashed)
+      let fcBandHtml = '';
       let cycleHtml = '';
+      const firstFcIdx = rows.findIndex(r => Boolean(r.isForecast));
+      if (hasKosis && firstFcIdx > 0) {{
+        const bx0 = xOf(firstFcIdx - 1);
+        const bx1 = xOf(n - 1);
+        const bw = Math.max(8, bx1 - bx0);
+        const midX = bx0 + bw / 2;
+        fcBandHtml = `
+          <rect x="${{bx0.toFixed(1)}}" y="${{padT}}" width="${{bw.toFixed(1)}}" height="${{plotH}}" fill="rgba(245, 158, 11, 0.10)"/>
+          <line x1="${{bx0.toFixed(1)}}" y1="${{padT}}" x2="${{bx0.toFixed(1)}}" y2="${{padT + plotH}}" stroke="#d97706" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <text x="${{Math.min(W - padR - 4, midX).toFixed(1)}}" y="${{padT + 13}}" text-anchor="middle" font-size="10" font-weight="800" fill="#b45309">예측치</text>
+        `;
+      }}
       if (hasKosis) {{
-        const pts = rows.map((r, i) => (r.cycle !== null && r.cycle !== undefined) ? [xOf(i), yL(r.cycle)] : null).filter(Boolean);
-        if (pts.length >= 2) {{
-          const lineD = pts.map((p, idx) => `${{idx === 0 ? 'M' : 'L'}}${{p[0].toFixed(1)}},${{p[1].toFixed(1)}}`).join(' ');
-          const areaD = `${{lineD}} L${{pts[pts.length - 1][0].toFixed(1)}},${{yZero.toFixed(1)}} L${{pts[0][0].toFixed(1)}},${{yZero.toFixed(1)}} Z`;
-          cycleHtml = `
+        const actualPts = [];
+        const fcPts = [];
+        let lastActualPt = null;
+        rows.forEach((r, i) => {{
+          if (r.cycle === null || r.cycle === undefined) return;
+          const pt = [xOf(i), yL(r.cycle), r];
+          if (r.isForecast) {{
+            if (!fcPts.length && lastActualPt) fcPts.push(lastActualPt);
+            fcPts.push(pt);
+          }} else {{
+            actualPts.push(pt);
+            lastActualPt = pt;
+          }}
+        }});
+        if (actualPts.length >= 2) {{
+          const lineD = actualPts.map((p, idx) => `${{idx === 0 ? 'M' : 'L'}}${{p[0].toFixed(1)}},${{p[1].toFixed(1)}}`).join(' ');
+          const areaD = `${{lineD}} L${{actualPts[actualPts.length - 1][0].toFixed(1)}},${{yZero.toFixed(1)}} L${{actualPts[0][0].toFixed(1)}},${{yZero.toFixed(1)}} Z`;
+          cycleHtml += `
             <defs>
               <clipPath id="semiPosClip"><rect x="${{padL}}" y="${{padT}}" width="${{plotW}}" height="${{Math.max(0, yZero - padT).toFixed(1)}}"/></clipPath>
               <clipPath id="semiNegClip"><rect x="${{padL}}" y="${{yZero.toFixed(1)}}" width="${{plotW}}" height="${{Math.max(0, padT + plotH - yZero).toFixed(1)}}"/></clipPath>
@@ -8543,6 +8586,16 @@ def build_web_dashboard(here):
             <path d="${{areaD}}" fill="rgba(16, 185, 129, 0.16)" clip-path="url(#semiPosClip)"/>
             <path d="${{areaD}}" fill="rgba(37, 99, 235, 0.13)" clip-path="url(#semiNegClip)"/>
             <path d="${{lineD}}" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round"/>
+          `;
+        }}
+        if (fcPts.length >= 2) {{
+          const fcD = fcPts.map((p, idx) => `${{idx === 0 ? 'M' : 'L'}}${{p[0].toFixed(1)}},${{p[1].toFixed(1)}}`).join(' ');
+          const fcDots = fcPts.filter(p => p[2].isForecast).map(p =>
+            `<circle cx="${{p[0].toFixed(1)}}" cy="${{p[1].toFixed(1)}}" r="4" fill="#fff" stroke="#d97706" stroke-width="2.2"/>`
+          ).join('');
+          cycleHtml += `
+            <path d="${{fcD}}" fill="none" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6 4" stroke-linejoin="round"/>
+            ${{fcDots}}
           `;
         }}
       }}
@@ -8564,6 +8617,7 @@ def build_web_dashboard(here):
 
       container.innerHTML = `
         <svg viewBox="0 0 ${{W}} ${{H}}" preserveAspectRatio="xMidYMid meet">
+          ${{fcBandHtml}}
           ${{gridHtml}}
           ${{cycleHtml}}
           ${{priceHtml}}
@@ -8593,7 +8647,9 @@ def build_web_dashboard(here):
         const cx = xOf(idx);
         cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = '';
         if (hasKosis && r.cycle !== null && r.cycle !== undefined) {{
-          dotL.setAttribute('cx', cx); dotL.setAttribute('cy', yL(r.cycle)); dotL.style.display = '';
+          dotL.setAttribute('cx', cx); dotL.setAttribute('cy', yL(r.cycle));
+          dotL.setAttribute('fill', r.isForecast ? '#d97706' : '#0f766e');
+          dotL.style.display = '';
         }} else dotL.style.display = 'none';
         [dotR0, dotR1].forEach((dot, si) => {{
           if (rSeries[si] && rSeries[si].vals[idx] !== null) {{
@@ -8601,14 +8657,16 @@ def build_web_dashboard(here):
             dot.setAttribute('fill', rSeries[si].color); dot.style.display = '';
           }} else dot.style.display = 'none';
         }});
-        const lines = [`[${{r.ym}}] ${{r.phase ? `국면: ${{r.phase}}` : '월별 데이터'}}`];
+        const fcMark = r.isForecast ? ' · 예측치(10년 평균)' : '';
+        const lines = [`[${{r.ym}}${{fcMark}}] ${{r.phase ? `국면: ${{r.phase}}` : '월별 데이터'}}`];
         if (hasKosis) {{
-          lines.push(`• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}`);
+          lines.push(`• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}${{r.isForecast ? ' (예측)' : ''}}`);
           lines.push(`• 출하 YoY: ${{_semiFmtSigned(r.shipYoY, '%')}} / 재고 YoY: ${{_semiFmtSigned(r.invYoY, '%')}}`);
           if (r.invRatio !== null && r.invRatio !== undefined) lines.push(`• 재고율(재고/출하): ${{r.invRatio.toFixed(1)}}%`);
         }}
         if (r.samsung) lines.push(`• 삼성전자 종가: ${{r.samsung.toLocaleString('ko-KR')}}원`);
         if (r.hynix) lines.push(`• SK하이닉스 종가: ${{r.hynix.toLocaleString('ko-KR')}}원`);
+        if (r.isForecast) lines.push('※ 최근 10년 동월 전월비 평균으로 산출된 예측치');
         tipBox.textContent = lines.join('\\n');
         tipBox.style.display = 'block';
         positionTip(e);
@@ -8641,27 +8699,54 @@ def build_web_dashboard(here):
       }}
       grid += `<line x1="${{padL}}" y1="${{yOf(0).toFixed(1)}}" x2="${{W - padR}}" y2="${{yOf(0).toFixed(1)}}" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4 3"/>`;
 
-      const mkPath = (field) => {{
-        let d = '', st = false;
+      const mkSplitPaths = (field) => {{
+        let dAct = '', stA = false, dFc = '', lastActPt = null;
+        const fcDots = [];
         rows.forEach((r, i) => {{
           const v = r[field];
-          if (v === null || v === undefined) {{ st = false; return; }}
-          d += `${{st ? 'L' : 'M'}}${{xOf(i).toFixed(1)}},${{yOf(v).toFixed(1)}} `;
-          st = true;
+          if (v === null || v === undefined) {{ stA = false; return; }}
+          const pt = [xOf(i), yOf(v)];
+          if (r.isForecast) {{
+            if (!dFc && lastActPt) dFc = `M${{lastActPt[0].toFixed(1)}},${{lastActPt[1].toFixed(1)}} `;
+            dFc += `${{dFc ? 'L' : 'M'}}${{pt[0].toFixed(1)}},${{pt[1].toFixed(1)}} `;
+            fcDots.push(pt);
+          }} else {{
+            dAct += `${{stA ? 'L' : 'M'}}${{pt[0].toFixed(1)}},${{pt[1].toFixed(1)}} `;
+            stA = true;
+            lastActPt = pt;
+          }}
         }});
-        return d;
+        return {{ dAct, dFc, fcDots }};
       }};
+      const shipP = mkSplitPaths('shipYoY');
+      const invP = mkSplitPaths('invYoY');
+      const firstFcSi = rows.findIndex(r => Boolean(r.isForecast));
+      let siFcBand = '';
+      if (firstFcSi > 0) {{
+        const bx0 = xOf(firstFcSi - 1), bx1 = xOf(n - 1), bw = Math.max(6, bx1 - bx0);
+        siFcBand = `
+          <rect x="${{bx0.toFixed(1)}}" y="${{padT}}" width="${{bw.toFixed(1)}}" height="${{plotH}}" fill="rgba(245,158,11,0.10)"/>
+          <line x1="${{bx0.toFixed(1)}}" y1="${{padT}}" x2="${{bx0.toFixed(1)}}" y2="${{padT + plotH}}" stroke="#d97706" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="${{(bx0 + bw / 2).toFixed(1)}}" y="${{padT + 11}}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#b45309">예측치</text>
+        `;
+      }}
       const xStep = Math.max(1, Math.ceil(n / 6));
       let xLbl = '';
       for (let i = 0; i < n; i += xStep) {{
-        xLbl += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 9}}" text-anchor="middle" font-size="10" fill="#64748b" font-weight="600">${{rows[i].ym}}</text>`;
+        const isF = Boolean(rows[i].isForecast);
+        xLbl += `<text x="${{xOf(i).toFixed(1)}}" y="${{H - 9}}" text-anchor="middle" font-size="10" fill="${{isF ? '#b45309' : '#64748b'}}" font-weight="${{isF ? '800' : '600'}}">${{rows[i].ym}}${{isF ? '(E)' : ''}}</text>`;
       }}
 
       container.innerHTML = `
         <svg viewBox="0 0 ${{W}} ${{H}}" preserveAspectRatio="xMidYMid meet">
+          ${{siFcBand}}
           ${{grid}}
-          <path d="${{mkPath('shipYoY')}}" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round"/>
-          <path d="${{mkPath('invYoY')}}" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="${{shipP.dAct}}" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round"/>
+          ${{shipP.dFc ? `<path d="${{shipP.dFc}}" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-dasharray="5 3" stroke-linejoin="round"/>` : ''}}
+          ${{shipP.fcDots.map(p => `<circle cx="${{p[0].toFixed(1)}}" cy="${{p[1].toFixed(1)}}" r="3.2" fill="#fff" stroke="#dc2626" stroke-width="1.8"/>`).join('')}}
+          <path d="${{invP.dAct}}" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round"/>
+          ${{invP.dFc ? `<path d="${{invP.dFc}}" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-dasharray="5 3" stroke-linejoin="round"/>` : ''}}
+          ${{invP.fcDots.map(p => `<circle cx="${{p[0].toFixed(1)}}" cy="${{p[1].toFixed(1)}}" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="1.8"/>`).join('')}}
           ${{xLbl}}
           <line id="siCross" x1="0" y1="${{padT}}" x2="0" y2="${{padT + plotH}}" stroke="#334155" stroke-width="1" stroke-dasharray="3 3" style="display:none;"/>
           <circle id="siDotS" cx="0" cy="0" r="4" fill="#dc2626" stroke="#fff" stroke-width="1.8" style="display:none;"/>
@@ -8683,7 +8768,8 @@ def build_web_dashboard(here):
         cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = '';
         if (r.shipYoY !== null) {{ dotS.setAttribute('cx', cx); dotS.setAttribute('cy', yOf(r.shipYoY)); dotS.style.display = ''; }} else dotS.style.display = 'none';
         if (r.invYoY !== null) {{ dotI.setAttribute('cx', cx); dotI.setAttribute('cy', yOf(r.invYoY)); dotI.style.display = ''; }} else dotI.style.display = 'none';
-        tipBox.textContent = `[${{r.ym}}] ${{r.phase || ''}}\\n• 출하증가율(YoY): ${{_semiFmtSigned(r.shipYoY, '%')}}\\n• 재고증가율(YoY): ${{_semiFmtSigned(r.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}`;
+        const fcTag = r.isForecast ? ' · 예측치(10년 평균)' : '';
+        tipBox.textContent = `[${{r.ym}}${{fcTag}}] ${{r.phase || ''}}\\n• 출하증가율(YoY): ${{_semiFmtSigned(r.shipYoY, '%')}}\\n• 재고증가율(YoY): ${{_semiFmtSigned(r.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(r.cycle, '%p')}}`;
         tipBox.style.display = 'block';
         positionTip(e);
       }};
@@ -8706,19 +8792,34 @@ def build_web_dashboard(here):
       const yOf = (v) => padT + (1 - (v + maxAbsY) / (2 * maxAbsY)) * plotH;
       const x0 = xOf(0), y0 = yOf(0);
 
-      const polyD = pts.map((p, i) => `${{i === 0 ? 'M' : 'L'}}${{xOf(p.invYoY).toFixed(1)}},${{yOf(p.shipYoY).toFixed(1)}}`).join(' ');
+      const actPts = pts.filter(p => !p.isForecast);
+      const fcPtsClk = pts.filter(p => Boolean(p.isForecast));
+      const lastActIdx = actPts.length - 1;
+      const polyAct = actPts.map((p, i) => `${{i === 0 ? 'M' : 'L'}}${{xOf(p.invYoY).toFixed(1)}},${{yOf(p.shipYoY).toFixed(1)}}`).join(' ');
+      const fcChain = (actPts.length && fcPtsClk.length) ? [actPts[lastActIdx], ...fcPtsClk] : fcPtsClk;
+      const polyFc = fcChain.length >= 2
+        ? fcChain.map((p, i) => `${{i === 0 ? 'M' : 'L'}}${{xOf(p.invYoY).toFixed(1)}},${{yOf(p.shipYoY).toFixed(1)}}`).join(' ')
+        : '';
+
       const dotsHtml = pts.map((p, i) => {{
-        const isLast = (i === pts.length - 1);
+        const isFc = Boolean(p.isForecast);
+        const isLastAct = (!isFc && actPts.length && p.ym === actPts[lastActIdx].ym);
+        const isLastAll = (i === pts.length - 1);
         const cx = xOf(p.invYoY), cy = yOf(p.shipYoY);
-        const op = (0.3 + 0.7 * (i / Math.max(1, pts.length - 1))).toFixed(2);
-        const r = isLast ? 6 : (i >= pts.length - 6 ? 4 : 3);
-        const col = isLast ? '#dc2626' : '#0f766e';
-        const tip = `[${{p.ym}}] ${{p.phase || ''}}\\n• 출하YoY: ${{_semiFmtSigned(p.shipYoY, '%')}}\\n• 재고YoY: ${{_semiFmtSigned(p.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(p.cycle, '%p')}}`;
-        const halo = isLast ? `<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="10.5" fill="rgba(220,38,38,0.18)"/>` : '';
-        const lbl = (isLast || i === 0 || i % 6 === 0)
-          ? `<text x="${{(cx + 7).toFixed(1)}}" y="${{(cy - 5).toFixed(1)}}" font-size="${{isLast ? '10.5' : '9'}}" font-weight="${{isLast ? '800' : '600'}}" fill="${{isLast ? '#b91c1c' : '#475569'}}">${{p.ym.slice(2)}}</text>`
+        const op = isFc ? '1' : (0.3 + 0.7 * (i / Math.max(1, pts.length - 1))).toFixed(2);
+        const r = isLastAct ? 5.8 : (isFc ? 4.8 : (i >= pts.length - 7 ? 3.8 : 3));
+        const fill = isFc ? '#fff' : (isLastAct ? '#dc2626' : '#0f766e');
+        const stroke = isFc ? '#d97706' : '#fff';
+        const sw = isFc ? '2.2' : '1.2';
+        const fcMark = isFc ? ' · 예측치(10년 평균)' : '';
+        const tip = `[${{p.ym}}${{fcMark}}] ${{p.phase || ''}}\\n• 출하YoY: ${{_semiFmtSigned(p.shipYoY, '%')}}\\n• 재고YoY: ${{_semiFmtSigned(p.invYoY, '%')}}\\n• 재고순환지표: ${{_semiFmtSigned(p.cycle, '%p')}}`;
+        const halo = isLastAct
+          ? `<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="10" fill="rgba(220,38,38,0.18)"/>`
+          : (isLastAll && isFc ? `<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="9.5" fill="rgba(245,158,11,0.22)"/>` : '');
+        const lbl = (isLastAct || isFc || i === 0 || i % 6 === 0)
+          ? `<text x="${{(cx + 7).toFixed(1)}}" y="${{(cy - 5).toFixed(1)}}" font-size="${{(isLastAct || isLastAll) ? '10' : '8.8'}}" font-weight="${{(isLastAct || isFc) ? '800' : '600'}}" fill="${{isFc ? '#b45309' : (isLastAct ? '#b91c1c' : '#475569')}}">${{p.ym.slice(2)}}${{isFc ? '(E)' : ''}}</text>`
           : '';
-        return `${{halo}}<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="${{r}}" fill="${{col}}" fill-opacity="${{op}}" stroke="#fff" stroke-width="1.2" data-tip="${{escapeHtml(tip)}}" style="cursor:pointer;"/>${{lbl}}`;
+        return `${{halo}}<circle cx="${{cx.toFixed(1)}}" cy="${{cy.toFixed(1)}}" r="${{r}}" fill="${{fill}}" fill-opacity="${{op}}" stroke="${{stroke}}" stroke-width="${{sw}}" data-tip="${{escapeHtml(tip)}}" style="cursor:pointer;"/>${{lbl}}`;
       }}).join('');
 
       container.innerHTML = `
@@ -8734,7 +8835,8 @@ def build_web_dashboard(here):
           <text x="${{W - padR - 6}}" y="${{padT + 13}}" text-anchor="end" font-size="9.5" font-weight="800" fill="#b91c1c">② 확장기 (출하↑ 재고↑)</text>
           <text x="${{W - padR - 6}}" y="${{padT + plotH - 6}}" text-anchor="end" font-size="9.5" font-weight="800" fill="#c2410c">③ 둔화·후퇴 (출하↓ 재고↑)</text>
           <text x="${{padL + 6}}" y="${{padT + plotH - 6}}" font-size="9.5" font-weight="800" fill="#1d4ed8">④ 수축기 (출하↓ 재고↓)</text>
-          <path d="${{polyD}}" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-opacity="0.65" stroke-linejoin="round"/>
+          ${{polyAct ? `<path d="${{polyAct}}" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-opacity="0.65" stroke-linejoin="round"/>` : ''}}
+          ${{polyFc ? `<path d="${{polyFc}}" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="4 3" stroke-linejoin="round"/>` : ''}}
           ${{dotsHtml}}
           <text x="${{(padL + plotW / 2).toFixed(1)}}" y="${{H - 7}}" text-anchor="middle" font-size="10" fill="#475569" font-weight="700">← 재고 감소 | 재고증가율 (YoY, %) | 재고 증가 →</text>
         </svg>
