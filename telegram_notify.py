@@ -228,18 +228,28 @@ def _build_kr_text(here=HERE):
     d = _read_json(os.path.join(here, "kr_market.json")) or {}
     td = d.get("tradeDate") or "-"
     sess = d.get("sessionLabel") or "국내 시장 · NXT"
-    nxt_val = (d.get("nxtTopVal") or [])[:5]
+    is_krx = (d.get("defaultMode") == "KRX")
+    top_val = (d.get("krxTopVal") if is_krx else d.get("nxtTopVal")) or []
     nxt_up = (d.get("nxtTopUp") or [])[:4]
-    ss = sorted(d.get("sectorStrength") or [], key=lambda x: x.get("avgNxtChg") or -999, reverse=True)
+    chg_key = "krxChg" if is_krx else "nxtChg"
+    val_key = "krxValEok" if is_krx else "nxtValEok"
+    ss_key = "avgKrxChg" if is_krx else "avgNxtChg"
+    ss = sorted(d.get("sectorStrength") or [], key=lambda x: x.get(ss_key) or -999, reverse=True)
+    idx_map = {x["code"]: x for x in (d.get("indices") or [])}
+    kp = idx_map.get("KOSPI") or {}
+    kq = idx_map.get("KOSDAQ") or {}
     lines = [f"🇰🇷 [국내 시장 · NXT 업데이트 · {td}]", f"• 구분: {sess}"]
-    if nxt_val:
-        v_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('nxtChg'))}, {int(round(x.get('nxtValEok') or 0)):,}억)" for x in nxt_val[:4])
-        lines.append(f"• NXT 거래대금 TOP: {v_txt}")
+    if kp.get("price") is not None and kq.get("price") is not None:
+        lines.append(f"• 코스피 {kp['price']:,.2f}({_fmt_pct(kp.get('chgPct'))}) | 코스닥 {kq['price']:,.2f}({_fmt_pct(kq.get('chgPct'))})")
+    if top_val:
+        lbl = "KRX 거래대금 TOP" if is_krx else "NXT 거래대금 TOP"
+        v_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get(chg_key))}, {int(round(x.get(val_key) or 0)):,}억)" for x in top_val[:4])
+        lines.append(f"• {lbl}: {v_txt}")
     if nxt_up:
         u_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('nxtChg'))})" for x in nxt_up[:4])
         lines.append(f"• NXT 급등 TOP: {u_txt}")
     if ss:
-        t_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('avgNxtChg'))})" for x in ss[:3])
+        t_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get(ss_key))})" for x in ss[:3])
         lines.append(f"• 강세 섹터: {t_txt}")
     lines.append(f"👉 {DASHBOARD_URL}")
     return "\n".join(lines)
