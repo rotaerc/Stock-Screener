@@ -172,3 +172,13 @@ jobs:
           else
             echo "변경된 파일이 없어 커밋을 건너뜁니다."
           fi
+
+      - name: 텔레그램 완료 알림 발송
+        if: steps.resolve_mode.outputs.mode != 'skip'
+        env:
+          TZ: Asia/Seoul
+          RUN_MODE: ${{ steps.resolve_mode.outputs.mode }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python telegram_notify.py "$RUN_MODE" || true

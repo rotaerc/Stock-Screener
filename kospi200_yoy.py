@@ -11855,6 +11855,11 @@ def main():
         build_web_dashboard(here)
         if not skip_push:
             auto_push_to_github(here)
+            try:
+                import telegram_notify
+                telegram_notify.notify_update("reports", here)
+            except Exception:
+                pass
         return
 
     # 기존 최신 엑셀(.xlsx) 파일만으로 웹페이지(index.html) 즉시 생성 + GitHub 자동 업로드
@@ -11907,6 +11912,11 @@ def main():
     build_web_dashboard(here)
     if not skip_push:
         auto_push_to_github(here)
+        try:
+            import telegram_notify
+            telegram_notify.notify_update("screener" if screener_only else "all", here)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

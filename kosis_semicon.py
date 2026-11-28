@@ -640,6 +640,11 @@ def save_and_deploy(payload, skip_push=False):
         kospi200_yoy.build_web_dashboard(HERE)
         if not skip_push:
             kospi200_yoy.auto_push_to_github(HERE, commit_msg=f"Update semiconductor inventory cycle ({datetime.now().strftime('%Y-%m-%d %H:%M')})")
+            try:
+                import telegram_notify
+                telegram_notify.notify_update("semicon", HERE)
+            except Exception:
+                pass
     except Exception as e:
         print(f"  [경고] 웹 대시보드 재생성/푸시 중 오류: {e}")
 

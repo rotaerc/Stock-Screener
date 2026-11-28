@@ -1514,6 +1514,11 @@ def main():
             HERE,
             commit_msg=f"Auto-update US market flow ({datetime.now().strftime('%Y-%m-%d %H:%M')})",
         )
+        try:
+            import telegram_notify
+            telegram_notify.notify_update("us", HERE)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

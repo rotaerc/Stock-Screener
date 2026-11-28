@@ -926,6 +926,11 @@ def main():
             HERE,
             commit_msg=f"Auto-update Kiwoom investor flow ({datetime.now().strftime('%Y-%m-%d %H:%M')})",
         )
+        try:
+            import telegram_notify
+            telegram_notify.notify_update("flow", HERE)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
