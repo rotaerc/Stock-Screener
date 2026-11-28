@@ -167,17 +167,39 @@ def fetch_yahoo_1mo_stats(symbol):
         if not res_list:
             return symbol, None
         res = res_list[0]
+        meta = res.get("meta") or {}
         ts_list = res.get("timestamp") or []
         q = ((res.get("indicators") or {}).get("quote") or [{}])[0]
         closes = q.get("close") or []
         vols = q.get("volume") or []
 
+        meta_price = _num(meta.get("regularMarketPrice"))
+        meta_vol = _num(meta.get("regularMarketVolume"))
+        meta_ts = meta.get("regularMarketTime")
+        meta_dt = (
+            datetime.fromtimestamp(meta_ts, tz=timezone(timedelta(hours=-5))).strftime("%Y-%m-%d")
+            if meta_ts else ""
+        )
+
         bars = []
-        for ts, c, v in zip(ts_list, closes, vols):
+        n_ts = len(ts_list)
+        for idx, (ts, c, v) in enumerate(zip(ts_list, closes, vols)):
+            dt_us = datetime.fromtimestamp(ts, tz=timezone(timedelta(hours=-5))).strftime("%Y-%m-%d")
+            # 조기폐장(블랙프라이데이 등) 또는 장마감 직후 마지막 일봉 close가 None으로 내려오는 경우 meta.regularMarketPrice 보완
+            if (c is None or c <= 0) and idx == n_ts - 1 and meta_price and meta_price > 0:
+                c = meta_price
+                if (v is None or v <= 0) and meta_vol and meta_vol > 0:
+                    v = meta_vol
             if c is None or c <= 0:
                 continue
-            dt_us = datetime.fromtimestamp(ts, tz=timezone(timedelta(hours=-5))).strftime("%Y-%m-%d")
             bars.append((dt_us, float(c), float(v or 0)))
+
+        # meta.regularMarketTime이 일봉 배열 마지막 날짜보다 최신이면 최신 종가 바로 추가
+        if meta_dt and meta_price and meta_price > 0:
+            if not bars or meta_dt > bars[-1][0]:
+                bars.append((meta_dt, float(meta_price), float(meta_vol or 0)))
+            elif meta_dt == bars[-1][0] and abs(bars[-1][1] - float(meta_price)) > 1e-6:
+                bars[-1] = (meta_dt, float(meta_price), float(meta_vol or bars[-1][2]))
 
         if len(bars) < 2:
             return symbol, None
