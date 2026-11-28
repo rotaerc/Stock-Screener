@@ -7022,30 +7022,36 @@ def build_web_dashboard(here):
 
     function _findKrCodeByName(name) {{
       if (!name) return null;
-      const target = String(name).trim().replace(/\\s+/g, '');
-      const markets = ['KOSPI', 'KOSDAQ'];
-      for (const mk of markets) {{
-        const sheets = (DATA && DATA[mk]) ? DATA[mk] : [];
-        for (const sh of sheets) {{
-          for (const row of (sh.rows || [])) {{
-            const nm = String(row['종목명'] || '').trim().replace(/\\s+/g, '');
-            const cd = String(row['종목코드'] || '').trim();
-            if (nm === target && /^\\d{{6}}$/.test(cd)) return cd;
+      try {{
+        const target = String(name).trim().replace(/\\s+/g, '');
+        const markets = (typeof DB !== 'undefined' && DB) ? Object.keys(DB) : [];
+        for (const mk of markets) {{
+          const sheets = (DB[mk] && DB[mk].sheets) ? DB[mk].sheets : [];
+          for (const sh of sheets) {{
+            for (const row of (sh.rows || [])) {{
+              const nm = String(row['종목명'] || '').trim().replace(/\\s+/g, '');
+              const cd = String(row['종목코드'] || '').trim();
+              if (nm === target && /^\\d{{6}}$/.test(cd)) return cd;
+            }}
           }}
         }}
-      }}
-      if (FLOW_DATA && FLOW_DATA.daily) {{
-        const latestDay = (FLOW_DATA.dailyDates || [])[0];
-        const dayObj = latestDay ? FLOW_DATA.daily[latestDay] : null;
-        if (dayObj) {{
-          for (const inv of Object.keys(dayObj)) {{
-            for (const side of ['buy', 'sell']) {{
-              for (const it of (dayObj[inv][side] || [])) {{
-                if (String(it.name || '').trim().replace(/\\s+/g, '') === target && it.code) return it.code;
+        if (typeof FLOW_DATA !== 'undefined' && FLOW_DATA && FLOW_DATA.byDate) {{
+          const latestDay = (FLOW_DATA.dates || [])[0];
+          const dayObj = latestDay ? FLOW_DATA.byDate[latestDay] : null;
+          if (dayObj) {{
+            for (const inv of Object.keys(dayObj)) {{
+              const invObj = dayObj[inv];
+              if (!invObj || typeof invObj !== 'object') continue;
+              for (const side of ['buy', 'sell']) {{
+                for (const it of (invObj[side] || [])) {{
+                  if (String(it.name || '').trim().replace(/\\s+/g, '') === target && it.code) return it.code;
+                }}
               }}
             }}
           }}
         }}
+      }} catch (e) {{
+        return null;
       }}
       return null;
     }}
