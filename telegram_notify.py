@@ -224,6 +224,27 @@ def _build_semicon_text(here=HERE):
     return "\n".join(lines)
 
 
+def _build_kr_text(here=HERE):
+    d = _read_json(os.path.join(here, "kr_market.json")) or {}
+    td = d.get("tradeDate") or "-"
+    sess = d.get("sessionLabel") or "국내 시장 · NXT"
+    nxt_val = (d.get("nxtTopVal") or [])[:5]
+    nxt_up = (d.get("nxtTopUp") or [])[:4]
+    ss = sorted(d.get("sectorStrength") or [], key=lambda x: x.get("avgNxtChg") or -999, reverse=True)
+    lines = [f"🇰🇷 [국내 시장 · NXT 업데이트 · {td}]", f"• 구분: {sess}"]
+    if nxt_val:
+        v_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('nxtChg'))}, {int(round(x.get('nxtValEok') or 0)):,}억)" for x in nxt_val[:4])
+        lines.append(f"• NXT 거래대금 TOP: {v_txt}")
+    if nxt_up:
+        u_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('nxtChg'))})" for x in nxt_up[:4])
+        lines.append(f"• NXT 급등 TOP: {u_txt}")
+    if ss:
+        t_txt = ", ".join(f"{x['name']}({_fmt_pct(x.get('avgNxtChg'))})" for x in ss[:3])
+        lines.append(f"• 강세 섹터: {t_txt}")
+    lines.append(f"👉 {DASHBOARD_URL}")
+    return "\n".join(lines)
+
+
 def notify_update(mode="all", here=HERE):
     """외부 스크립트 또는 GitHub Actions에서 호출하는 통합 알림 함수"""
     tok, cid = _load_telegram_cfg()
@@ -234,6 +255,8 @@ def notify_update(mode="all", here=HERE):
     m = str(mode or "all").strip().lower()
     if m == "us":
         text = _build_us_text(here)
+    elif m == "kr":
+        text = _build_kr_text(here)
     elif m == "reports":
         text = _build_reports_text(here)
     elif m == "screener":

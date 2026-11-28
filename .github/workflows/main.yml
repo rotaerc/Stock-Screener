@@ -13,16 +13,23 @@ on:
   # [3] 미국 시장 거래대금·모멘텀·섹터 자금 흐름 자동 업데이트 (뉴욕 정규장 16:00 마감 + 20분 후 · 서머타임 자동 전환)
   #   - 서머타임(EDT, 3월~11월): 한국시간 05:20 KST (화~토) = UTC 월~금 20:20
   #   - 겨울 표준시(EST, 11월~3월): 한국시간 06:20 KST (화~토) = UTC 월~금 21:20
+  # [4] 국내 시장 · NXT(넥스트레이드 프리/애프터마켓) · 42개 국내 섹터 강도 자동 업데이트 (평일 월~금)
+  #   - 08:30 KST (NXT 프리마켓 진행 중) = UTC 일~목 23:30
+  #   - 15:40 KST (정규장 마감 직후)     = UTC 월~금 06:40
+  #   - 20:05 KST (NXT 애프터마켓 마감)  = UTC 월~금 11:05
   schedule:
     - cron: '20 20 * * 1-5'
     - cron: '20 21 * * 1-5'
+    - cron: '30 23 * * 0-4'
+    - cron: '40 6 * * 1-5'
+    - cron: '5 11 * * 1-5'
     - cron: '4 23 * * *'
     - cron: '15 0 * * *'
     - cron: '5 4 * * *'
     - cron: '3 7 * * *'
     - cron: '33 23 * * *'
     - cron: '18 7 * * *'
-  # [4] GitHub 웹 / 모바일 앱에서 'Run workflow' 버튼으로 원하는 항목만 즉시 실행
+  # [5] GitHub 웹 / 모바일 앱 / 대시보드 버튼으로 원하는 항목만 즉시 실행
   workflow_dispatch:
     inputs:
       mode:
@@ -33,6 +40,7 @@ on:
         options:
           - '리포트만 (1~2분)'
           - '미국 시장만 (30초)'
+          - '국내 시장·NXT만 (30초)'
           - '스크리너만 (13분)'
           - '전체 (리포트+스크리너+미국)'
 
@@ -66,6 +74,9 @@ jobs:
               *미국*|us)
                 MODE="us"
                 ;;
+              *국내*|*NXT*|kr)
+                MODE="kr"
+                ;;
               *스크리너만*|screener)
                 MODE="screener"
                 ;;
@@ -91,6 +102,9 @@ jobs:
                 else
                   MODE="skip"
                 fi
+                ;;
+              "30 23 * * 0-4"|"40 6 * * 1-5"|"5 11 * * 1-5")
+                MODE="kr"
                 ;;
               "4 23 * * *"|"15 0 * * *"|"5 4 * * *"|"3 7 * * *")
                 MODE="reports"
@@ -131,6 +145,9 @@ jobs:
           elif [ "$RUN_MODE" = "us" ]; then
             echo "▶ [미국 시장 전용] 미국 거래대금·RVOL·섹터 자금 흐름 수집 및 index.html 갱신"
             python us_market.py --no-push
+          elif [ "$RUN_MODE" = "kr" ]; then
+            echo "▶ [국내 시장·NXT 전용] NXT 집중 매수 종목 및 국내 42개 섹터 강도 보드 갱신"
+            python kr_market.py --no-push
           elif [ "$RUN_MODE" = "screener" ]; then
             if [ -n "$KOSIS_API_KEY" ]; then
               echo "▶ [통계청 KOSIS] 반도체 재고순환지표 갱신"
@@ -145,6 +162,8 @@ jobs:
             fi
             echo "▶ [미국 시장] 미국 거래대금·섹터 자금 흐름 갱신"
             python us_market.py --no-push || true
+            echo "▶ [국내 시장·NXT] NXT 집중 매수 및 국내 섹터 강도 갱신"
+            python kr_market.py --no-push || true
             echo "▶ [전체] 스크리너 + 기업 리포트 모두 수집 및 index.html 갱신"
             python kospi200_yoy.py --no-push
           fi
@@ -156,16 +175,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html hankyung_reports.json op_estimate_history.json op_baseline.json investor_flow.json semicon_cycle.json us_market.json kospi_top200_latest.xlsx kosdaq_top200_latest.xlsx
+          git add index.html hankyung_reports.json op_estimate_history.json op_baseline.json investor_flow.json semicon_cycle.json us_market.json kr_market.json kospi_top200_latest.xlsx kosdaq_top200_latest.xlsx
           if ! git diff --staged --quiet; then
             if [ "$RUN_MODE" = "reports" ]; then
               MSG="Auto-update corporate reports"
             elif [ "$RUN_MODE" = "us" ]; then
               MSG="Auto-update US market flow & sectors"
+            elif [ "$RUN_MODE" = "kr" ]; then
+              MSG="Auto-update KR market & NXT"
             elif [ "$RUN_MODE" = "screener" ]; then
               MSG="Auto-update stock screener & OP history"
             else
-              MSG="Auto-update stock screener, US market & reports"
+              MSG="Auto-update stock screener, US/KR market & reports"
             fi
             git commit -m "$MSG"
             git push || (git pull --rebase --autostash origin main && git push)

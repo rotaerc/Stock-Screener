@@ -3204,6 +3204,10 @@
       </div>
       <div class="us-body-wrap" id="usMarketBodyWrap"></div>
     </div>
+
+    <div class="us-view" id="krMarketView">
+      <div class="us-body-wrap" id="krMarketBodyWrap"></div>
+    </div>
     </main>
   </div>
 
@@ -3585,7 +3589,9 @@
         } else if (st.view === 'SEMICON') {
           selectSemiconView();
         } else if (st.view === 'US') {
-          selectUsMarketView(st.usTab || 'VOLUME');
+          selectUsMarketView(st.usTab || 'MORNING');
+        } else if (st.view === 'KR') {
+          selectKrMarketView();
         } else if (st.view === 'REPORTS') {
           selectReportsView('', st.repChange || '', st.repViewMode || 'SHEET');
         } else {
@@ -3809,6 +3815,14 @@
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
+          <div class="nav-section-title">국내 시장 (NXT · 섹터)</div>
+          <button class="nav-item ${currentViewMode === 'KR' ? 'active' : ''}" onclick="selectKrMarketView()">
+            <span class="nav-item-left"><span>🇰🇷</span><span>국내 브리핑 · NXT</span></span>
+            <span class="nav-badge" style="background:#fef3c7; color:#b45309;">NXT</span>
+          </button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
           <div class="nav-section-title">수급 동향 (키움)</div>
           <button class="nav-item ${currentViewMode === 'HOME' ? 'active' : ''}" onclick="selectHomeView(currentFlowMode)">
             <span class="nav-item-left"><span>🧠</span><span>수급 브리핑</span></span>
@@ -3897,6 +3911,7 @@
       const showHome = (!showScreener && currentViewMode === 'HOME');
       const showSemi = (!showScreener && currentViewMode === 'SEMICON');
       const showUs = (!showScreener && currentViewMode === 'US');
+      const showKr = (!showScreener && currentViewMode === 'KR');
       document.getElementById('sheetTabs').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('screenerControls').style.display = showScreener ? 'flex' : 'none';
       document.getElementById('tableWrap').style.display = showScreener ? 'block' : 'none';
@@ -3910,6 +3925,8 @@
       if (sv) sv.classList.toggle('active', showSemi);
       const uv = document.getElementById('usMarketView');
       if (uv) uv.classList.toggle('active', showUs);
+      const kv = document.getElementById('krMarketView');
+      if (kv) kv.classList.toggle('active', showKr);
     }
 
     // ================= 미국 모닝 브리핑 · 거래대금 · 모멘텀 · 섹터 자금 흐름 =================
@@ -4264,9 +4281,10 @@
 
       const modes = [
         { val: '미국 시장만 (30초)', icon: '🌅', title: '미국 모닝 브리핑', sub: '지수·매크로·48테마·뉴스 (약 30초)' },
+        { val: '국내 시장·NXT만 (30초)', icon: '🇰🇷', title: '국내 시장 · NXT', sub: 'NXT 집중매수·42테마 강도 (약 20초)' },
         { val: '리포트만 (1~2분)', icon: '📰', title: '기업 리포트만', sub: '한경·네이버 최신 리포트 (약 1~2분)' },
         { val: '스크리너만 (13분)', icon: '📊', title: '한국 스크리너만', sub: '코스피·코스닥 200 (약 13분)' },
-        { val: '전체 (리포트+스크리너+미국)', icon: '🚀', title: '전체 업데이트', sub: '미국 + 리포트 + 스크리너 전부' },
+        { val: '전체 (리포트+스크리너+미국)', icon: '🚀', title: '전체 업데이트', sub: '미국 + 국내·NXT + 리포트 + 스크리너' },
       ];
 
       let lastRunHtml = '';
@@ -5036,6 +5054,379 @@
       } else {
         wrap.innerHTML = idxHtml + etfCardHtml + tableCardHtml + secFlowHtml;
       }
+    }
+
+    // ================= 국내 시장 브리핑 · NXT(넥스트레이드) · 국내 섹터 강도 보드 =================
+    let currentKrSsMode = (KR_DATA && KR_DATA.defaultMode) ? KR_DATA.defaultMode : 'NXT'; // 'NXT' | 'KRX'
+    let currentKrSsFilter = 'ALL'; // 'ALL' | 'UP' | 'DN'
+    let currentKrSsSort = 'ABS'; // 'ABS' | 'DESC' | 'ASC' | 'VAL' | 'NAME'
+    let currentKrSsQuery = '';
+
+    function selectKrMarketView() {
+      closeMobileNav();
+      currentViewMode = 'KR';
+      setScreenerVisibility(false);
+      renderSidebar();
+      renderKrMarketView();
+      pushNavHistory();
+    }
+
+    function setKrSsMode(m) { currentKrSsMode = m || 'NXT'; renderKrSectorStrengthBoard(); }
+    function setKrSsFilter(f) { currentKrSsFilter = f || 'ALL'; renderKrSectorStrengthBoard(); }
+    function setKrSsSort(s) { currentKrSsSort = s || 'ABS'; renderKrSectorStrengthBoard(); }
+    function setKrSsQuery(q) { currentKrSsQuery = q || ''; renderKrSectorStrengthBoard(); }
+
+    function _krFmtEok(v) {
+      if (v === null || v === undefined || isNaN(Number(v))) return '-';
+      const n = Number(v);
+      if (n >= 10000) return `${(n / 10000).toFixed(2)}조`;
+      if (n >= 100) return `${Math.round(n).toLocaleString('ko-KR')}억`;
+      return `${n.toFixed(1)}억`;
+    }
+
+    function openKrThemeModal(themeId) {
+      const list = (KR_DATA && KR_DATA.sectorStrength) || [];
+      const item = list.find(x => x.id === themeId);
+      if (!item) return;
+      const modal = document.getElementById('usThemeModal');
+      const titleEl = document.getElementById('usThemeModalTitle');
+      const bodyEl = document.getElementById('usThemeModalBody');
+      if (!modal || !titleEl || !bodyEl) return;
+
+      const nxtCls = item.avgNxtChg > 0 ? 'up' : (item.avgNxtChg < 0 ? 'dn' : 'flat');
+      titleEl.innerHTML = `
+        <span>${item.icon || '📊'} ${escapeHtml(item.name)}</span>
+        <span class="usm-pop-chg ${nxtCls}">NXT ${_usFmtPct(item.avgNxtChg)}</span>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">KRX <b class="${_usPctCls(item.avgKrxChg)}">${_usFmtPct(item.avgKrxChg)}</b></span>
+        ${item.nxtValEok ? `<span style="font-size:11.5px; color:#b45309; background:#fef3c7; padding:2px 7px; border-radius:6px; font-weight:800;">NXT 대금 ${_krFmtEok(item.nxtValEok)}</span>` : ''}
+      `;
+
+      const sortedStocks = [...(item.stocks || [])].sort((a, b) => {
+        const va = currentKrSsMode === 'NXT' ? (a.effNxtChg ?? -999) : (a.krxChg ?? -999);
+        const vb = currentKrSsMode === 'NXT' ? (b.effNxtChg ?? -999) : (b.krxChg ?? -999);
+        return vb - va;
+      });
+
+      const rowsHtml = sortedStocks.map((s, idx) => {
+        const mainChg = (currentKrSsMode === 'NXT' && s.nxtChg !== null && s.nxtChg !== undefined) ? s.nxtChg : s.krxChg;
+        const mainPrice = (currentKrSsMode === 'NXT' && s.nxtPrice) ? s.nxtPrice : s.krxPrice;
+        const chgCls = (mainChg > 0) ? 'up' : ((mainChg < 0) ? 'dn' : 'flat');
+        const naverUrl = `https://stock.naver.com/domestic/stock/${s.code}/price`;
+        const krNewsUrl = `https://news.google.com/search?q=${encodeURIComponent(s.name + ' 주가')}&hl=ko&gl=KR&ceid=KR:ko`;
+        return `
+          <div class="usm-pop-stock">
+            <div class="usm-pop-top">
+              <div class="usm-pop-name-wrap">
+                <span style="font-size:11px; color:#94a3b8; font-weight:900;">${idx + 1}</span>
+                <a class="usm-pop-sym" href="${naverUrl}" target="_blank" rel="noopener noreferrer" data-live-code="${s.code}" data-live-name="${escapeHtml(s.name)}">${escapeHtml(s.name)}</a>
+                <span class="usm-pop-eng">${s.code} · ${escapeHtml(s.market || 'KOSPI')}</span>
+                ${s.hasNxt ? `<span style="font-size:10px; font-weight:800; background:#fef3c7; color:#b45309; padding:1px 5px; border-radius:4px;">NXT</span>` : ''}
+              </div>
+              <div class="usm-pop-metrics">
+                <span style="font-size:13px; font-weight:800; color:#0f172a;">${mainPrice ? Number(mainPrice).toLocaleString('ko-KR') + '원' : '-'}</span>
+                <span class="usm-pop-chg ${chgCls}">${_usFmtPct(mainChg)}</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; font-size:11px; color:#64748b; font-weight:700; flex-wrap:wrap;">
+              <span>⚡ NXT <b class="${_usPctCls(s.nxtChg)}">${s.hasNxt ? _usFmtPct(s.nxtChg) : '미거래'}</b>${s.nxtValEok ? ` (${_krFmtEok(s.nxtValEok)})` : ''}</span>
+              <span>🏛️ KRX 정규 <b class="${_usPctCls(s.krxChg)}">${_usFmtPct(s.krxChg)}</b>${s.krxValEok ? ` (${_krFmtEok(s.krxValEok)})` : ''}</span>
+            </div>
+            ${s.desc ? `<div class="usm-pop-desc">📌 ${escapeHtml(s.desc)}</div>` : ''}
+            <div class="usm-pop-actions">
+              <a class="usm-pop-act" href="${naverUrl}" target="_blank" rel="noopener noreferrer" data-live-code="${s.code}" data-live-name="${escapeHtml(s.name)}">📊 네이버 증권 ↗</a>
+              <a class="usm-pop-act" href="${krNewsUrl}" target="_blank" rel="noopener noreferrer">📰 최신 뉴스 ↗</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const tNews = item.news || [];
+      const themeNewsHtml = tNews.length ? `
+        <div style="margin-top:14px;">
+          <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-bottom:7px;">📰 [${escapeHtml(item.name)}] 최근 주요 뉴스</div>
+          <div class="usm-news-list">
+            ${tNews.map(n => `
+              <a class="usm-news-item" style="padding:8px 10px;" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">
+                <div style="min-width:0; flex:1;">
+                  <div class="usm-news-title" style="font-size:12.5px;">${escapeHtml(n.title)}</div>
+                  <div class="usm-news-meta">
+                    <span class="usm-press-badge">${escapeHtml(n.press)}</span>
+                    <span>${escapeHtml(n.pubKst || '')}</span>
+                  </div>
+                </div>
+                <span style="color:#94a3b8; font-size:13px; font-weight:800; flex-shrink:0;">↗</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      bodyEl.innerHTML = `
+        <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+          <span>🇰🇷 국내 테마 구성 종목 (${sortedStocks.length}종목 · 종목명 호버 시 네이버 실시간 주가)</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">${currentKrSsMode === 'NXT' ? 'NXT 상승률순' : 'KRX 상승률순'}</span>
+        </div>
+        <div class="usm-mini-list" style="gap:8px;">${rowsHtml}</div>
+        ${themeNewsHtml}
+      `;
+      modal.classList.add('open');
+      if (typeof bindLiveQuotes === 'function') bindLiveQuotes();
+    }
+
+    function renderKrSectorStrengthBoard() {
+      const host = document.getElementById('krmSectorStrengthBody');
+      if (!host) return;
+      const all = (KR_DATA && KR_DATA.sectorStrength) || [];
+      if (!all.length) {
+        host.innerHTML = `<div style="padding:18px; text-align:center; color:#94a3b8; font-size:13px;">국내 섹터 강도 데이터가 없습니다.</div>`;
+        return;
+      }
+      const fld = currentKrSsMode === 'KRX' ? 'avgKrxChg' : 'avgNxtChg';
+      const upAll = all.filter(x => (Number(x[fld]) || 0) > 0).length;
+      const dnAll = all.filter(x => (Number(x[fld]) || 0) < 0).length;
+
+      const q = (currentKrSsQuery || '').trim().toLowerCase();
+      let list = all.filter(x => {
+        const v = Number(x[fld]) || 0;
+        if (currentKrSsFilter === 'UP' && v <= 0) return false;
+        if (currentKrSsFilter === 'DN' && v >= 0) return false;
+        if (q) {
+          const hay = `${x.name} ${(x.stocks || []).map(s => s.name + ' ' + s.code).join(' ')}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      list.sort((a, b) => {
+        const va = Number(a[fld]) || 0;
+        const vb = Number(b[fld]) || 0;
+        if (currentKrSsSort === 'DESC') return vb - va;
+        if (currentKrSsSort === 'ASC') return va - vb;
+        if (currentKrSsSort === 'VAL') return (Number(b.nxtValEok) || 0) - (Number(a.nxtValEok) || 0);
+        if (currentKrSsSort === 'NAME') return String(a.name).localeCompare(String(b.name), 'ko');
+        return Math.abs(vb) - Math.abs(va);
+      });
+
+      const toolbarHtml = `
+        <div class="usm-ss-toolbar">
+          <div class="usm-ss-filters">
+            <button class="usm-ss-pill ${currentKrSsFilter === 'ALL' ? 'active-all' : ''}" onclick="setKrSsFilter('ALL')">전체 ${all.length}</button>
+            <button class="usm-ss-pill up ${currentKrSsFilter === 'UP' ? 'active-up' : ''}" onclick="setKrSsFilter('UP')">▲ 상승 ${upAll}</button>
+            <button class="usm-ss-pill dn ${currentKrSsFilter === 'DN' ? 'active-dn' : ''}" onclick="setKrSsFilter('DN')">▼ 하락 ${dnAll}</button>
+            <div class="flow-mode-group" style="margin-left:2px;">
+              <button class="flow-mode-btn ${currentKrSsMode === 'NXT' ? 'active' : ''}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrSsMode('NXT')">⚡ NXT 기준</button>
+              <button class="flow-mode-btn ${currentKrSsMode === 'KRX' ? 'active' : ''}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrSsMode('KRX')">🏛️ KRX 정규</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <input type="text" class="search-input" style="width:155px; padding:4px 9px; font-size:12px;" placeholder="🔍 테마·종목명 검색" value="${escapeHtml(currentKrSsQuery)}" oninput="setKrSsQuery(this.value)" />
+            <select class="select-box" style="padding:4px 8px; font-size:12px; font-weight:700;" onchange="setKrSsSort(this.value)">
+              <option value="ABS" ${currentKrSsSort === 'ABS' ? 'selected' : ''}>등락폭 큰 순</option>
+              <option value="DESC" ${currentKrSsSort === 'DESC' ? 'selected' : ''}>상승률 높은 순</option>
+              <option value="ASC" ${currentKrSsSort === 'ASC' ? 'selected' : ''}>하락률 큰 순</option>
+              <option value="VAL" ${currentKrSsSort === 'VAL' ? 'selected' : ''}>NXT 거래대금순</option>
+              <option value="NAME" ${currentKrSsSort === 'NAME' ? 'selected' : ''}>가나다 순</option>
+            </select>
+          </div>
+        </div>
+      `;
+
+      const gridHtml = list.length ? `
+        <div class="usm-ss-grid">
+          ${list.map(x => {
+            const v = x[fld];
+            const lvl = _usSsLevelClass(v);
+            const valSub = x.nxtValEok ? ` · NXT ${_krFmtEok(x.nxtValEok)}` : '';
+            return `<div class="usm-ss-tile ${lvl}" onclick="openKrThemeModal('${x.id}')" title="${escapeHtml(x.name)} · NXT ${_usFmtPct(x.avgNxtChg)} / KRX ${_usFmtPct(x.avgKrxChg)}">
+              <div class="usm-ss-tname"><span>${x.icon || '📊'}</span><span>${escapeHtml(x.name)}</span></div>
+              <div class="usm-ss-tpct">${_usFmtPct(v)}</div>
+              <div class="usm-ss-tcnt">${x.count}종목${valSub} ›</div>
+            </div>`;
+          }).join('')}
+        </div>
+      ` : `<div style="padding:22px; text-align:center; color:#94a3b8; font-size:13px;">검색 조건에 맞는 국내 테마가 없습니다.</div>`;
+
+      host.innerHTML = toolbarHtml + gridHtml;
+    }
+
+    function renderKrMarketView() {
+      const wrap = document.getElementById('krMarketBodyWrap');
+      if (!wrap) return;
+      const kd = KR_DATA || { indices: [], bullets: [], nxtTopVal: [], nxtTopUp: [], nxtThemeFlow: [], sectorStrength: [], news: [] };
+      const idxs = kd.indices || [];
+      const bullets = kd.bullets || [];
+      const nxtVal = (kd.nxtTopVal || []).slice(0, 15);
+      const nxtUp = (kd.nxtTopUp || []).slice(0, 15);
+      const themeFlow = kd.nxtThemeFlow || [];
+      const news = kd.news || [];
+
+      document.getElementById('pageTitle').textContent = '🇰🇷 국내 시장 브리핑 · NXT · 섹터 강도';
+      document.getElementById('pageSubtitle').textContent = 'NXT(넥스트레이드 프리마켓 08:30 · 애프터마켓) 자금 집중 종목 + 국내 42개 핵심 테마 섹터 강도 보드 (매일 평일 08:30 / 15:40 / 20:05 자동 갱신)';
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">📅 기준일: ${kd.tradeDate || '-'}</span>
+        <span class="meta-pill" style="background:#fffbeb; color:#b45309; border-color:#fcd34d;">${escapeHtml(kd.sessionLabel || '국내 시장')}</span>
+        <span class="meta-pill">⚡ NXT 거래 ${kd.nxtActiveCount || 0}종목 · ${_krFmtEok(kd.totalNxtValEok || 0)}</span>
+        <span class="meta-pill">🕒 업데이트: ${kd.updatedAt || '-'}</span>
+      `;
+
+      if (!idxs.length && !(kd.sectorStrength || []).length) {
+        wrap.innerHTML = `<div class="flow-empty-guide"><h3>🇰🇷 국내 시장 데이터가 아직 수집되지 않았습니다</h3><p><code>python kr_market.py</code> 실행 시 NXT 집중 매수 및 국내 42개 섹터 강도 보드가 자동 반영됩니다.</p></div>`;
+        return;
+      }
+
+      // 1) 국내 시장 히어로 브리핑 카드
+      const tagClsMap = { '국내 지수': '', 'NXT 자금집중': 'mac', 'NXT 급등주': 'kr', '주도 섹터': 'sec' };
+      const heroHtml = `
+        <div class="usm-hero">
+          <div class="usm-hero-head" style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #065f46 100%);">
+            <div class="usm-hero-title">🇰🇷 ${escapeHtml(kd.tradeDate || '')} 국내 증시 · NXT 자금 흐름 브리핑</div>
+            <div class="usm-hero-pills">
+              <span class="usm-pill kr-pos">${escapeHtml(kd.sessionLabel || 'NXT 실시간')}</span>
+              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('krmNxtBoard'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'});">⚡ NXT 집중 매수 ↓</span>
+              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('krmSectorStrengthCard'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'});">🧱 국내 섹터 강도 (${(kd.sectorStrength || []).length}) ↓</span>
+            </div>
+          </div>
+          <div class="usm-bullets">
+            ${bullets.map(b => `
+              <div class="usm-bullet">
+                <span class="usm-btag ${tagClsMap[b.tag] || ''}">${escapeHtml(b.tag || '요약')}</span>
+                <span>${escapeHtml(b.text || '')}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      // 2) 국내 4대 주요 지표 카드
+      const idxHtml = `
+        <div class="us-idx-grid">
+          ${idxs.map(x => {
+            const c = x.chgPct;
+            const dirCls = (c > 0) ? 'up' : ((c < 0) ? 'dn' : '');
+            const isFx = x.code === 'USDKRW';
+            const pTxt = x.price !== null && x.price !== undefined
+              ? (isFx ? `${Number(x.price).toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}원` : Number(x.price).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+              : '-';
+            const absTxt = x.absChg !== null && x.absChg !== undefined
+              ? `${Number(x.absChg) > 0 ? '+' : ''}${Number(x.absChg).toLocaleString('ko-KR', { minimumFractionDigits: isFx ? 1 : 2, maximumFractionDigits: isFx ? 1 : 2 })}`
+              : '';
+            return `<a class="usm-idx-card ${dirCls}" href="${escapeHtml(x.url)}" target="_blank" rel="noopener noreferrer">
+              <div class="usm-idx-name">
+                <span>${escapeHtml(x.label)}</span>
+                <span style="font-size:10.5px; color:#64748b; font-weight:700;">${escapeHtml(x.desc || '')}</span>
+              </div>
+              <div class="usm-idx-val">${pTxt}</div>
+              <div class="usm-idx-chg ${_usPctCls(c)}">
+                <span>${_usFmtPct(c)}</span>
+                <span style="font-size:11.5px; opacity:0.85;">${absTxt}</span>
+              </div>
+              <div class="usm-idx-meta"><span>${escapeHtml(x.tradedAt || '')}</span></div>
+            </a>`;
+          }).join('')}
+        </div>
+      `;
+
+      // 3) NXT(넥스트레이드) 자금 집중 · 중심 매수 종목 보드 (2열 PC / 1열 모바일)
+      const renderNxtRows = (arr) => arr.map((s, idx) => `
+        <a class="usm-mini-row" href="https://stock.naver.com/domestic/stock/${s.code}/price" target="_blank" rel="noopener noreferrer" data-live-code="${s.code}" data-live-name="${escapeHtml(s.name)}">
+          <span style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+            <span style="font-size:11px; font-weight:900; color:#64748b; width:18px; flex-shrink:0;">${idx + 1}</span>
+            <b style="color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(s.name)}</b>
+            ${s.theme ? `<span style="font-size:10px; font-weight:700; color:#1d4ed8; background:#eff6ff; border:1px solid #dbeafe; padding:1px 5px; border-radius:4px; white-space:nowrap;">${escapeHtml(s.theme)}</span>` : ''}
+          </span>
+          <span style="display:flex; align-items:center; gap:8px; flex-shrink:0; font-variant-numeric:tabular-nums;">
+            <span style="font-size:11.5px; font-weight:800; color:#b45309; background:#fffbeb; padding:1px 6px; border-radius:5px;">${_krFmtEok(s.nxtValEok)}</span>
+            <b class="${_usPctCls(s.nxtChg)}" style="min-width:56px; text-align:right; font-size:12.5px;">${_usFmtPct(s.nxtChg)}</b>
+          </span>
+        </a>
+      `).join('');
+
+      const maxThemeVal = Math.max(1, ...themeFlow.map(t => Number(t.nxtValEok) || 0));
+      const nxtThemeBarHtml = themeFlow.length ? `
+        <div class="usm-card">
+          <div class="usm-sec-title">
+            <span>🔥 NXT 거래대금 집중 국내 테마 TOP ${themeFlow.length}</span>
+            <span style="font-size:11px; color:#64748b; font-weight:600;">클릭 시 테마 구성종목 팝업 · 단위: 억원</span>
+          </div>
+          <div>
+            ${themeFlow.map(tf => {
+              const w = Math.max(4, (Number(tf.nxtValEok) / maxThemeVal * 100)).toFixed(1);
+              const barCol = (tf.avgNxtChg || 0) >= 0 ? '#ef4444' : '#3b82f6';
+              const leads = (tf.leaders || []).map(l => `${l.name}(${_usFmtPct(l.nxtChg)}, ${_krFmtEok(l.nxtValEok)})`).join(' · ');
+              return `<div class="us-flow-row" style="cursor:pointer;" onclick="openKrThemeModal('${tf.id}')">
+                <div style="font-weight:800; color:#0f172a;">${tf.icon || ''} ${escapeHtml(tf.name)}</div>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <div class="us-flow-bar-track">
+                    <div style="width:${w}%; background:${barCol}; height:100%;"></div>
+                  </div>
+                  <div style="font-size:10.5px; color:#64748b;">${escapeHtml(leads)}</div>
+                </div>
+                <div style="text-align:right; font-weight:800;">
+                  <div style="color:#0f172a;">${_krFmtEok(tf.nxtValEok)}</div>
+                  <div class="${_usPctCls(tf.avgNxtChg)}" style="font-size:11px;">평균 ${_usFmtPct(tf.avgNxtChg)}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      const nxtBoardHtml = `
+        <div class="usm-two-col" id="krmNxtBoard">
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>💰 NXT 거래대금 TOP 15 (자금 집중 중심주)</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">호버→실시간주가 · 클릭→네이버</span>
+            </div>
+            <div class="usm-mini-list">${renderNxtRows(nxtVal) || '<div style="padding:18px; text-align:center; color:#94a3b8;">NXT 거래 데이터가 없습니다.</div>'}</div>
+          </div>
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>🚀 NXT 상승률 급등 TOP 15 (강세 모멘텀)</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">NXT 거래대금 필터 적용</span>
+            </div>
+            <div class="usm-mini-list">${renderNxtRows(nxtUp) || '<div style="padding:18px; text-align:center; color:#94a3b8;">NXT 급등 데이터가 없습니다.</div>'}</div>
+          </div>
+        </div>
+      `;
+
+      // 4) KR SECTOR STRENGTH · 국내 42개 섹터 강도 보드
+      const krSsHtml = `
+        <div class="usm-card" id="krmSectorStrengthCard">
+          <div class="usm-sec-title" style="margin-bottom:10px;">
+            <span><span class="usm-ss-badge" style="background:#dcfce7; color:#166534;">KR SECTOR STRENGTH</span>국내 섹터 강도 보드 <span style="font-size:11.5px; color:#64748b; font-weight:600;">전체 ${(kd.sectorStrength || []).length}개 · 셀 클릭 시 구성 종목 & 뉴스 팝업</span></span>
+          </div>
+          <div id="krmSectorStrengthBody"></div>
+        </div>
+      `;
+
+      // 5) 국내 증시 특징주 · NXT 주요 뉴스
+      const newsHtml = `
+        <div class="usm-card">
+          <div class="usm-sec-title">
+            <span>📰 국내 증시 특징주 · NXT 주요 뉴스</span>
+            <span style="font-size:11px; color:#64748b; font-weight:600;">Google 뉴스 자동 수집</span>
+          </div>
+          <div class="usm-news-list">
+            ${news.length ? news.map((n, idx) => `
+              <a class="usm-news-item" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">
+                <div style="min-width:0; flex:1;">
+                  <div class="usm-news-title"><span style="color:#059669; font-weight:900; margin-right:6px;">${idx + 1}.</span>${escapeHtml(n.title)}</div>
+                  <div class="usm-news-meta">
+                    <span class="usm-press-badge">${escapeHtml(n.press)}</span>
+                    <span>${escapeHtml(n.pubKst || '')}</span>
+                  </div>
+                </div>
+                <span style="color:#94a3b8; font-size:14px; font-weight:800; flex-shrink:0;">↗</span>
+              </a>
+            `).join('') : '<div style="padding:18px; text-align:center; color:#94a3b8; font-size:13px;">수집된 뉴스가 없습니다.</div>'}
+          </div>
+        </div>
+      `;
+
+      wrap.innerHTML = heroHtml + idxHtml + nxtBoardHtml + nxtThemeBarHtml + krSsHtml + newsHtml;
+      renderKrSectorStrengthBoard();
+      if (typeof bindLiveQuotes === 'function') bindLiveQuotes();
     }
 
     let currentSemiconRange = 60; // 최근 60개월(5년), 0=전체
