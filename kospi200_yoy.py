@@ -6007,7 +6007,7 @@ def build_web_dashboard(here):
     <div class="topbar-left">
       <button class="menu-toggle-btn" id="menuToggleBtn" onclick="toggleSidebar()" title="좌측 메뉴 접기/펼치기">☰</button>
       <button class="menu-toggle-btn" id="navBackBtn" onclick="window.history.back()" title="이전 페이지로 돌아가기 (브라우저 뒤로가기 동일)" style="width:auto; padding:0 9px; font-size:12px; font-weight:800; color:#334155; gap:3px;">← 뒤로</button>
-      <div class="brand-logo" onclick="selectHomeView()" title="수급 브리핑 메인 화면으로 이동">
+      <div class="brand-logo" onclick="selectUsMarketView('MORNING')" title="미국 모닝 브리핑 메인 화면으로 이동">
         <img src="favicon.svg" alt="R" class="brand-icon" />
         <span>STOCK SCREENER</span>
       </div>
@@ -6459,10 +6459,13 @@ def build_web_dashboard(here):
         if (e.key === 'Enter') handleGlobalSearch(e.target.value);
       }});
 
+      const hasUsMorning = US_DATA && US_DATA.morning && (US_DATA.morning.majorIndices || []).length > 0;
       const hasFlowData = FLOW_DATA && ((FLOW_DATA.dates && FLOW_DATA.dates.length > 0) || (FLOW_DATA.weeks && FLOW_DATA.weeks.length > 0));
       isRestoringHistory = true;
       try {{
-        if (hasFlowData) {{
+        if (hasUsMorning) {{
+          selectUsMarketView('MORNING');
+        }} else if (hasFlowData) {{
           selectHomeView('DAILY');
         }} else {{
           renderSidebar();
@@ -6882,14 +6885,14 @@ def build_web_dashboard(here):
           <div class="nav-section-title">미국 시장</div>
           <button class="nav-item ${{currentViewMode === 'US' ? 'active' : ''}}" onclick="selectUsMarketView('MORNING')">
             <span class="nav-item-left"><span>🌅</span><span>미국 모닝 브리핑</span></span>
+            <span class="nav-badge" style="background:#dbeafe; color:#1d4ed8;">HOME</span>
           </button>
         </div>
         <div class="nav-divider"></div>
         <div class="nav-section">
           <div class="nav-section-title">수급 동향 (키움)</div>
           <button class="nav-item ${{currentViewMode === 'HOME' ? 'active' : ''}}" onclick="selectHomeView(currentFlowMode)">
-            <span class="nav-item-left"><span>🧠</span><span>수급 브리핑 (메인)</span></span>
-            <span class="nav-badge" style="background:#dbeafe; color:#1d4ed8;">HOME</span>
+            <span class="nav-item-left"><span>🧠</span><span>수급 브리핑</span></span>
           </button>
           <button class="nav-item ${{currentViewMode === 'FLOW' && currentFlowMode === 'DAILY' && currentFlowSubTab !== 'PRIVATE_TOP50' ? 'active' : ''}}" onclick="selectFlowView('DAILY', 'ALL')">
             <span class="nav-item-left"><span>🏦</span><span>일간 수급</span></span>
