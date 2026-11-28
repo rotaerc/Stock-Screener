@@ -3183,6 +3183,34 @@ def build_web_dashboard(here):
       border-radius: 7px;
       white-space: nowrap;
     }}
+    .top-visitor-chip {{
+      display: none;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #0f766e;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      padding: 3px 9px;
+      border-radius: 7px;
+      white-space: nowrap;
+      cursor: help;
+    }}
+    .sidebar-visitor-box {{
+      margin-top: 8px;
+      padding: 7px 10px;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f766e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }}
     .topbar-center {{
       display: flex;
       align-items: center;
@@ -5207,6 +5235,7 @@ def build_web_dashboard(here):
         <span>STOCK SCREENER</span>
       </div>
       <span class="top-date-chip" id="topDateChip"></span>
+      <span class="top-visitor-chip" id="topVisitorChip" title="오늘 방문자(브라우저당 1일 1회) · 누적 방문자 · 한국시간(KST) 기준"></span>
     </div>
     <div class="topbar-center">
       <input type="text" id="globalSearchInput" class="global-search" placeholder="🔍 한국 종목 통합 검색 (Enter)" />
@@ -5624,10 +5653,71 @@ def build_web_dashboard(here):
       }}
       pushNavHistory(true);
       loadFullFlowArchive();
+      initVisitorCounter();
       window.addEventListener('popstate', (e) => {{
         if (e.state && e.state.view) {{
           applyNavState(e.state);
         }}
+      }});
+    }}
+
+    let VISITOR_STATS = {{ today: null, total: null, views: null }};
+    function _renderVisitorStats() {{
+      const chip = document.getElementById('topVisitorChip');
+      const sb = document.getElementById('sidebarVisitorBox');
+      const hasData = (VISITOR_STATS.today !== null || VISITOR_STATS.total !== null);
+      if (!hasData) return;
+      const tStr = VISITOR_STATS.today !== null ? VISITOR_STATS.today.toLocaleString('ko-KR') : '-';
+      const totStr = VISITOR_STATS.total !== null ? VISITOR_STATS.total.toLocaleString('ko-KR') : '-';
+      const vStr = VISITOR_STATS.views !== null ? ` · 총 조회 ${{VISITOR_STATS.views.toLocaleString('ko-KR')}}회` : '';
+      const tip = `한국시간(KST) 기준 방문자 통계 (같은 브라우저는 하루 1명으로 집계)${{vStr}}`;
+      if (chip) {{
+        chip.style.display = 'inline-flex';
+        chip.textContent = `👀 오늘 ${{tStr}} · 누적 ${{totStr}}`;
+        chip.title = tip;
+      }}
+      if (sb) {{
+        sb.style.display = 'flex';
+        sb.title = tip;
+        sb.innerHTML = `<span>👀 방문자</span><span>오늘 <b>${{tStr}}</b> · 누적 <b>${{totStr}}</b></span>`;
+      }}
+    }}
+
+    function initVisitorCounter() {{
+      const ns = 'rotaerc-stock-screener';
+      const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const ymd = nowKst.toISOString().slice(0, 10).replace(/-/g, '');
+      const dayKey = `day-${{ymd}}`;
+      const lsKey = 'stock_screener_visit_day_v1';
+      const isLiveHost = (window.location.hostname || '').endsWith('github.io');
+      let alreadyCountedToday = false;
+      try {{
+        alreadyCountedToday = (localStorage.getItem(lsKey) === ymd);
+      }} catch (e) {{}}
+      const shouldHitVisitor = isLiveHost && !alreadyCountedToday;
+      const opVisitor = shouldHitVisitor ? 'hit' : 'get';
+      const opViews = isLiveHost ? 'hit' : 'get';
+
+      const fetchCnt = (op, key) =>
+        fetch(`https://abacus.jasoncameron.dev/${{op}}/${{ns}}/${{key}}`)
+          .then(r => (r.ok ? r.json() : null))
+          .then(d => (d && typeof d.value === 'number' && d.value >= 0 ? d.value : null))
+          .catch(() => null);
+
+      Promise.all([
+        fetchCnt(opVisitor, dayKey),
+        fetchCnt(opVisitor, 'total'),
+        fetchCnt(opViews, 'views'),
+      ]).then(([todayVal, totalVal, viewsVal]) => {{
+        if (shouldHitVisitor && (todayVal !== null || totalVal !== null)) {{
+          try {{ localStorage.setItem(lsKey, ymd); }} catch (e) {{}}
+        }}
+        VISITOR_STATS = {{
+          today: todayVal !== null ? todayVal : 0,
+          total: totalVal !== null ? totalVal : 0,
+          views: viewsVal,
+        }};
+        _renderVisitorStats();
       }});
     }}
 
@@ -6027,8 +6117,10 @@ def build_web_dashboard(here):
           <a class="nav-item" href="https://stock.naver.com/research/company" target="_blank">
             <span class="nav-item-left"><span>💚</span><span>네이버 리서치</span></span>
           </a>
+          <div class="sidebar-visitor-box" id="sidebarVisitorBox" style="display:none;"></div>
         </div>
       `;
+      _renderVisitorStats();
     }}
 
     function selectMarketAndSheet(mkt, sheetName) {{
