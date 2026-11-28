@@ -4246,7 +4246,7 @@ def build_web_dashboard(here):
     .rep-flow-p.sell {{ background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }}
     .live-quote-box {{
       position: fixed;
-      z-index: 9999;
+      z-index: 10100;
       display: none;
       width: 248px;
       background: #ffffff;
@@ -7085,7 +7085,7 @@ def build_web_dashboard(here):
               const href = cd
                 ? `https://stock.naver.com/domestic/stock/${{cd}}/price`
                 : `https://stock.naver.com/search?q=${{encodeURIComponent(cleanName)}}`;
-              const liveAttr = cd ? `data-live-code="${{cd}}"` : '';
+              const liveAttr = cd ? `data-live-code="${{cd}}" data-live-name="${{escapeHtml(kn)}}"` : '';
               return `<a class="usm-kr-chip" href="${{href}}" target="_blank" rel="noopener noreferrer" ${{liveAttr}}>${{escapeHtml(kn)}} ↗</a>`;
             }}).join('')}}
           </div>
@@ -7165,11 +7165,14 @@ def build_web_dashboard(here):
         ${{themeNewsHtml}}
       `;
       modal.classList.add('open');
+      if (typeof bindLiveQuotes === 'function') bindLiveQuotes();
     }}
 
     function closeUsThemeModal() {{
       const modal = document.getElementById('usThemeModal');
       if (modal) modal.classList.remove('open');
+      const lq = document.getElementById('liveQuoteBox');
+      if (lq) lq.style.display = 'none';
     }}
     document.addEventListener('keydown', (e) => {{
       if (e.key === 'Escape') closeUsThemeModal();
@@ -10912,7 +10915,7 @@ def build_web_dashboard(here):
           const cd = String(el.getAttribute('data-live-code') || '').trim();
           if (!cd) return;
           activeLiveCode = cd;
-          const nm = (el.textContent || '').trim().split(' ')[0];
+          const nm = (el.getAttribute('data-live-name') || '').trim() || (el.textContent || '').trim().split(' ')[0];
           clearTimeout(liveQuoteTimer);
           const cached = LIVE_QUOTE_CACHE[cd.padStart(6, '0')];
           if (cached && (Date.now() - cached.ts) < 20000) {{
