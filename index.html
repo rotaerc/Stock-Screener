@@ -3707,11 +3707,8 @@
       nav.innerHTML = `
         <div class="nav-section">
           <div class="nav-section-title">미국 시장</div>
-          <button class="nav-item ${currentViewMode === 'US' && currentUsTab === 'MORNING' ? 'active' : ''}" onclick="selectUsMarketView('MORNING')">
+          <button class="nav-item ${currentViewMode === 'US' ? 'active' : ''}" onclick="selectUsMarketView('MORNING')">
             <span class="nav-item-left"><span>🌅</span><span>미국 모닝 브리핑</span></span>
-          </button>
-          <button class="nav-item ${currentViewMode === 'US' && currentUsTab !== 'MORNING' ? 'active' : ''}" onclick="selectUsMarketView('VOLUME')">
-            <span class="nav-item-left"><span>🇺🇸</span><span>미국 거래대금 · 섹터</span></span>
           </button>
         </div>
         <div class="nav-divider"></div>
