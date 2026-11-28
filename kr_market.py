@@ -641,7 +641,8 @@ def collect_kr_market(here=HERE):
     nxt_stocks = [v for v in rt_map.values() if v.get("hasNxt") and (v.get("nxtValEok") or 0) > 0]
     print(f"  - 실시간 시세 수신: {len(rt_map)}/{len(all_codes)}종목 · NXT 거래 종목: {len(nxt_stocks)}종목")
 
-    # 현재 NXT 세션 판별 (PRE_MARKET / AFTER_MARKET / CLOSE)
+    # 현재 세션 판별:
+    # - 08:00~08:55 프리마켓(PRE_MARKET) 시간대에만 NXT를 기본으로, 그 외 전체 시간대는 전체 시장(KRX 정규장) 기본!
     sam = rt_map.get("005930") or (nxt_stocks[0] if nxt_stocks else {})
     nxt_session = sam.get("nxtSession") or ""
     nxt_status = sam.get("nxtStatus") or ""
@@ -653,16 +654,16 @@ def collect_kr_market(here=HERE):
         session_label = "🌅 NXT 프리마켓 실시간 (08:00~08:50)" if nxt_status == "OPEN" else "🌅 NXT 프리마켓 마감"
         default_mode = "NXT"
     elif krx_status == "OPEN":
-        session_label = "🏛️ KRX 정규장 진행 중 (09:00~15:30)"
+        session_label = "🏛️ KRX 전체 시장 장중 실시간"
         default_mode = "KRX"
-    elif nxt_session == "AFTER_MARKET":
-        session_label = "🌙 NXT 애프터마켓 진행 중 (15:30~20:00)" if nxt_status == "OPEN" else "🌙 NXT 애프터마켓 마감"
-        default_mode = "NXT"
+    elif nxt_session == "AFTER_MARKET" and nxt_status == "OPEN":
+        session_label = "🌙 KRX 마감 · NXT 애프터마켓 진행 중"
+        default_mode = "KRX"
     else:
-        session_label = "🏛️ 국내 정규장 마감"
+        session_label = "🏛️ 국내 전체 시장 마감 (KRX + NXT)"
         default_mode = "KRX"
 
-    # 코드 -> 소속 테마명 매핑 (NXT TOP 리스트에 테마 태그 표시용)
+    # 코드 -> 소속 테마명 매핑 (거래대금/급등 TOP 리스트에 테마 태그 표시용)
     code_to_theme = {}
     for _tid, tname, _ico, _nq, members in KR_THEME_BASKETS:
         if _tid == "kr_top10":
@@ -670,8 +671,9 @@ def collect_kr_market(here=HERE):
         for cd, _nm, _desc in members:
             code_to_theme.setdefault(cd, tname)
 
-    # NXT 거래대금 TOP 25 & NXT 상승률 급등 TOP 25 (거래대금 5억 이상 & 상승 종목 우선)
-    def _nxt_row(v):
+    def _stock_row(v):
+        kv = v.get("krxValEok") or 0.0
+        nv = v.get("nxtValEok") or 0.0
         return {
             "code": v["code"],
             "name": v["name"],
@@ -685,30 +687,41 @@ def collect_kr_market(here=HERE):
             "krxPrice": v["krxPrice"],
             "krxChg": v["krxChg"],
             "krxValEok": v["krxValEok"],
+            "totalValEok": round(kv + nv, 1),
             "mcapEok": (uni.get(v["code"]) or {}).get("mcapEok"),
         }
 
+    # 1) NXT 거래대금 TOP 25 & NXT 급등 TOP 25
     nxt_by_val = sorted(nxt_stocks, key=lambda x: x.get("nxtValEok") or 0, reverse=True)
-    nxt_top_val = [_nxt_row(x) for x in nxt_by_val[:25]]
+    nxt_top_val = [_stock_row(x) for x in nxt_by_val[:25]]
 
-    # 프리마켓(08:30)에는 거래대금 1억↑, 애프터/마감에는 10억↑ 기준 적용
-    min_val_eok = 1.0 if nxt_session == "PRE_MARKET" else 10.0
+    min_nxt_val = 1.0 if nxt_session == "PRE_MARKET" else 10.0
     nxt_surge_pool = [
         x for x in nxt_stocks
-        if (x.get("nxtValEok") or 0) >= min_val_eok and x.get("nxtChg") is not None
+        if (x.get("nxtValEok") or 0) >= min_nxt_val and x.get("nxtChg") is not None
     ]
     if len(nxt_surge_pool) < 15:
         nxt_surge_pool = [x for x in nxt_stocks if x.get("nxtChg") is not None]
     nxt_surge_pool.sort(key=lambda x: x.get("nxtChg") or -999, reverse=True)
-    nxt_top_up = [_nxt_row(x) for x in nxt_surge_pool[:25]]
+    nxt_top_up = [_stock_row(x) for x in nxt_surge_pool[:25]]
 
-    # KRX 정규장 거래대금 TOP 20도 함께 저장
+    # 2) 전체 시장 (KRX 정규장) 거래대금 TOP 25 & 급등 TOP 25
+    all_krx_stocks = [v for v in rt_map.values() if v.get("krxPrice") is not None]
     krx_by_val = sorted(
-        [v for v in rt_map.values() if (v.get("krxValEok") or 0) > 0],
+        [v for v in all_krx_stocks if (v.get("krxValEok") or 0) > 0],
         key=lambda x: x.get("krxValEok") or 0,
         reverse=True,
     )
-    krx_top_val = [_nxt_row(x) for x in krx_by_val[:20]]
+    krx_top_val = [_stock_row(x) for x in krx_by_val[:25]]
+
+    krx_surge_pool = [
+        v for v in all_krx_stocks
+        if (v.get("krxValEok") or 0) >= 50.0 and v.get("krxChg") is not None
+    ]
+    if len(krx_surge_pool) < 15:
+        krx_surge_pool = [v for v in all_krx_stocks if v.get("krxChg") is not None]
+    krx_surge_pool.sort(key=lambda x: x.get("krxChg") or -999, reverse=True)
+    krx_top_up = [_stock_row(x) for x in krx_surge_pool[:25]]
 
     print("[3/4] 국내 45개 테마 한국어 뉴스 & 시장 핵심 뉴스 병렬 수집 중...")
     theme_news_map = {}
@@ -781,19 +794,99 @@ def collect_kr_market(here=HERE):
             "stocks": rows,
         })
 
-    # NXT 거래대금이 가장 많이 몰린 테마 TOP 8 (코스피 TOP10 제외)
+    # 거래대금이 가장 많이 몰린 테마 TOP 8 (NXT 기준 / KRX 전체 기준 각각 저장)
     nxt_theme_flow = sorted(
         [s for s in sector_strength if s["id"] != "kr_top10" and s["nxtValEok"] > 0],
         key=lambda x: x["nxtValEok"],
         reverse=True,
     )[:8]
+    krx_theme_flow = sorted(
+        [s for s in sector_strength if s["id"] != "kr_top10" and s["krxValEok"] > 0],
+        key=lambda x: x["krxValEok"],
+        reverse=True,
+    )[:8]
 
-    # 자동 한국어 4줄 브리핑 생성
+    # 시간대별 변화 추적 스냅샷 누적 (같은 거래일 내 08:30 -> 10:03 -> 12:03 -> 14:03 -> 15:40 -> 20:05 자동 비교)
+    now_kst_dt = datetime.now(KST)
+    now_hhmm = now_kst_dt.strftime("%H:%M")
+    trade_date = (nxt_time or krx_time or now_kst_dt.strftime("%Y-%m-%d"))[:10]
+
+    prev_snapshots = []
+    if os.path.isfile(os.path.join(here, "kr_market.json")):
+        try:
+            with open(os.path.join(here, "kr_market.json"), "r", encoding="utf-8") as f:
+                old_kr = json.load(f)
+            if old_kr.get("tradeDate") == trade_date:
+                prev_snapshots = [
+                    sp for sp in (old_kr.get("intradaySnapshots") or [])
+                    if isinstance(sp, dict) and sp.get("sectors")
+                ]
+        except Exception:
+            prev_snapshots = []
+
     idx_map = {x["code"]: x for x in indices}
     kp = idx_map.get("KOSPI") or {}
     kq = idx_map.get("KOSDAQ") or {}
     fx = idx_map.get("USDKRW") or {}
 
+    if default_mode == "NXT":
+        slot_tag = "NXT 프리"
+    elif krx_status == "OPEN":
+        slot_tag = "장중"
+    elif nxt_session == "AFTER_MARKET" and nxt_status == "OPEN":
+        slot_tag = "애프터"
+    else:
+        slot_tag = "마감"
+
+    cur_snap = {
+        "time": now_hhmm,
+        "label": f"{now_hhmm} ({slot_tag})",
+        "mode": default_mode,
+        "kospi": kp.get("price"),
+        "kospiChg": kp.get("chgPct"),
+        "kosdaq": kq.get("price"),
+        "kosdaqChg": kq.get("chgPct"),
+        "sectors": {
+            s["id"]: (s["avgNxtChg"] if default_mode == "NXT" else s["avgKrxChg"])
+            for s in sector_strength
+        },
+        "sectorsNxt": {s["id"]: s["avgNxtChg"] for s in sector_strength},
+        "sectorsKrx": {s["id"]: s["avgKrxChg"] for s in sector_strength},
+    }
+
+    # 직전 스냅샷과 8분 이내 동일 시각대 재실행이면 덮어쓰고, 아니면 새 타임슬롯으로 누적 (최대 10개)
+    def _hm_to_min(hm):
+        try:
+            h, m = hm.split(":")
+            return int(h) * 60 + int(m)
+        except Exception:
+            return -999
+
+    snapshots = list(prev_snapshots)
+    if snapshots and abs(_hm_to_min(snapshots[-1].get("time", "")) - _hm_to_min(now_hhmm)) <= 8:
+        snapshots[-1] = cur_snap
+    else:
+        snapshots.append(cur_snap)
+    snapshots = snapshots[-10:]
+
+    # 직전 스냅샷 대비 섹터 등락 변화(deltaChg) 계산
+    prev_snap = snapshots[-2] if len(snapshots) >= 2 else None
+    prev_snap_label = prev_snap.get("label") if prev_snap else ""
+    for s in sector_strength:
+        cur_v = s["avgNxtChg"] if default_mode == "NXT" else s["avgKrxChg"]
+        if prev_snap:
+            pv = (prev_snap.get("sectors") or {}).get(s["id"])
+            s["deltaChg"] = round(cur_v - pv, 2) if (cur_v is not None and pv is not None) else None
+            pv_nxt = (prev_snap.get("sectorsNxt") or prev_snap.get("sectors") or {}).get(s["id"])
+            pv_krx = (prev_snap.get("sectorsKrx") or prev_snap.get("sectors") or {}).get(s["id"])
+            s["deltaNxtChg"] = round(s["avgNxtChg"] - pv_nxt, 2) if pv_nxt is not None else None
+            s["deltaKrxChg"] = round(s["avgKrxChg"] - pv_krx, 2) if pv_krx is not None else None
+        else:
+            s["deltaChg"] = None
+            s["deltaNxtChg"] = None
+            s["deltaKrxChg"] = None
+
+    # 자동 한국어 4줄 브리핑 생성
     def _fp(v):
         return f"{v:+.2f}%" if v is not None else "-"
 
@@ -807,38 +900,64 @@ def collect_kr_market(here=HERE):
             + f" 기준입니다. ({session_label})"
         ),
     })
-    if nxt_top_val:
+    if default_mode == "NXT" and nxt_top_val:
         top5_txt = ", ".join(
             f"{x['name']}({_fp(x['nxtChg'])}, {int(round(x['nxtValEok'])):,}억)"
             for x in nxt_top_val[:5]
         )
         bullets.append({
             "tag": "NXT 자금집중",
-            "text": f"NXT 거래대금 상위 핵심 종목은 {top5_txt} 순으로 매수·거래가 집중되었습니다.",
+            "text": f"NXT 프리마켓 거래대금 상위 중심주는 {top5_txt} 순으로 매수가 집중되었습니다.",
         })
-    if nxt_top_up:
+    elif krx_top_val:
+        top5_txt = ", ".join(
+            f"{x['name']}({_fp(x['krxChg'])}, {int(round(x['krxValEok'])):,}억)"
+            for x in krx_top_val[:5]
+        )
+        bullets.append({
+            "tag": "거래대금 TOP",
+            "text": f"국내 전체 시장 거래대금 상위 주도주는 {top5_txt} 순입니다.",
+        })
+
+    if default_mode == "NXT" and nxt_top_up:
         up5_txt = ", ".join(
             f"{x['name']}({_fp(x['nxtChg'])}" + (f" · {x['theme']}" if x.get("theme") else "") + ")"
             for x in nxt_top_up[:5]
         )
         bullets.append({
             "tag": "NXT 급등주",
-            "text": f"NXT 강세 급등 상위 종목은 {up5_txt} 등입니다.",
+            "text": f"NXT 프리마켓 강세 급등 상위 종목은 {up5_txt} 등입니다.",
         })
+    elif krx_top_up:
+        up5_txt = ", ".join(
+            f"{x['name']}({_fp(x['krxChg'])}" + (f" · {x['theme']}" if x.get("theme") else "") + ")"
+            for x in krx_top_up[:5]
+        )
+        bullets.append({
+            "tag": "전체 급등주",
+            "text": f"국내 전체 시장 강세 급등 상위 종목은 {up5_txt} 등입니다.",
+        })
+
     sort_fld = "avgNxtChg" if default_mode == "NXT" else "avgKrxChg"
     sorted_ss = sorted(sector_strength, key=lambda x: x[sort_fld], reverse=True)
     top_ss = ", ".join(f"{x['name']}({_fp(x[sort_fld])})" for x in sorted_ss[:4])
     bot_ss = ", ".join(f"{x['name']}({_fp(x[sort_fld])})" for x in sorted_ss[-2:])
+    delta_note = ""
+    if prev_snap:
+        movers = [s for s in sector_strength if s.get("deltaChg") is not None]
+        movers.sort(key=lambda x: x["deltaChg"], reverse=True)
+        if movers and abs(movers[0]["deltaChg"]) >= 0.1:
+            delta_note = f" [{prev_snap_label} 대비 모멘텀 가속: {movers[0]['name']}({movers[0]['deltaChg']:+.2f}%p)]"
     bullets.append({
         "tag": "주도 섹터",
-        "text": f"강세 상위 섹터는 {top_ss} / 상대 약세는 {bot_ss} 흐름입니다.",
+        "text": f"강세 상위 섹터는 {top_ss} / 상대 약세는 {bot_ss} 흐름입니다.{delta_note}",
     })
 
     total_nxt_val_eok = round(sum(x.get("nxtValEok") or 0 for x in nxt_stocks), 1)
-    trade_date = (nxt_time or krx_time or datetime.now(KST).strftime("%Y-%m-%d"))[:10]
+    total_krx_val_eok = round(sum(x.get("krxValEok") or 0 for x in all_krx_stocks), 1)
 
     payload = {
-        "updatedAt": datetime.now(KST).strftime("%Y-%m-%d %H:%M"),
+        "updatedAt": now_kst_dt.strftime("%Y-%m-%d %H:%M"),
         "tradeDate": trade_date,
         "sessionLabel": session_label,
         "defaultMode": default_mode,
@@ -850,20 +969,38 @@ def collect_kr_market(here=HERE):
         "universeCount": len(rt_map),
         "nxtActiveCount": len(nxt_stocks),
         "totalNxtValEok": total_nxt_val_eok,
+        "totalKrxValEok": total_krx_val_eok,
+        "prevSnapLabel": prev_snap_label,
+        "intradaySnapshots": snapshots,
         "indices": indices,
         "bullets": bullets,
+        "krxTopVal": krx_top_val,
+        "krxTopUp": krx_top_up,
         "nxtTopVal": nxt_top_val,
         "nxtTopUp": nxt_top_up,
-        "krxTopVal": krx_top_val,
+        "krxThemeFlow": [
+            {
+                "id": x["id"],
+                "name": x["name"],
+                "icon": x["icon"],
+                "valEok": x["krxValEok"],
+                "avgChg": x["avgKrxChg"],
+                "leaders": [
+                    {"name": s["name"], "code": s["code"], "chg": s["krxChg"], "valEok": s["krxValEok"]}
+                    for s in sorted(x["stocks"], key=lambda r: r.get("krxValEok") or 0, reverse=True)[:3]
+                ],
+            }
+            for x in krx_theme_flow
+        ],
         "nxtThemeFlow": [
             {
                 "id": x["id"],
                 "name": x["name"],
                 "icon": x["icon"],
-                "nxtValEok": x["nxtValEok"],
-                "avgNxtChg": x["avgNxtChg"],
+                "valEok": x["nxtValEok"],
+                "avgChg": x["avgNxtChg"],
                 "leaders": [
-                    {"name": s["name"], "code": s["code"], "nxtChg": s["effNxtChg"], "nxtValEok": s["nxtValEok"]}
+                    {"name": s["name"], "code": s["code"], "chg": s["effNxtChg"], "valEok": s["nxtValEok"]}
                     for s in sorted(x["stocks"], key=lambda r: r.get("nxtValEok") or 0, reverse=True)[:3]
                 ],
             }

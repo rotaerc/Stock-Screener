@@ -8254,10 +8254,11 @@ def build_web_dashboard(here):
       }}
     }}
 
-    // ================= 국내 시장 브리핑 · NXT(넥스트레이드) · 국내 섹터 강도 보드 =================
-    let currentKrSsMode = (KR_DATA && KR_DATA.defaultMode) ? KR_DATA.defaultMode : 'NXT'; // 'NXT' | 'KRX'
+    // ================= 국내 시장 브리핑 · 전체 시장(KRX) & NXT · 시간대별 변화 · 국내 섹터 강도 보드 =================
+    let currentKrMarketMode = (KR_DATA && KR_DATA.defaultMode) ? KR_DATA.defaultMode : 'KRX'; // 'KRX' | 'NXT'
+    let currentKrSnapIdx = -1; // -1 = 최신 스냅샷, 0..N-1 = 특정 시간대 스냅샷 선택
     let currentKrSsFilter = 'ALL'; // 'ALL' | 'UP' | 'DN'
-    let currentKrSsSort = 'ABS'; // 'ABS' | 'DESC' | 'ASC' | 'VAL' | 'NAME'
+    let currentKrSsSort = 'ABS'; // 'ABS' | 'DESC' | 'ASC' | 'DELTA' | 'VAL' | 'NAME'
     let currentKrSsQuery = '';
 
     function selectKrMarketView() {{
@@ -8269,7 +8270,14 @@ def build_web_dashboard(here):
       pushNavHistory();
     }}
 
-    function setKrSsMode(m) {{ currentKrSsMode = m || 'NXT'; renderKrSectorStrengthBoard(); }}
+    function setKrMarketMode(m) {{
+      currentKrMarketMode = m || 'KRX';
+      renderKrMarketView();
+    }}
+    function setKrSnapIdx(idx) {{
+      currentKrSnapIdx = idx;
+      renderKrSectorStrengthBoard();
+    }}
     function setKrSsFilter(f) {{ currentKrSsFilter = f || 'ALL'; renderKrSectorStrengthBoard(); }}
     function setKrSsSort(s) {{ currentKrSsSort = s || 'ABS'; renderKrSectorStrengthBoard(); }}
     function setKrSsQuery(q) {{ currentKrSsQuery = q || ''; renderKrSectorStrengthBoard(); }}
@@ -8291,23 +8299,31 @@ def build_web_dashboard(here):
       const bodyEl = document.getElementById('usThemeModalBody');
       if (!modal || !titleEl || !bodyEl) return;
 
-      const nxtCls = item.avgNxtChg > 0 ? 'up' : (item.avgNxtChg < 0 ? 'dn' : 'flat');
+      const isNxt = (currentKrMarketMode === 'NXT');
+      const mainAvg = isNxt ? item.avgNxtChg : item.avgKrxChg;
+      const subAvg = isNxt ? item.avgKrxChg : item.avgNxtChg;
+      const mainCls = mainAvg > 0 ? 'up' : (mainAvg < 0 ? 'dn' : 'flat');
+      const dVal = isNxt ? item.deltaNxtChg : item.deltaKrxChg;
+      const dBadge = (dVal !== null && dVal !== undefined)
+        ? `<span style="font-size:11.5px; font-weight:800; padding:2px 7px; border-radius:6px; background:${{dVal >= 0 ? '#fef2f2' : '#eff6ff'}}; color:${{dVal >= 0 ? '#dc2626' : '#2563eb'}};">직전대비 ${{dVal >= 0 ? '▲+' : '▼'}}${{Math.abs(dVal).toFixed(2)}}%p</span>`
+        : '';
+
       titleEl.innerHTML = `
         <span>${{item.icon || '📊'}} ${{escapeHtml(item.name)}}</span>
-        <span class="usm-pop-chg ${{nxtCls}}">NXT ${{_usFmtPct(item.avgNxtChg)}}</span>
-        <span style="font-size:12px; color:#64748b; font-weight:700;">KRX <b class="${{_usPctCls(item.avgKrxChg)}}">${{_usFmtPct(item.avgKrxChg)}}</b></span>
-        ${{item.nxtValEok ? `<span style="font-size:11.5px; color:#b45309; background:#fef3c7; padding:2px 7px; border-radius:6px; font-weight:800;">NXT 대금 ${{_krFmtEok(item.nxtValEok)}}</span>` : ''}}
+        <span class="usm-pop-chg ${{mainCls}}">${{isNxt ? 'NXT' : 'KRX'}} ${{_usFmtPct(mainAvg)}}</span>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">${{isNxt ? 'KRX' : 'NXT'}} <b class="${{_usPctCls(subAvg)}}">${{_usFmtPct(subAvg)}}</b></span>
+        ${{dBadge}}
       `;
 
       const sortedStocks = [...(item.stocks || [])].sort((a, b) => {{
-        const va = currentKrSsMode === 'NXT' ? (a.effNxtChg ?? -999) : (a.krxChg ?? -999);
-        const vb = currentKrSsMode === 'NXT' ? (b.effNxtChg ?? -999) : (b.krxChg ?? -999);
+        const va = isNxt ? (a.effNxtChg ?? -999) : (a.krxChg ?? -999);
+        const vb = isNxt ? (b.effNxtChg ?? -999) : (b.krxChg ?? -999);
         return vb - va;
       }});
 
       const rowsHtml = sortedStocks.map((s, idx) => {{
-        const mainChg = (currentKrSsMode === 'NXT' && s.nxtChg !== null && s.nxtChg !== undefined) ? s.nxtChg : s.krxChg;
-        const mainPrice = (currentKrSsMode === 'NXT' && s.nxtPrice) ? s.nxtPrice : s.krxPrice;
+        const mainChg = (isNxt && s.nxtChg !== null && s.nxtChg !== undefined) ? s.nxtChg : s.krxChg;
+        const mainPrice = (isNxt && s.nxtPrice) ? s.nxtPrice : s.krxPrice;
         const chgCls = (mainChg > 0) ? 'up' : ((mainChg < 0) ? 'dn' : 'flat');
         const naverUrl = `https://stock.naver.com/domestic/stock/${{s.code}}/price`;
         const krNewsUrl = `https://news.google.com/search?q=${{encodeURIComponent(s.name + ' 주가')}}&hl=ko&gl=KR&ceid=KR:ko`;
@@ -8326,8 +8342,8 @@ def build_web_dashboard(here):
               </div>
             </div>
             <div style="display:flex; gap:10px; font-size:11px; color:#64748b; font-weight:700; flex-wrap:wrap;">
-              <span>⚡ NXT <b class="${{_usPctCls(s.nxtChg)}}">${{s.hasNxt ? _usFmtPct(s.nxtChg) : '미거래'}}</b>${{s.nxtValEok ? ` (${{_krFmtEok(s.nxtValEok)}})` : ''}}</span>
               <span>🏛️ KRX 정규 <b class="${{_usPctCls(s.krxChg)}}">${{_usFmtPct(s.krxChg)}}</b>${{s.krxValEok ? ` (${{_krFmtEok(s.krxValEok)}})` : ''}}</span>
+              <span>⚡ NXT <b class="${{_usPctCls(s.nxtChg)}}">${{s.hasNxt ? _usFmtPct(s.nxtChg) : '미거래'}}</b>${{s.nxtValEok ? ` (${{_krFmtEok(s.nxtValEok)}})` : ''}}</span>
             </div>
             ${{s.desc ? `<div class="usm-pop-desc">📌 ${{escapeHtml(s.desc)}}</div>` : ''}}
             <div class="usm-pop-actions">
@@ -8362,7 +8378,7 @@ def build_web_dashboard(here):
       bodyEl.innerHTML = `
         <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
           <span>🇰🇷 국내 테마 구성 종목 (${{sortedStocks.length}}종목 · 종목명 호버 시 네이버 실시간 주가)</span>
-          <span style="font-size:11px; color:#64748b; font-weight:600;">${{currentKrSsMode === 'NXT' ? 'NXT 상승률순' : 'KRX 상승률순'}}</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">${{isNxt ? 'NXT 상승률순' : 'KRX 전체 상승률순'}}</span>
         </div>
         <div class="usm-mini-list" style="gap:8px;">${{rowsHtml}}</div>
         ${{themeNewsHtml}}
@@ -8379,13 +8395,35 @@ def build_web_dashboard(here):
         host.innerHTML = `<div style="padding:18px; text-align:center; color:#94a3b8; font-size:13px;">국내 섹터 강도 데이터가 없습니다.</div>`;
         return;
       }}
-      const fld = currentKrSsMode === 'KRX' ? 'avgKrxChg' : 'avgNxtChg';
-      const upAll = all.filter(x => (Number(x[fld]) || 0) > 0).length;
-      const dnAll = all.filter(x => (Number(x[fld]) || 0) < 0).length;
+      const snaps = (KR_DATA && KR_DATA.intradaySnapshots) || [];
+      const activeIdx = (currentKrSnapIdx >= 0 && currentKrSnapIdx < snaps.length) ? currentKrSnapIdx : (snaps.length - 1);
+      const isViewingPast = (snaps.length > 0 && activeIdx >= 0 && activeIdx < snaps.length - 1);
+      const activeSnap = activeIdx >= 0 ? snaps[activeIdx] : null;
+      const prevSnap = activeIdx >= 1 ? snaps[activeIdx - 1] : null;
+      const isNxt = (currentKrMarketMode === 'NXT');
+
+      const getVal = (x) => {{
+        if (isViewingPast && activeSnap) {{
+          const m = isNxt ? (activeSnap.sectorsNxt || activeSnap.sectors || {{}}) : (activeSnap.sectorsKrx || activeSnap.sectors || {{}});
+          if (m[x.id] !== undefined && m[x.id] !== null) return Number(m[x.id]);
+        }}
+        return Number(isNxt ? x.avgNxtChg : x.avgKrxChg) || 0;
+      }};
+      const getDelta = (x) => {{
+        if (!prevSnap) return null;
+        const curV = getVal(x);
+        const pm = isNxt ? (prevSnap.sectorsNxt || prevSnap.sectors || {{}}) : (prevSnap.sectorsKrx || prevSnap.sectors || {{}});
+        const prevV = pm[x.id];
+        if (prevV === undefined || prevV === null) return null;
+        return Number((curV - Number(prevV)).toFixed(2));
+      }};
+
+      const upAll = all.filter(x => getVal(x) > 0).length;
+      const dnAll = all.filter(x => getVal(x) < 0).length;
 
       const q = (currentKrSsQuery || '').trim().toLowerCase();
       let list = all.filter(x => {{
-        const v = Number(x[fld]) || 0;
+        const v = getVal(x);
         if (currentKrSsFilter === 'UP' && v <= 0) return false;
         if (currentKrSsFilter === 'DN' && v >= 0) return false;
         if (q) {{
@@ -8396,14 +8434,27 @@ def build_web_dashboard(here):
       }});
 
       list.sort((a, b) => {{
-        const va = Number(a[fld]) || 0;
-        const vb = Number(b[fld]) || 0;
+        const va = getVal(a), vb = getVal(b);
         if (currentKrSsSort === 'DESC') return vb - va;
         if (currentKrSsSort === 'ASC') return va - vb;
-        if (currentKrSsSort === 'VAL') return (Number(b.nxtValEok) || 0) - (Number(a.nxtValEok) || 0);
+        if (currentKrSsSort === 'DELTA') return (getDelta(b) ?? -999) - (getDelta(a) ?? -999);
+        if (currentKrSsSort === 'VAL') return (Number(isNxt ? b.nxtValEok : b.krxValEok) || 0) - (Number(isNxt ? a.nxtValEok : a.krxValEok) || 0);
         if (currentKrSsSort === 'NAME') return String(a.name).localeCompare(String(b.name), 'ko');
         return Math.abs(vb) - Math.abs(va);
       }});
+
+      // 시간대 스냅샷 선택 타임라인 바
+      const snapBarHtml = snaps.length ? `
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:10px; padding:7px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px;">
+          <span style="font-size:11.5px; font-weight:900; color:#334155;">🕒 시간대별 스냅샷:</span>
+          ${{snaps.map((sp, i) => {{
+            const isAct = (i === activeIdx);
+            const isLast = (i === snaps.length - 1);
+            return `<button class="usm-ss-pill ${{isAct ? 'active-all' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrSnapIdx(${{isLast ? -1 : i}})">${{escapeHtml(sp.label)}}${{isLast ? ' · 최신' : ''}}</button>`;
+          }}).join('')}}
+          ${{prevSnap ? `<span style="font-size:11px; color:#64748b; font-weight:700; margin-left:auto;">각 셀 하단 ▲/▼ = <b>${{escapeHtml(prevSnap.label)}}</b> 대비 변화</span>` : `<span style="font-size:11px; color:#64748b; font-weight:600; margin-left:auto;">다음 업데이트부터 직전 시간대 대비 ▲/▼ 변화 표시</span>`}}
+        </div>
+      ` : '';
 
       const toolbarHtml = `
         <div class="usm-ss-toolbar">
@@ -8412,8 +8463,8 @@ def build_web_dashboard(here):
             <button class="usm-ss-pill up ${{currentKrSsFilter === 'UP' ? 'active-up' : ''}}" onclick="setKrSsFilter('UP')">▲ 상승 ${{upAll}}</button>
             <button class="usm-ss-pill dn ${{currentKrSsFilter === 'DN' ? 'active-dn' : ''}}" onclick="setKrSsFilter('DN')">▼ 하락 ${{dnAll}}</button>
             <div class="flow-mode-group" style="margin-left:2px;">
-              <button class="flow-mode-btn ${{currentKrSsMode === 'NXT' ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrSsMode('NXT')">⚡ NXT 기준</button>
-              <button class="flow-mode-btn ${{currentKrSsMode === 'KRX' ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrSsMode('KRX')">🏛️ KRX 정규</button>
+              <button class="flow-mode-btn ${{!isNxt ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrMarketMode('KRX')">🏛️ 전체 시장(KRX)</button>
+              <button class="flow-mode-btn ${{isNxt ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setKrMarketMode('NXT')">⚡ NXT</button>
             </div>
           </div>
           <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
@@ -8422,7 +8473,8 @@ def build_web_dashboard(here):
               <option value="ABS" ${{currentKrSsSort === 'ABS' ? 'selected' : ''}}>등락폭 큰 순</option>
               <option value="DESC" ${{currentKrSsSort === 'DESC' ? 'selected' : ''}}>상승률 높은 순</option>
               <option value="ASC" ${{currentKrSsSort === 'ASC' ? 'selected' : ''}}>하락률 큰 순</option>
-              <option value="VAL" ${{currentKrSsSort === 'VAL' ? 'selected' : ''}}>NXT 거래대금순</option>
+              ${{prevSnap ? `<option value="DELTA" ${{currentKrSsSort === 'DELTA' ? 'selected' : ''}}>직전 대비 급강세순</option>` : ''}}
+              <option value="VAL" ${{currentKrSsSort === 'VAL' ? 'selected' : ''}}>거래대금 큰 순</option>
               <option value="NAME" ${{currentKrSsSort === 'NAME' ? 'selected' : ''}}>가나다 순</option>
             </select>
           </div>
@@ -8432,56 +8484,63 @@ def build_web_dashboard(here):
       const gridHtml = list.length ? `
         <div class="usm-ss-grid">
           ${{list.map(x => {{
-            const v = x[fld];
+            const v = getVal(x);
+            const dv = getDelta(x);
             const lvl = _usSsLevelClass(v);
-            const valSub = x.nxtValEok ? ` · NXT ${{_krFmtEok(x.nxtValEok)}}` : '';
-            return `<div class="usm-ss-tile ${{lvl}}" onclick="openKrThemeModal('${{x.id}}')" title="${{escapeHtml(x.name)}} · NXT ${{_usFmtPct(x.avgNxtChg)}} / KRX ${{_usFmtPct(x.avgKrxChg)}}">
+            const valEok = isNxt ? x.nxtValEok : x.krxValEok;
+            const deltaHtml = (dv !== null && Math.abs(dv) >= 0.05)
+              ? `<span style="display:inline-block; margin-left:4px; padding:0 4px; border-radius:4px; font-size:9.5px; font-weight:900; background:rgba(255,255,255,0.85); color:${{dv > 0 ? '#dc2626' : '#2563eb'}};">${{dv > 0 ? '▲+' : '▼'}}${{Math.abs(dv).toFixed(1)}}</span>`
+              : '';
+            const valSub = valEok ? ` · ${{_krFmtEok(valEok)}}` : '';
+            return `<div class="usm-ss-tile ${{lvl}}" onclick="openKrThemeModal('${{x.id}}')" title="${{escapeHtml(x.name)}} · KRX ${{_usFmtPct(x.avgKrxChg)}} / NXT ${{_usFmtPct(x.avgNxtChg)}}${{dv !== null ? ` · 직전대비 ${{dv >= 0 ? '+' : ''}}${{dv.toFixed(2)}}%p` : ''}}">
               <div class="usm-ss-tname"><span>${{x.icon || '📊'}}</span><span>${{escapeHtml(x.name)}}</span></div>
-              <div class="usm-ss-tpct">${{_usFmtPct(v)}}</div>
+              <div class="usm-ss-tpct">${{_usFmtPct(v)}}${{deltaHtml}}</div>
               <div class="usm-ss-tcnt">${{x.count}}종목${{valSub}} ›</div>
             </div>`;
           }}).join('')}}
         </div>
       ` : `<div style="padding:22px; text-align:center; color:#94a3b8; font-size:13px;">검색 조건에 맞는 국내 테마가 없습니다.</div>`;
 
-      host.innerHTML = toolbarHtml + gridHtml;
+      host.innerHTML = snapBarHtml + toolbarHtml + gridHtml;
     }}
 
     function renderKrMarketView() {{
       const wrap = document.getElementById('krMarketBodyWrap');
       if (!wrap) return;
-      const kd = KR_DATA || {{ indices: [], bullets: [], nxtTopVal: [], nxtTopUp: [], nxtThemeFlow: [], sectorStrength: [], news: [] }};
+      const kd = KR_DATA || {{ indices: [], bullets: [], krxTopVal: [], krxTopUp: [], nxtTopVal: [], nxtTopUp: [], krxThemeFlow: [], nxtThemeFlow: [], intradaySnapshots: [], sectorStrength: [], news: [] }};
+      const isNxt = (currentKrMarketMode === 'NXT');
       const idxs = kd.indices || [];
       const bullets = kd.bullets || [];
-      const nxtVal = (kd.nxtTopVal || []).slice(0, 15);
-      const nxtUp = (kd.nxtTopUp || []).slice(0, 15);
-      const themeFlow = kd.nxtThemeFlow || [];
+      const topValList = ((isNxt ? kd.nxtTopVal : kd.krxTopVal) || kd.nxtTopVal || []).slice(0, 15);
+      const topUpList = ((isNxt ? kd.nxtTopUp : kd.krxTopUp) || kd.nxtTopUp || []).slice(0, 15);
+      const themeFlow = (isNxt ? kd.nxtThemeFlow : kd.krxThemeFlow) || kd.nxtThemeFlow || [];
+      const snaps = kd.intradaySnapshots || [];
       const news = kd.news || [];
 
-      document.getElementById('pageTitle').textContent = '🇰🇷 국내 시장 브리핑 · NXT · 섹터 강도';
-      document.getElementById('pageSubtitle').textContent = 'NXT(넥스트레이드) 자금 집중 종목 + 국내 42개 핵심 테마 섹터 강도 보드 (평일 08:30 / 10:03 / 12:03 / 14:03 / 15:40 / 20:05 자동 갱신)';
+      document.getElementById('pageTitle').textContent = '🇰🇷 국내 전체 시장 · NXT · 섹터 강도';
+      document.getElementById('pageSubtitle').textContent = '국내 전체 시장(KRX) & NXT(08:30 프리마켓) 자금 집중 종목 + 시간대별 섹터 강도 변화 추적 (평일 08:30 / 10:03 / 12:03 / 14:03 / 15:40 / 20:05 자동 갱신)';
       document.getElementById('metaBadges').innerHTML = `
         <span class="meta-pill">📅 기준일: ${{kd.tradeDate || '-'}}</span>
         <span class="meta-pill" style="background:#fffbeb; color:#b45309; border-color:#fcd34d;">${{escapeHtml(kd.sessionLabel || '국내 시장')}}</span>
-        <span class="meta-pill">⚡ NXT 거래 ${{kd.nxtActiveCount || 0}}종목 · ${{_krFmtEok(kd.totalNxtValEok || 0)}}</span>
-        <span class="meta-pill">🕒 업데이트: ${{kd.updatedAt || '-'}}</span>
+        <span class="meta-pill">🏛️ KRX ${{_krFmtEok(kd.totalKrxValEok || 0)}} · ⚡ NXT ${{_krFmtEok(kd.totalNxtValEok || 0)}}</span>
+        <span class="meta-pill">🕒 스냅샷 ${{snaps.length}}회 · ${{kd.updatedAt || '-'}}</span>
       `;
 
       if (!idxs.length && !(kd.sectorStrength || []).length) {{
-        wrap.innerHTML = `<div class="flow-empty-guide"><h3>🇰🇷 국내 시장 데이터가 아직 수집되지 않았습니다</h3><p><code>python kr_market.py</code> 실행 시 NXT 집중 매수 및 국내 42개 섹터 강도 보드가 자동 반영됩니다.</p></div>`;
+        wrap.innerHTML = `<div class="flow-empty-guide"><h3>🇰🇷 국내 시장 데이터가 아직 수집되지 않았습니다</h3><p><code>python kr_market.py</code> 실행 시 국내 전체 시장·NXT 집중 매수 및 42개 섹터 강도 보드가 자동 반영됩니다.</p></div>`;
         return;
       }}
 
-      // 1) 국내 시장 히어로 브리핑 카드
-      const tagClsMap = {{ '국내 지수': '', 'NXT 자금집중': 'mac', 'NXT 급등주': 'kr', '주도 섹터': 'sec' }};
+      // 1) 국내 시장 히어로 브리핑 카드 + 전체시장/NXT 메인 전환 버튼
+      const tagClsMap = {{ '국내 지수': '', '거래대금 TOP': 'mac', 'NXT 자금집중': 'mac', '전체 급등주': 'kr', 'NXT 급등주': 'kr', '주도 섹터': 'sec' }};
       const heroHtml = `
         <div class="usm-hero">
           <div class="usm-hero-head" style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #065f46 100%);">
-            <div class="usm-hero-title">🇰🇷 ${{escapeHtml(kd.tradeDate || '')}} 국내 증시 · NXT 자금 흐름 브리핑</div>
+            <div class="usm-hero-title">🇰🇷 ${{escapeHtml(kd.tradeDate || '')}} 국내 증시 · ${{isNxt ? 'NXT(프리/애프터)' : '전체 시장(KRX)'}} 브리핑</div>
             <div class="usm-hero-pills">
-              <span class="usm-pill kr-pos">${{escapeHtml(kd.sessionLabel || 'NXT 실시간')}}</span>
-              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('krmNxtBoard'); if(el) el.scrollIntoView({{behavior:'smooth', block:'start'}});">⚡ NXT 집중 매수 ↓</span>
-              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('krmSectorStrengthCard'); if(el) el.scrollIntoView({{behavior:'smooth', block:'start'}});">🧱 국내 섹터 강도 (${{(kd.sectorStrength || []).length}}) ↓</span>
+              <span class="usm-pill ${{!isNxt ? 'kr-pos' : 'neu'}}" style="cursor:pointer;" onclick="setKrMarketMode('KRX')">🏛️ 전체 시장 (KRX)</span>
+              <span class="usm-pill ${{isNxt ? 'kr-pos' : 'neu'}}" style="cursor:pointer;" onclick="setKrMarketMode('NXT')">⚡ NXT (08:30 프리/애프터)</span>
+              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('krmSectorStrengthCard'); if(el) el.scrollIntoView({{behavior:'smooth', block:'start'}});">🧱 섹터 강도 ↓</span>
             </div>
           </div>
           <div class="usm-bullets">
@@ -8524,33 +8583,152 @@ def build_web_dashboard(here):
         </div>
       `;
 
-      // 3) NXT(넥스트레이드) 자금 집중 · 중심 매수 종목 보드 (2열 PC / 1열 모바일)
-      const renderNxtRows = (arr) => arr.map((s, idx) => `
-        <a class="usm-mini-row" href="https://stock.naver.com/domestic/stock/${{s.code}}/price" target="_blank" rel="noopener noreferrer" data-live-code="${{s.code}}" data-live-name="${{escapeHtml(s.name)}}">
+      // 3) 시간대별 변화 추적 보드 (업데이트 시각마다 섹터·지수 변화 누적 표시)
+      let timelineHtml = '';
+      if (snaps.length >= 2) {{
+        const latestSp = snaps[snaps.length - 1];
+        const prevSp = snaps[snaps.length - 2];
+        const secList = kd.sectorStrength || [];
+        const withDelta = secList.map(s => {{
+          const mCur = isNxt ? (latestSp.sectorsNxt || latestSp.sectors || {{}}) : (latestSp.sectorsKrx || latestSp.sectors || {{}});
+          const mPrv = isNxt ? (prevSp.sectorsNxt || prevSp.sectors || {{}}) : (prevSp.sectorsKrx || prevSp.sectors || {{}});
+          const cv = mCur[s.id], pv = mPrv[s.id];
+          const dl = (cv !== undefined && pv !== undefined) ? Number((Number(cv) - Number(pv)).toFixed(2)) : null;
+          return {{ ...s, _cur: cv, _prv: pv, _dl: dl }};
+        }}).filter(s => s._dl !== null);
+        const topAccel = [...withDelta].sort((a, b) => b._dl - a._dl).slice(0, 5);
+        const topFade = [...withDelta].sort((a, b) => a._dl - b._dl).slice(0, 5);
+        const topMoveTable = [...withDelta].sort((a, b) => Math.abs(b._dl) - Math.abs(a._dl)).slice(0, 10);
+
+        timelineHtml = `
+          <div class="usm-card" id="krmTimelineCard">
+            <div class="usm-sec-title">
+              <span>🕒 시간대별 섹터 변화 추적 (${{escapeHtml(prevSp.label)}} → ${{escapeHtml(latestSp.label)}})</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">오늘 총 ${{snaps.length}}회 스냅샷 비교 · 클릭 시 섹터 상세</span>
+            </div>
+            <div class="usm-two-col" style="margin-bottom:12px;">
+              <div>
+                <div style="font-size:11.5px; font-weight:900; color:#dc2626; margin-bottom:5px;">🔥 직전 대비 모멘텀 가속 TOP 5</div>
+                <div class="usm-mini-list">
+                  ${{topAccel.map(s => `
+                    <div class="usm-mini-row" style="cursor:pointer;" onclick="openKrThemeModal('${{s.id}}')">
+                      <span style="font-weight:800; color:#0f172a;">${{s.icon || ''}} ${{escapeHtml(s.name)}}</span>
+                      <span style="display:flex; gap:8px; align-items:center; font-variant-numeric:tabular-nums;">
+                        <span style="font-size:11px; color:#64748b;">${{_usFmtPct(s._prv)}} → ${{_usFmtPct(s._cur)}}</span>
+                        <b class="pct-up" style="min-width:56px; text-align:right;">▲+${{s._dl.toFixed(2)}}%p</b>
+                      </span>
+                    </div>
+                  `).join('')}}
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11.5px; font-weight:900; color:#2563eb; margin-bottom:5px;">❄️ 직전 대비 약세 전환 / 숨고르기 TOP 5</div>
+                <div class="usm-mini-list">
+                  ${{topFade.map(s => `
+                    <div class="usm-mini-row" style="cursor:pointer;" onclick="openKrThemeModal('${{s.id}}')">
+                      <span style="font-weight:800; color:#0f172a;">${{s.icon || ''}} ${{escapeHtml(s.name)}}</span>
+                      <span style="display:flex; gap:8px; align-items:center; font-variant-numeric:tabular-nums;">
+                        <span style="font-size:11px; color:#64748b;">${{_usFmtPct(s._prv)}} → ${{_usFmtPct(s._cur)}}</span>
+                        <b class="${{s._dl < 0 ? 'pct-down' : 'pct-up'}}" style="min-width:56px; text-align:right;">${{s._dl < 0 ? '▼' : '▲+'}}${{Math.abs(s._dl).toFixed(2)}}%p</b>
+                      </span>
+                    </div>
+                  `).join('')}}
+                </div>
+              </div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="pe-tbl" style="font-size:11.5px;">
+                <thead>
+                  <tr>
+                    <th class="lft">변동 큰 주요 섹터</th>
+                    ${{snaps.map(sp => `<th class="ctr">${{escapeHtml(sp.time)}}<div style="font-size:9.5px; font-weight:600; color:#64748b;">${{sp.kospiChg !== null && sp.kospiChg !== undefined ? 'KP ' + _usFmtPct(sp.kospiChg) : sp.mode}}</div></th>`).join('')}}
+                    <th class="ctr">직전 대비</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${{topMoveTable.map(s => `
+                    <tr style="cursor:pointer;" onclick="openKrThemeModal('${{s.id}}')">
+                      <td class="lft" style="font-weight:800; color:#0f172a;">${{s.icon || ''}} ${{escapeHtml(s.name)}}</td>
+                      ${{snaps.map(sp => {{
+                        const sm = isNxt ? (sp.sectorsNxt || sp.sectors || {{}}) : (sp.sectorsKrx || sp.sectors || {{}});
+                        const v = sm[s.id];
+                        return `<td class="ctr ${{_usPctCls(v)}}" style="font-weight:700;">${{_usFmtPct(v)}}</td>`;
+                      }}).join('')}}
+                      <td class="ctr ${{s._dl > 0 ? 'pct-up' : (s._dl < 0 ? 'pct-down' : '')}}" style="font-weight:900;">${{s._dl > 0 ? '▲+' : (s._dl < 0 ? '▼' : '')}}${{Math.abs(s._dl).toFixed(2)}}%p</td>
+                    </tr>
+                  `).join('')}}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }} else if (snaps.length === 1) {{
+        const sp0 = snaps[0];
+        timelineHtml = `
+          <div class="usm-card" id="krmTimelineCard" style="background:linear-gradient(135deg,#f8fafc,#f0f9ff); border-color:#bae6fd;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; font-size:12.5px;">
+              <div>
+                <b style="color:#0369a1;">🕒 시간대별 변화 추적 활성화됨</b>
+                <span style="color:#334155; margin-left:6px;">현재 기준 스냅샷: <b>${{escapeHtml(sp0.label)}}</b> (코스피 ${{_usFmtPct(sp0.kospiChg)}} · 코스닥 ${{_usFmtPct(sp0.kosdaqChg)}})</span>
+              </div>
+              <span style="font-size:11.5px; color:#475569; font-weight:600;">평일 08:30 → 10:03 → 12:03 → 14:03 → 15:40 → 20:05 업데이트마다 직전 대비 변화(▲/▼%p)가 자동 누적 비교됩니다.</span>
+            </div>
+          </div>
+        `;
+      }}
+
+      // 4) 거래대금 TOP 15 & 상승률 급등 TOP 15 (전체 시장 KRX 또는 NXT 전환)
+      const renderRows = (arr) => arr.map((s, idx) => {{
+        const chg = isNxt ? s.nxtChg : s.krxChg;
+        const val = isNxt ? s.nxtValEok : s.krxValEok;
+        return `<a class="usm-mini-row" href="https://stock.naver.com/domestic/stock/${{s.code}}/price" target="_blank" rel="noopener noreferrer" data-live-code="${{s.code}}" data-live-name="${{escapeHtml(s.name)}}">
           <span style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
             <span style="font-size:11px; font-weight:900; color:#64748b; width:18px; flex-shrink:0;">${{idx + 1}}</span>
             <b style="color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${{escapeHtml(s.name)}}</b>
             ${{s.theme ? `<span style="font-size:10px; font-weight:700; color:#1d4ed8; background:#eff6ff; border:1px solid #dbeafe; padding:1px 5px; border-radius:4px; white-space:nowrap;">${{escapeHtml(s.theme)}}</span>` : ''}}
           </span>
           <span style="display:flex; align-items:center; gap:8px; flex-shrink:0; font-variant-numeric:tabular-nums;">
-            <span style="font-size:11.5px; font-weight:800; color:#b45309; background:#fffbeb; padding:1px 6px; border-radius:5px;">${{_krFmtEok(s.nxtValEok)}}</span>
-            <b class="${{_usPctCls(s.nxtChg)}}" style="min-width:56px; text-align:right; font-size:12.5px;">${{_usFmtPct(s.nxtChg)}}</b>
+            <span style="font-size:11.5px; font-weight:800; color:#b45309; background:#fffbeb; padding:1px 6px; border-radius:5px;">${{_krFmtEok(val)}}</span>
+            <b class="${{_usPctCls(chg)}}" style="min-width:56px; text-align:right; font-size:12.5px;">${{_usFmtPct(chg)}}</b>
           </span>
-        </a>
-      `).join('');
+        </a>`;
+      }}).join('');
 
-      const maxThemeVal = Math.max(1, ...themeFlow.map(t => Number(t.nxtValEok) || 0));
-      const nxtThemeBarHtml = themeFlow.length ? `
+      const boardModeTitle = isNxt ? '⚡ NXT(넥스트레이드)' : '🏛️ 국내 전체 시장(KRX)';
+      const topBoardHtml = `
+        <div class="usm-two-col" id="krmNxtBoard">
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>💰 ${{boardModeTitle}} 거래대금 TOP 15</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">호버→실시간주가 · 클릭→네이버</span>
+            </div>
+            <div class="usm-mini-list">${{renderRows(topValList) || '<div style="padding:18px; text-align:center; color:#94a3b8;">거래 데이터가 없습니다.</div>'}}</div>
+          </div>
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>🚀 ${{boardModeTitle}} 상승률 급등 TOP 15</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">거래대금 필터 적용 강세주</span>
+            </div>
+            <div class="usm-mini-list">${{renderRows(topUpList) || '<div style="padding:18px; text-align:center; color:#94a3b8;">급등 데이터가 없습니다.</div>'}}</div>
+          </div>
+        </div>
+      `;
+
+      // 5) 자금 집중 국내 테마 TOP 8 바 차트
+      const maxThemeVal = Math.max(1, ...themeFlow.map(t => Number(t.valEok ?? t.nxtValEok) || 0));
+      const themeBarHtml = themeFlow.length ? `
         <div class="usm-card">
           <div class="usm-sec-title">
-            <span>🔥 NXT 거래대금 집중 국내 테마 TOP ${{themeFlow.length}}</span>
+            <span>🔥 ${{boardModeTitle}} 거래대금 집중 국내 테마 TOP ${{themeFlow.length}}</span>
             <span style="font-size:11px; color:#64748b; font-weight:600;">클릭 시 테마 구성종목 팝업 · 단위: 억원</span>
           </div>
           <div>
             ${{themeFlow.map(tf => {{
-              const w = Math.max(4, (Number(tf.nxtValEok) / maxThemeVal * 100)).toFixed(1);
-              const barCol = (tf.avgNxtChg || 0) >= 0 ? '#ef4444' : '#3b82f6';
-              const leads = (tf.leaders || []).map(l => `${{l.name}}(${{_usFmtPct(l.nxtChg)}}, ${{_krFmtEok(l.nxtValEok)}})`).join(' · ');
+              const vEok = Number(tf.valEok ?? tf.nxtValEok) || 0;
+              const avgC = tf.avgChg ?? tf.avgNxtChg ?? 0;
+              const w = Math.max(4, (vEok / maxThemeVal * 100)).toFixed(1);
+              const barCol = avgC >= 0 ? '#ef4444' : '#3b82f6';
+              const leads = (tf.leaders || []).map(l => `${{l.name}}(${{_usFmtPct(l.chg ?? l.nxtChg)}}, ${{_krFmtEok(l.valEok ?? l.nxtValEok)}})`).join(' · ');
               return `<div class="us-flow-row" style="cursor:pointer;" onclick="openKrThemeModal('${{tf.id}}')">
                 <div style="font-weight:800; color:#0f172a;">${{tf.icon || ''}} ${{escapeHtml(tf.name)}}</div>
                 <div style="display:flex; flex-direction:column; gap:2px;">
@@ -8560,8 +8738,8 @@ def build_web_dashboard(here):
                   <div style="font-size:10.5px; color:#64748b;">${{escapeHtml(leads)}}</div>
                 </div>
                 <div style="text-align:right; font-weight:800;">
-                  <div style="color:#0f172a;">${{_krFmtEok(tf.nxtValEok)}}</div>
-                  <div class="${{_usPctCls(tf.avgNxtChg)}}" style="font-size:11px;">평균 ${{_usFmtPct(tf.avgNxtChg)}}</div>
+                  <div style="color:#0f172a;">${{_krFmtEok(vEok)}}</div>
+                  <div class="${{_usPctCls(avgC)}}" style="font-size:11px;">평균 ${{_usFmtPct(avgC)}}</div>
                 </div>
               </div>`;
             }}).join('')}}
@@ -8569,26 +8747,7 @@ def build_web_dashboard(here):
         </div>
       ` : '';
 
-      const nxtBoardHtml = `
-        <div class="usm-two-col" id="krmNxtBoard">
-          <div class="usm-card">
-            <div class="usm-sec-title">
-              <span>💰 NXT 거래대금 TOP 15 (자금 집중 중심주)</span>
-              <span style="font-size:11px; color:#64748b; font-weight:600;">호버→실시간주가 · 클릭→네이버</span>
-            </div>
-            <div class="usm-mini-list">${{renderNxtRows(nxtVal) || '<div style="padding:18px; text-align:center; color:#94a3b8;">NXT 거래 데이터가 없습니다.</div>'}}</div>
-          </div>
-          <div class="usm-card">
-            <div class="usm-sec-title">
-              <span>🚀 NXT 상승률 급등 TOP 15 (강세 모멘텀)</span>
-              <span style="font-size:11px; color:#64748b; font-weight:600;">NXT 거래대금 필터 적용</span>
-            </div>
-            <div class="usm-mini-list">${{renderNxtRows(nxtUp) || '<div style="padding:18px; text-align:center; color:#94a3b8;">NXT 급등 데이터가 없습니다.</div>'}}</div>
-          </div>
-        </div>
-      `;
-
-      // 4) KR SECTOR STRENGTH · 국내 42개 섹터 강도 보드
+      // 6) KR SECTOR STRENGTH · 국내 42개 섹터 강도 보드
       const krSsHtml = `
         <div class="usm-card" id="krmSectorStrengthCard">
           <div class="usm-sec-title" style="margin-bottom:10px;">
@@ -8598,7 +8757,7 @@ def build_web_dashboard(here):
         </div>
       `;
 
-      // 5) 국내 증시 특징주 · NXT 주요 뉴스
+      // 7) 국내 증시 특징주 · NXT 주요 뉴스
       const newsHtml = `
         <div class="usm-card">
           <div class="usm-sec-title">
@@ -8622,7 +8781,7 @@ def build_web_dashboard(here):
         </div>
       `;
 
-      wrap.innerHTML = heroHtml + idxHtml + nxtBoardHtml + nxtThemeBarHtml + krSsHtml + newsHtml;
+      wrap.innerHTML = heroHtml + idxHtml + timelineHtml + krSsHtml + topBoardHtml + themeBarHtml + newsHtml;
       renderKrSectorStrengthBoard();
       if (typeof bindLiveQuotes === 'function') bindLiveQuotes();
     }}
