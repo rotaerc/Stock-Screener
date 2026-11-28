@@ -5823,6 +5823,101 @@ def build_web_dashboard(here):
       text-decoration: none;
     }}
     .usm-kr-chip:hover {{ background: #059669; color: #fff; border-color: #059669; }}
+    .usm-pop-stock {{
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+    .usm-pop-stock:hover {{ border-color: #93c5fd; background: #fafcff; }}
+    .usm-pop-top {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+    .usm-pop-name-wrap {{
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }}
+    .usm-pop-sym {{
+      font-size: 14px;
+      font-weight: 900;
+      color: #1d4ed8;
+      text-decoration: none;
+    }}
+    .usm-pop-sym:hover {{ text-decoration: underline; }}
+    .usm-pop-ko {{ font-size: 13.5px; font-weight: 800; color: #0f172a; }}
+    .usm-pop-eng {{ font-size: 11px; font-weight: 600; color: #64748b; }}
+    .usm-pop-metrics {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }}
+    .usm-pop-chg {{
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 900;
+    }}
+    .usm-pop-chg.up {{ background: #fee2e2; color: #dc2626; }}
+    .usm-pop-chg.dn {{ background: #dbeafe; color: #2563eb; }}
+    .usm-pop-chg.flat {{ background: #f1f5f9; color: #475569; }}
+    .usm-pop-desc {{
+      font-size: 12.5px;
+      color: #334155;
+      line-height: 1.48;
+      background: #f8fafc;
+      border-radius: 7px;
+      padding: 6px 9px;
+      word-break: keep-all;
+    }}
+    .usm-pop-news {{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #475569;
+      padding-top: 2px;
+    }}
+    .usm-pop-news a.usm-pop-nlink {{
+      color: #1e293b;
+      text-decoration: none;
+      font-weight: 600;
+      line-height: 1.4;
+      flex: 1;
+      min-width: 0;
+    }}
+    .usm-pop-news a.usm-pop-nlink:hover {{ color: #1d4ed8; text-decoration: underline; }}
+    .usm-pop-actions {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-top: 2px;
+    }}
+    .usm-pop-act {{
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }}
+    .usm-pop-act:hover {{ background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }}
     @media (max-width: 1280px) {{
       .usm-ss-grid {{ grid-template-columns: repeat(5, minmax(0, 1fr)); }}
     }}
@@ -6206,12 +6301,12 @@ def build_web_dashboard(here):
   <div class="tooltip-box" id="tooltipBox"></div>
   <div class="live-quote-box" id="liveQuoteBox"></div>
   <div class="wl-modal-backdrop" id="usThemeModal" onclick="if(event.target===this)closeUsThemeModal()">
-    <div class="wl-modal" style="max-width:560px;">
+    <div class="wl-modal" style="max-width:680px; width:94vw;">
       <div class="wl-modal-head">
-        <div class="wl-modal-title" id="usThemeModalTitle">테마 상세</div>
+        <div class="wl-modal-title" id="usThemeModalTitle" style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">테마 상세</div>
         <button class="wl-modal-close" onclick="closeUsThemeModal()" title="닫기">✕</button>
       </div>
-      <div class="wl-modal-body" id="usThemeModalBody" style="max-height:76vh; overflow-y:auto;"></div>
+      <div class="wl-modal-body" id="usThemeModalBody" style="max-height:78vh; overflow-y:auto;"></div>
     </div>
   </div>
   <div class="wl-modal-backdrop" id="watchlistModal" onclick="if(event.target===this)closeWatchlistModal()">
@@ -6964,7 +7059,11 @@ def build_web_dashboard(here):
       const bodyEl = document.getElementById('usThemeModalBody');
       if (!modal || !titleEl || !bodyEl) return;
 
-      titleEl.innerHTML = `${{item.icon || '📊'}} ${{escapeHtml(item.name)}} <span class="${{_usPctCls(item.avgChg1d)}}" style="margin-left:6px; font-size:14px;">1일 ${{_usFmtPct(item.avgChg1d)}}</span> <span style="font-size:12px; color:#64748b; font-weight:700; margin-left:4px;">(5일 ${{_usFmtPct(item.avgChg5d)}})</span>`;
+      titleEl.innerHTML = `
+        <span>${{item.icon || '📊'}} ${{escapeHtml(item.name)}}</span>
+        <span class="usm-pop-chg ${{item.avgChg1d > 0 ? 'up' : (item.avgChg1d < 0 ? 'dn' : 'flat')}}">1일 ${{_usFmtPct(item.avgChg1d)}}</span>
+        <span style="font-size:12px; color:#64748b; font-weight:700;">5일 <b class="${{_usPctCls(item.avgChg5d)}}">${{_usFmtPct(item.avgChg5d)}}</b></span>
+      `;
 
       const krList = String(item.krStocks || '').split('·').map(s => s.trim()).filter(Boolean);
       const krHtml = krList.length ? `
@@ -6983,36 +7082,88 @@ def build_web_dashboard(here):
         </div>
       ` : '';
 
-      const rowsHtml = (item.stocks || []).map((s, idx) => `
-        <a class="usm-mini-row" href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank" rel="noopener noreferrer">
-          <span style="display:flex; align-items:center; gap:7px; min-width:0;">
-            <span style="font-size:11px; color:#64748b; font-weight:800; width:16px;">${{idx + 1}}</span>
-            <b style="color:#1d4ed8;">${{s.symbol}}</b>
-            <span style="font-weight:700; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${{escapeHtml(s.nameKo || '')}}</span>
-          </span>
-          <span style="display:flex; align-items:center; gap:10px; flex-shrink:0; font-variant-numeric:tabular-nums;">
-            <span style="font-size:12px; font-weight:700; color:#334155;">$${{s.price ? Number(s.price).toFixed(2) : '-'}}</span>
-            <span style="font-size:11px; color:#64748b;">5일 <b class="${{_usPctCls(s.chg5d)}}">${{_usFmtPct(s.chg5d)}}</b></span>
-            <b class="${{_usPctCls(s.chg1d)}}" style="min-width:58px; text-align:right; font-size:13px;">${{_usFmtPct(s.chg1d)}}</b>
-          </span>
-        </a>
-      `).join('');
+      const rowsHtml = (item.stocks || []).map((s, idx) => {{
+        const c1 = s.chg1d;
+        const chgCls = (c1 > 0) ? 'up' : ((c1 < 0) ? 'dn' : 'flat');
+        const krNewsUrl = `https://news.google.com/search?q=${{encodeURIComponent((s.nameKo || s.symbol) + ' ' + s.symbol + ' 주가')}}&hl=ko&gl=KR&ceid=KR:ko`;
+        const stockNewsHtml = (s.news && s.news.title) ? `
+          <div class="usm-pop-news">
+            <span style="flex-shrink:0;">📰</span>
+            <a class="usm-pop-nlink" href="${{escapeHtml(s.news.link)}}" target="_blank" rel="noopener noreferrer">
+              ${{escapeHtml(s.news.title)}}
+              <span style="color:#64748b; font-weight:700; margin-left:5px;">(${{escapeHtml(s.news.press || '뉴스')}}${{s.news.pubKst ? ' · ' + escapeHtml(s.news.pubKst) : ''}})</span>
+            </a>
+          </div>
+        ` : '';
+        return `
+          <div class="usm-pop-stock">
+            <div class="usm-pop-top">
+              <div class="usm-pop-name-wrap">
+                <span style="font-size:11px; color:#94a3b8; font-weight:900;">${{idx + 1}}</span>
+                <a class="usm-pop-sym" href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank" rel="noopener noreferrer">${{s.symbol}}</a>
+                <span class="usm-pop-ko">${{escapeHtml(s.nameKo || '')}}</span>
+                ${{s.engName && s.engName !== s.symbol ? `<span class="usm-pop-eng">${{escapeHtml(s.engName)}}</span>` : ''}}
+              </div>
+              <div class="usm-pop-metrics">
+                <span style="font-size:13px; font-weight:800; color:#0f172a;">$${{s.price ? Number(s.price).toFixed(2) : '-'}}</span>
+                <span class="usm-pop-chg ${{chgCls}}">${{_usFmtPct(c1)}}</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; font-size:11px; color:#64748b; font-weight:700; flex-wrap:wrap;">
+              <span>5일 <b class="${{_usPctCls(s.chg5d)}}">${{_usFmtPct(s.chg5d)}}</b></span>
+              ${{s.dollarVolB ? `<span>거래대금 <b style="color:#334155;">$${{Number(s.dollarVolB).toFixed(2)}}B</b></span>` : ''}}
+            </div>
+            ${{s.desc ? `<div class="usm-pop-desc">📌 ${{escapeHtml(s.desc)}}</div>` : ''}}
+            ${{stockNewsHtml}}
+            <div class="usm-pop-actions">
+              <a class="usm-pop-act" href="${{krNewsUrl}}" target="_blank" rel="noopener noreferrer">🇰🇷 한국어 뉴스 ↗</a>
+              <a class="usm-pop-act" href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank" rel="noopener noreferrer">📈 TradingView 차트 ↗</a>
+              <a class="usm-pop-act" href="https://finance.yahoo.com/quote/${{s.symbol}}/" target="_blank" rel="noopener noreferrer">📊 Yahoo Finance ↗</a>
+            </div>
+          </div>
+        `;
+      }}).join('');
+
+      const tNews = item.news || [];
+      const themeNewsHtml = tNews.length ? `
+        <div style="margin-top:14px;">
+          <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-bottom:7px;">📰 [${{escapeHtml(item.name)}}] 최근 한국어 주요 뉴스</div>
+          <div class="usm-news-list">
+            ${{tNews.map(n => `
+              <a class="usm-news-item" style="padding:8px 10px;" href="${{escapeHtml(n.link)}}" target="_blank" rel="noopener noreferrer">
+                <div style="min-width:0; flex:1;">
+                  <div class="usm-news-title" style="font-size:12.5px;">${{escapeHtml(n.title)}}</div>
+                  <div class="usm-news-meta">
+                    <span class="usm-press-badge">${{escapeHtml(n.press)}}</span>
+                    <span>${{escapeHtml(n.pubKst || '')}}</span>
+                  </div>
+                </div>
+                <span style="color:#94a3b8; font-size:13px; font-weight:800; flex-shrink:0;">↗</span>
+              </a>
+            `).join('')}}
+          </div>
+        </div>
+      ` : '';
 
       bodyEl.innerHTML = `
         ${{krHtml}}
-        <div style="font-size:12px; font-weight:900; color:#0f172a; margin-bottom:7px; display:flex; justify-content:space-between;">
+        <div style="font-size:12.5px; font-weight:900; color:#0f172a; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
           <span>🇺🇸 미국 테마 구성 종목 (${{(item.stocks || []).length}}종목 · 상승 ${{item.upCount || 0}} / 하락 ${{item.downCount || 0}})</span>
-          <span style="font-size:11px; color:#64748b; font-weight:600;">클릭 → TradingView</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">상승률 높은 순 정렬</span>
         </div>
-        <div class="usm-mini-list">${{rowsHtml}}</div>
+        <div class="usm-mini-list" style="gap:8px;">${{rowsHtml}}</div>
+        ${{themeNewsHtml}}
       `;
-      modal.classList.add('show');
+      modal.classList.add('open');
     }}
 
     function closeUsThemeModal() {{
       const modal = document.getElementById('usThemeModal');
-      if (modal) modal.classList.remove('show');
+      if (modal) modal.classList.remove('open');
     }}
+    document.addEventListener('keydown', (e) => {{
+      if (e.key === 'Escape') closeUsThemeModal();
+    }});
 
     function renderUsSectorStrengthBoard() {{
       const host = document.getElementById('usmSectorStrengthBody');

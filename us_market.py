@@ -130,7 +130,7 @@ THEME_BASKETS = [
         ("FLNC", "플루언스"), ("EOSE", "이오스에너지"), ("ENPH", "엔페이즈"), ("SEDG", "솔라엣지"), ("TSLA", "테슬라"), ("STEM", "스템"),
     ]),
     ("memory", "메모리/SSD/HDD", "💾", "삼성전자 · SK하이닉스 · 한미반도체 · 파두", [
-        ("MU", "마이크론"), ("WDC", "웨스턴디지털"), ("STX", "시게이트"), ("PSTG", "퓨어스토리지"), ("SIMO", "실리콘모션"),
+        ("MU", "마이크론"), ("WDC", "웨스턴디지털"), ("STX", "시게이트"), ("NTAP", "넷앱"), ("SIMO", "실리콘모션"),
     ]),
     ("semicon_core", "반도체 (대표)", "🧩", "삼성전자 · SK하이닉스 · 리노공업 · DB하이텍", [
         ("NVDA", "엔비디아"), ("AVGO", "브로드컴"), ("AMD", "AMD"), ("TSM", "TSMC"), ("MU", "마이크론"), ("QCOM", "퀄컴"), ("TXN", "텍사스인스트루먼트"),
@@ -263,6 +263,294 @@ THEME_BASKETS = [
         ("GOOGL", "알파벳"), ("META", "메타"), ("AVGO", "브로드컴"), ("TSLA", "테슬라"), ("LLY", "일라이릴리"), ("WMT", "월마트"),
     ]),
 ]
+
+# 미국 주요 테마 구성 종목 한국어 1줄 설명 사전
+US_STOCK_DESC_KO = {
+    "IONQ": "이온트랩 방식 양자컴퓨터 상용화 선도 기업",
+    "RGTI": "초전도 큐비트 기반 양자컴퓨팅 프로세서·클라우드 개발",
+    "QBTS": "양자 어닐링 상용 양자컴퓨터·최적화 솔루션 제공",
+    "QUBT": "광자(포토닉) 기반 양자컴퓨팅·양자 보안 소프트웨어",
+    "RKLB": "소형·중형 우주 발사체(일렉트론·뉴트론) 및 위성 시스템 선도",
+    "ASTS": "일반 스마트폰과 직접 연결되는 저궤도 위성 통신망 구축",
+    "LUNR": "NASA 달 착륙선·우주 탐사 인프라 및 달 통신 서비스",
+    "PL": "초소형 지구관측 위성 군집 운영 및 위성영상 데이터 제공",
+    "BA": "글로벌 민간 항공기·군용기·우주선 제조 대표 기업",
+    "QS": "폭스바겐 투자 차세대 전기차용 리튬메탈 전고체 배터리 개발",
+    "ALB": "글로벌 최대 리튬 채굴·정제 및 2차전지 소재 공급사",
+    "SQM": "칠레 염호 기반 글로벌 핵심 리튬·특수비료 생산 기업",
+    "ENVX": "실리콘 음극재 기반 고에너지밀도 차세대 리튬이온 배터리",
+    "SLDP": "황화물계 전고체 배터리 전해질·셀 기술 개발 (BMW·포드 협력)",
+    "FLNC": "글로벌 유틸리티급 ESS(전력저장장치) 시스템·AI 운영 소프트웨어 1위",
+    "EOSE": "아연(Zinc) 기반 비리튬 장주기 그리드 ESS 배터리 제조",
+    "ENPH": "주택용 태양광 마이크로인버터 및 가정용 ESS 저장장치 선도",
+    "SEDG": "태양광 전력 최적화 인버터·상업용 ESS 에너지 관리 시스템",
+    "TSLA": "글로벌 전기차·메가팩(ESS)·자율주행(FSD)·휴머노이드 로봇 선도",
+    "STEM": "AI 기반 상업·산업용 ESS 에너지 최적화 소프트웨어 플랫폼",
+    "MU": "미국 대표 메모리 반도체(DRAM·HBM·낸드플래시) 종합 제조사",
+    "WDC": "글로벌 기업용·데이터센터 HDD 및 스토리지 핵심 제조사",
+    "STX": "AI 데이터센터 대용량 니어라인 HDD(HAMR) 글로벌 선도",
+    "NTAP": "클라우드·AI 데이터센터용 올플래시 엔터프라이즈 스토리지 선도",
+    "SIMO": "SSD·모바일용 낸드플래시 컨트롤러 반도체 팹리스 글로벌 1위",
+    "NVDA": "글로벌 AI 가속기 GPU·데이터센터 컴퓨팅 생태계(CUDA) 독주",
+    "AVGO": "AI 맞춤형 반도체(ASIC)·초고속 네트워크 칩·인프라 SW 강자",
+    "AMD": "AI 가속기(MI시리즈)·데이터센터 서버 CPU(EPYC)·PC 프로세서",
+    "TSM": "글로벌 1위 첨단 반도체 파운드리(엔비디아·애플 핵심 생산)",
+    "QCOM": "모바일 AP(스냅드래곤)·5G 모뎀·차량용 반도체 설계 선도",
+    "TXN": "산업·전장용 아날로그·임베디드 반도체 글로벌 최대 제조사",
+    "ASML": "첨단 반도체 노광장비(EUV·DUV) 글로벌 독점 공급사",
+    "AMAT": "증착·식각·CMP 등 글로벌 1위 종합 반도체 전공정 장비사",
+    "LRCX": "메모리(HBM·3D 낸드) 핵심 식각(Etch)·증착 반도체 장비 강자",
+    "KLAC": "반도체 웨이퍼 결함 검사·계측(MI) 공정 장비 글로벌 1위",
+    "TER": "반도체 테스트 장비(ATE) 및 협동로봇(UR) 글로벌 선도",
+    "ENTG": "첨단 반도체 공정용 특수가스·필터·CMP 슬러리 핵심 소재",
+    "INTC": "PC·서버 CPU 제조 및 미국 내 첨단 파운드리·패키징 확장",
+    "GFS": "미국 기반 글로벌 파운드리(통신·전장·IoT 특수공정 강점)",
+    "UMC": "대만 대표 성숙공정(28nm 이상) 반도체 파운드리 기업",
+    "AMKR": "글로벌 Top2 반도체 후공정 패키징·테스트(OSAT) 전문사",
+    "ARM": "글로벌 모바일·AI 데이터센터 CPU 아키텍처 IP 라이선스 독점",
+    "MRVL": "AI 데이터센터 맞춤형 ASIC·고속 광인터커넥트(DSP) 팹리스",
+    "CRDO": "AI 데이터센터 초고속 구리·광 연결 케이블(AEC)·SerDes 칩 강자",
+    "ON": "전기차·태양광용 SiC(실리콘카바이드) 전력반도체·이미지센서",
+    "NXPI": "차량용 MCU·레이더·보안 반도체 글로벌 핵심 공급사",
+    "STM": "유럽 대표 전장·산업용 SiC 전력반도체 및 MCU 종합 제조사",
+    "MCHP": "산업·자동차·항공용 마이크로컨트롤러(MCU) 및 아날로그 칩",
+    "MPWR": "AI 서버·전기차용 고효율 전력관리 반도체(PMIC) 고속 성장사",
+    "ADI": "산업·통신·자동차용 고정밀 아날로그·혼합신호 반도체 선도",
+    "GLW": "디스플레이 특수유리·AI 데이터센터 광섬유·반도체 유리기판 핵심",
+    "COHR": "AI 데이터센터 800G/1.6T 광트랜시버·산업용 레이저 선도",
+    "LITE": "초고속 광통신용 레이저 칩(EML)·광부품 핵심 공급사",
+    "CIEN": "장거리·데이터센터 간(DCI) 초고속 광전송 네트워크 장비 1위",
+    "AAOI": "하이퍼스케일 데이터센터용 초고속 광트랜시버 제조 전문",
+    "FN": "엔비디아 등 빅테크용 초정밀 광통신 모듈 위탁생산(EMS) 핵심",
+    "VRT": "AI 데이터센터 전력관리·액체냉각(CDU) 인프라 글로벌 1위",
+    "MOD": "데이터센터 전용 열관리·액체냉각 시스템 및 전장 공조 제조",
+    "NVT": "데이터센터 액체냉각 매니폴드·전기 보호 인클로저 전문",
+    "TT": "상업용 빌딩·데이터센터 대형 냉동기(Chiller) 및 HVAC 선도",
+    "CARR": "글로벌 상업·주거용 냉난방 공조(HVAC) 및 데이터센터 냉각",
+    "JCI": "스마트 빌딩 공조(HVAC)·데이터센터 냉각·보안 설비 공급",
+    "ETN": "북미 데이터센터·전력망용 변압기·배전반·전력기기 핵심",
+    "GEV": "가스터빈·초고압 송배전망·풍력·SMR 원전 종합 에너지 인프라",
+    "PWR": "북미 최대 초고압 송전망·신재생·데이터센터 전력 시공 전문",
+    "HUBB": "북미 전력 유틸리티용 송배전 기자재·스마트그리드 설비",
+    "CEG": "미국 최대 원자력 발전사 · 빅테크 AI 데이터센터 전력 직공급",
+    "VST": "미국 핵심 원전·천연가스 독립 발전사(IPP) · AI 전력 수혜주",
+    "SMR": "미국 NRC 설계인증을 최초 획득한 소형모듈원전(SMR) 개발사",
+    "OKLO": "샘 올트먼 투자 차세대 고속로 초소형 원전(SMR) 개발 기업",
+    "TLN": "원전·가스 발전소 보유 및 아마존(AWS) 데이터센터 직접 전력공급",
+    "CCJ": "글로벌 최대 상장 우라늄 채굴·핵연료 가공 및 웨스팅하우스 지분",
+    "UEC": "미국 내 최대 규모 우라늄 광산 보유 및 무채무 우라늄 생산사",
+    "UUUU": "미국 대표 우라늄 정련소(화이트메사) 및 희토류 생산 기업",
+    "NXE": "캐나다 아타바스카 분지 초대형 고품위 우라늄 광구 개발",
+    "DNN": "캐나다 고품위 우라늄 탐사·개발(휠러리버 프로젝트) 전문",
+    "BE": "AI 데이터센터용 고체산화물 연료전지(SOFC) 분산전원 선도",
+    "PLUG": "그린수소 생산 수전해 설비 및 물류용 수소 연료전지 공급",
+    "FCEL": "산업·발전용 탄산염·고체산화물 연료전지 및 탄소포집 시스템",
+    "BLDP": "상용차·버스·선박용 양성자교환막(PEM) 수소 연료전지 제조",
+    "FSLR": "미국 최대 박막(CdTe) 태양광 모듈 제조사 · IRA 최대 수혜",
+    "NXT": "유틸리티급 태양광 추적장치(트래커) 글로벌 1위 기업",
+    "RUN": "미국 최대 주택용 태양광 설치·리스·가정용 배터리 서비스",
+    "CSIQ": "글로벌 태양광 모듈 제조 및 대형 ESS 에너지 저장 프로젝트",
+    "SHLS": "대규모 태양광 발전소용 전력배선·접속반(EBOS) 부품 선도",
+    "NEE": "미국 최대 신재생에너지(풍력·태양광) 발전 및 플로리다 전력사",
+    "AES": "글로벌 신재생·ESS 발전 및 빅테크향 청정에너지 PPA 공급",
+    "CWEN": "미국 내 대규모 풍력·태양광 청정 발전 자산 운영 배당주",
+    "ISRG": "다빈치 수술로봇 글로벌 독점 1위 의료 로보틱스 기업",
+    "SYM": "월마트 등 대형 물류창고용 AI 자동화 로봇 시스템 선도",
+    "ROK": "북미 최대 공장자동화(PLC)·스마트팩토리 산업 제어 시스템",
+    "SERV": "엔비디아 투자 도심 인도 주행 AI 자율배달 로봇 운영사",
+    "PATH": "기업 업무자동화(RPA) 및 AI 에이전트 워크플로우 플랫폼",
+    "MBLY": "글로벌 완성차 ADAS(첨단운전자보조)·자율주행 칩(EyeQ) 선도",
+    "AUR": "미국 고속도로 무인 자율주행 대형 화물트럭(오로라 드라이버)",
+    "OUST": "자율주행·로보틱스·스마트인프라용 디지털 라이다(LiDAR) 센서",
+    "INVZ": "BMW·폭스바겐 등 완성차 공급용 차량용 고체 라이다 제조",
+    "JOBY": "도요타·델타항공 투자 전기수직이착륙(eVTOL) 에어택시 선도",
+    "ACHR": "유나이티드항공·스텔란티스 협력 도심항공교통(UAM) 기체 개발",
+    "AVAV": "미군 주력 자폭드론(스위치블레이드)·정찰 무인기 핵심 방산",
+    "KTOS": "저비용 무인 전투드론(발키리)·위성통신·극초음속 방산 전문",
+    "RCAT": "미 육군 단거리 정찰드론(SRR) 선정 군용 드론 제조사",
+    "LMT": "F-35 전투기·미사일 방어체계 글로벌 1위 미국 방산 기업",
+    "RTX": "패트리어트 미사일·레이더·항공기 엔진(P&W) 종합 방산·항공",
+    "NOC": "B-21 스텔스 폭격기·우주감시·무인정찰기 핵심 방산 대장주",
+    "GD": "미 해군 핵잠수함·에이브람스 전차·걸프스트림 비즈니스젯 제조",
+    "LHX": "군용 전술통신·전자전·우주센서·로켓모터(에어로젯) 방산 전문",
+    "PLTR": "국방·기업용 AI 데이터 분석 플랫폼(AIP·고담) 초고속 성장",
+    "ANET": "AI 데이터센터 초고속 이더넷 스위치 글로벌 1위 네트워크 장비",
+    "CSCO": "글로벌 최대 기업용 네트워크 라우터·스위치·사이버보안 기업",
+    "ERIC": "글로벌 5G 이동통신 기지국 및 통신 인프라 장비 핵심 공급사",
+    "NOK": "글로벌 5G 기지국·광전송 네트워크 장비 및 통신 특허 보유",
+    "UI": "기업·가정용 무선 와이파이(UniFi)·네트워크 장비 고수익 강자",
+    "MSFT": "클라우드(Azure)·오피스365·오픈AI 협력 글로벌 AI SW 대장주",
+    "ORCL": "엔터프라이즈 DB 1위 및 AI 데이터센터 클라우드(OCI) 급성장",
+    "CRM": "글로벌 1위 클라우드 CRM 및 AI 에이전트(에이전트포스) 선도",
+    "NOW": "글로벌 대기업 IT·업무 워크플로우 자동화 SaaS 플랫폼 강자",
+    "SNOW": "클라우드 기반 엔터프라이즈 AI 데이터 웨어하우스 플랫폼",
+    "APP": "AI 기반 모바일 앱 광고 매칭 엔진(AXON) 초고속 성장 기업",
+    "RIVN": "북미 전기 픽업트럭(R1T)·SUV 및 아마존 전기 배송밴 제조",
+    "LCID": "사우디 국부펀드 투자 초장거리 럭셔리 세단·SUV 전기차 제조",
+    "NIO": "중국 프리미엄 전기차 및 배터리 교체(스왑) 스테이션 생태계",
+    "LI": "중국 주행거리 연장형(EREV) 패밀리 SUV 전기차 대표 기업",
+    "GM": "미국 최대 전통 완성차(쉐보레·캐딜락) 및 전기차·자율주행",
+    "F": "북미 베스트셀러 픽업(F-시리즈)·상용차(포드 프로) 완성차",
+    "TM": "글로벌 판매 1위 완성차 · 하이브리드(HEV) 압도적 수익성",
+    "STLA": "지프·램·푸조·피아트 등 보유 글로벌 다국적 완성차 그룹",
+    "HMC": "글로벌 완성차·하이브리드·이륜차 및 항공기 제조 일본 대표",
+    "LLY": "비만·당뇨 치료제(마운자로·젭바운드) 글로벌 시총 1위 제약사",
+    "NVO": "위고비·오젬픽 GLP-1 비만·당뇨 치료제 원조 유럽 제약 대장",
+    "VKTX": "경구·주사형 차세대 비만치료제(VK2735) 임상 주목 바이오",
+    "AMGN": "글로벌 대형 바이오제약 · 월 1회 비만 신약(마리타이드) 개발",
+    "JNJ": "글로벌 최대 헬스케어(혁신의약품·의료기기) 대표 우량주",
+    "ABBV": "자가면역질환(스카이리치·린버크)·미용(보톡스) 대형 제약사",
+    "MRK": "글로벌 매출 1위 면역항암제(키트루다) 보유 빅파마",
+    "PFE": "항암제(시젠 인수)·백신·감염병 치료제 보유 글로벌 제약사",
+    "BMY": "면역항암제(옵디보)·심혈관·신경계 신약 보유 대형 제약사",
+    "VRTX": "낭포성섬유증 치료제 독점 및 비마약성 진통제·유전자치료 선도",
+    "REGN": "아일리아(황반변성)·듀피젠트(아토피) 블록버스터 바이오 대장",
+    "GILD": "HIV·간염 치료제 글로벌 1위 및 항암제(트로델비) 확장 바이오",
+    "MRNA": "mRNA 백신·개인맞춤형 암백신 파이프라인 보유 바이오텍",
+    "CRSP": "크리스퍼(CRISPR) 유전자 가위 치료제 세계 최초 승인 선도",
+    "BIIB": "알츠하이머(레켐비)·희귀신경질환 치료제 전문 대형 바이오",
+    "NEM": "글로벌 1위 금광 채굴 및 구리 부산물 생산 대표 금 관련주",
+    "AEM": "캐나다·호주 등 저위험 지역 고수익 금광 운영 글로벌 Top3",
+    "WPM": "금·은 광산 스트리밍(로열티) 모델로 높은 마진율 유지",
+    "KGC": "북미·남미·서아프리카 금광 운영 중대형 금 채굴 기업",
+    "AU": "아프리카·호주·남미 다각화 포트폴리오 보유 글로벌 금광사",
+    "GFI": "남아공·호주·칠레 대형 금광 자산 보유 글로벌 금 생산사",
+    "PAAS": "아메리카 대륙 최대 규모 은·금 광산 운영 대표 은 관련주",
+    "HL": "미국 내 최대 은 생산량 보유 북미 대표 은·금 채굴 기업",
+    "AG": "멕시코 핵심 은광 운영 및 높은 은 매출 비중 보유 순수 은광사",
+    "CDE": "북미(미국·멕시코) 금·은 광산 확장 중인 귀금속 채굴 기업",
+    "EXK": "멕시코 고품위 은광 개발·운영 중견 순수 은 채굴 기업",
+    "FCX": "글로벌 최대 상장 구리·금 광산(그라스버그) 운영 구리 대장주",
+    "SCCO": "페루·멕시코 초대형 저비용 구리 광산 및 최대 매장량 보유",
+    "BHP": "글로벌 1위 종합 자원 기업(철광석·구리·원료탄·칼륨)",
+    "RIO": "글로벌 핵심 철광석·알루미늄·구리·리튬 종합 광산 대기업",
+    "TECK": "캐나다 대표 구리·아연 에너지전환 핵심 광물 생산 기업",
+    "AA": "보크사이트·알루미나·알루미늄 수직계열화 미국 대표 알루미늄",
+    "CENX": "미국 최대 1차 알루미늄 제련소 운영 · 관세 수혜 대표주",
+    "KALU": "항공우주·자동차·포장용 고부가 알루미늄 압연·압출 제품 제조",
+    "CSTM": "항공·전기차 차체·캔용 특수 알루미늄 합금 글로벌 공급사",
+    "NUE": "미국 최대 전기로(EAF) 기반 친환경 철강 생산 대장주",
+    "STLD": "고수익 전기로 철강·알루미늄 압연 확장 미국 핵심 철강사",
+    "CLF": "미국 최대 자동차용 강판 및 철광석 수직계열화 철강사",
+    "MT": "유럽·미주·인도 글로벌 최상위권 종합 철강 생산 그룹",
+    "RS": "북미 최대 철강·알루미늄 금속 가공·유통 서비스 센터",
+    "XOM": "미국 최대 종합 에너지(원유·LNG·정유·석유화학) 석유 대장",
+    "CVX": "글로벌 석유·천연가스 탐사생산 및 정유 대표 고배당 에너지",
+    "OXY": "버크셔 해서웨이 대주주 · 미국 퍼미안 분지 원유·탄소포집",
+    "SLB": "글로벌 1위 유전 탐사·시추 기술 서비스 및 에너지 장비사",
+    "VLO": "미국 최대 독립 정유사 및 재생디젤(바이오연료) 생산 선도",
+    "MPC": "미국 최대 정제능력 보유 정유·파이프라인(MPLX) 에너지 기업",
+    "MSTR": "글로벌 상장사 최대 비트코인 보유 · 비트코인 레버리지 대장주",
+    "COIN": "미국 최대 규제 준수 가상자산 거래소·기관 수탁(ETF 커스터디)",
+    "MARA": "글로벌 최대 해시레이트 보유 비트코인 채굴·디지털 에너지사",
+    "RIOT": "텍사스 대형 전력 인프라 기반 미국 대표 비트코인 채굴 기업",
+    "CLSK": "저전력 고효율 데이터센터 기반 비트코인 채굴 고속 성장사",
+    "META": "페이스북·인스타그램·왓츠앱 글로벌 SNS 광고 및 오픈소스 AI",
+    "GOOGL": "구글 검색·유튜브·클라우드(GCP)·제미나이 AI·웨이모 자율주행",
+    "RDDT": "미국 최대 커뮤니티 플랫폼 · AI 학습 데이터 라이선스 급성장",
+    "SNAP": "북미 Z세대 중심 메신저(스냅챗) 및 AR(증강현실) 광고 플랫폼",
+    "PINS": "이미지 검색·쇼핑 연동 SNS 플랫폼 · 디지털 광고 수익화",
+    "NFLX": "글로벌 1위 OTT 동영상 스트리밍 · 광고요금제·라이브스포츠 확장",
+    "V": "글로벌 1위 신용·체크카드 결제 네트워크 인프라 독점적 수익성",
+    "MA": "글로벌 Top2 카드 결제망 및 크로스보더(해외결제)·보안 솔루션",
+    "PYPL": "글로벌 온라인 간편결제(페이팔·벤모)·가맹점 결제 플랫폼",
+    "XYZ": "스퀘어(가맹점 POS)·캐시앱(간편송금·비트코인) 핀테크 플랫폼",
+    "AXP": "프리미엄 신용카드 발급·자체 결제망 운영 고소득 소비 대장주",
+    "SOFI": "미국 Z세대 디지털 은행·대출·주식투자 통합 핀테크 플랫폼",
+    "JPM": "미국 최대 자산·수익성 보유 글로벌 1위 종합 상업·투자은행",
+    "BAC": "미국 최대 소매예금 기반 상업은행 및 메릴린치 자산관리",
+    "WFC": "미국 핵심 소매·상업은행 · 자산상한 규제 완화 수혜 기대",
+    "C": "글로벌 기업금융·자금관리(TTS) 강점 대형 은행 및 구조조정",
+    "GS": "글로벌 1위 투자은행(IB)·M&A 자문·트레이딩·자산운용 명가",
+    "MS": "글로벌 자산관리(WM) 1위 및 대형 투자은행(IB) 수익 안정성",
+    "CAT": "글로벌 1위 건설·광산 중장비 및 데이터센터 비상발전기 공급",
+    "DE": "글로벌 1위 스마트 농업기계(자율주행 트랙터) 및 건설장비",
+    "URI": "북미 최대 건설·산업 장비 렌탈 1위 · 인프라·데이터센터 수혜",
+    "CMI": "상용차 디젤·수소 엔진 및 데이터센터용 대형 발전기(액셀레라)",
+    "PH": "항공·산업·로봇용 유압·모션·제어 핵심 정밀부품 글로벌 선도",
+    "DAL": "미국 최고 수익성·프리미엄 노선 보유 대형 항공사 1위",
+    "UAL": "국제선 장거리 노선 강점 미국 3대 대형 항공사",
+    "LVS": "마카오·싱가포르(마리나베이샌즈) 초대형 복합리조트·카지노",
+    "WYNN": "라스베이거스·마카오·UAE 럭셔리 카지노 리조트 운영",
+    "MAR": "글로벌 최다 객실 보유 세계 1위 호텔 체인(메리어트·리츠칼튼)",
+    "ABNB": "글로벌 숙박·여행 체험 공유 플랫폼 1위 · 높은 잉여현금흐름",
+    "RCL": "글로벌 최고 수익성·신규 초대형 선박 보유 크루즈 대장주",
+    "CCL": "세계 최대 승객 수송 규모 글로벌 크루즈 선단 운영사",
+    "NCLH": "프리미엄·럭셔리 노선 중심 글로벌 3대 크루즈 선사",
+    "ZIM": "이스라엘 기반 글로벌 컨테이너 해운사 · 운임 변동 민감주",
+    "WMT": "미국 최대 오프라인·이커머스 유통 및 리테일 광고 고속 성장",
+    "COST": "글로벌 유료 멤버십 창고형 할인매장 1위 · 압도적 재가입률",
+    "AMZN": "글로벌 1위 이커머스 및 클라우드(AWS)·디지털 광고 삼각편대",
+    "TGT": "미국 중산층 타깃 대형 종합 할인매장 및 자체브랜드(PB) 유통",
+    "HD": "미국 최대 주택 개보수·건자재(홈임프루브먼트) 전문 유통 1위",
+    "CPNG": "한국 최대 로켓배송 이커머스·쿠팡이츠·파페치 보유 뉴욕상장사",
+    "DHI": "미국 최대 단독주택 건설사(판매량 1위) · 금리 인하 민감주",
+    "LEN": "미국 Top2 대형 주택건설사 · 경량 토지 전략으로 수익성 개선",
+    "PHM": "미국 3대 주택건설사(생애최초·은퇴자 커뮤니티 강점)",
+    "TOL": "미국 최고급 럭셔리 단독주택 전문 건설사 · 높은 영업이익률",
+    "NVR": "토지 옵션 방식 고효율 자본운용 미국 대표 주택건설 우량주",
+    "TMUS": "미국 5G 가입자 순증 1위 · 가장 빠른 성장의 미국 통신사",
+    "VZ": "미국 최대 무선통신 가입자 기반 고배당 방어주 통신사",
+    "T": "미국 무선·초고속 광통신(파이버) 집중 고배당 대표 통신사",
+    "CMCSA": "미국 최대 케이블 인터넷(엑스피니티)·유니버설 스튜디오 보유",
+    "BABA": "중국 최대 이커머스(타오바오·티몰)·클라우드·AI(Qwen) 선도",
+    "PDD": "핀둬둬·테무(Temu) 초저가 글로벌 이커머스 초고속 성장사",
+    "JD": "중국 자체 직매입·물류망 기반 가전·종합 이커머스 대표 기업",
+    "BIDU": "중국 1위 검색엔진·어니봇 AI 및 로보택시(아폴로 고) 선도",
+    "TCOM": "중국 최대 온라인 여행·항공·호텔 예약 플랫폼(트립닷컴)",
+}
+
+# 테마별 Google 뉴스 KR 검색 키워드 (테마 팝업 내 한국어 최신 이슈 수집용)
+THEME_NEWS_QUERIES = {
+    "quantum": "아이온큐 OR 리게티 양자컴퓨팅 주가",
+    "space": "로켓랩 OR AST스페이스 우주항공 미국 주가",
+    "battery_ss": "퀀텀스케이프 OR 앨버말 전고체 2차전지 주가",
+    "ess": "플루언스 OR 테슬라 ESS 미국 주가",
+    "memory": "마이크론 OR 웨스턴디지털 메모리 미국 주가",
+    "semicon_core": "엔비디아 OR 브로드컴 필라델피아 반도체 주가",
+    "semi_equip": "ASML OR 어플라이드머티어리얼즈 OR 램리서치 주가",
+    "foundry": "TSMC OR 인텔 파운드리 주가",
+    "system_semi": "ARM OR 마벨 OR AMD AI 반도체 주가",
+    "power_semi": "온세미 OR NXP 전력반도체 주가",
+    "glass_sub": "코닝 OR 인텔 유리기판 반도체 주가",
+    "optical": "코히런트 OR 루멘텀 광통신 AI 주가",
+    "cooling": "버티브 OR 데이터센터 액체냉각 주가",
+    "power_infra": "이튼 OR GE버노바 미국 전력인프라 주가",
+    "nuclear": "컨스텔레이션 OR 오클로 OR 뉴스케일파워 원전 주가",
+    "uranium": "카메코 OR 우라늄 미국 주가",
+    "fuel_cell": "블룸에너지 OR 플러그파워 연료전지 주가",
+    "renewable": "퍼스트솔라 OR 엔페이즈 미국 태양광 주가",
+    "wind": "GE버노바 OR 넥스트에라 풍력 신재생 주가",
+    "robot": "인튜이티브서지컬 OR 심보틱 OR 휴머노이드 로봇 주가",
+    "autonomy": "모빌아이 OR 테슬라 로보택시 자율주행 주가",
+    "drone": "조비에비에이션 OR 아처에비에이션 드론 UAM 주가",
+    "defense": "록히드마틴 OR 팔란티어 미국 방산 주가",
+    "network": "아리스타네트웍스 OR 시스코 네트워크 주가",
+    "ai_sw": "팔란티어 OR 오라클 OR 세일즈포스 AI 소프트웨어 주가",
+    "ev": "테슬라 OR 리비안 미국 전기차 주가",
+    "auto": "GM OR 포드 미국 자동차 관세 주가",
+    "obesity": "일라이릴리 OR 노보노디스크 비만치료제 주가",
+    "pharma": "머크 OR 화이자 OR 애브비 미국 제약 주가",
+    "biotech": "모더나 OR 리제네론 미국 바이오텍 주가",
+    "gold": "뉴몬트 국제 금값 금광 주가",
+    "silver": "국제 은값 은광 미국 주가",
+    "copper_mine": "프리포트맥모란 구리 가격 광산 주가",
+    "aluminum": "알코아 알루미늄 관세 주가",
+    "steel": "뉴코 미국 철강 관세 주가",
+    "oil": "엑슨모빌 OR 셰브론 국제유가 WTI 주가",
+    "crypto": "스트래티지 OR 코인베이스 비트코인 주가",
+    "sns_bigtech": "메타 OR 알파벳 OR 넷플릭스 주가",
+    "payment": "비자 OR 페이팔 OR 소파이 핀테크 주가",
+    "bank": "JP모건 OR 골드만삭스 미국 은행주",
+    "machinery": "캐터필러 OR 디어 미국 산업재 주가",
+    "airline_casino": "델타항공 OR 라스베이거스샌즈 항공 여행 주가",
+    "cruise": "로얄캐리비안 OR 카니발 크루즈 주가",
+    "retail": "월마트 OR 코스트코 OR 쿠팡 미국 유통 주가",
+    "homebuild": "DR호튼 OR 미국 주택건설 모기지 금리",
+    "telecom": "T모바일 OR 버라이즌 미국 통신주",
+    "china": "알리바바 OR 핀둬둬 중국 빅테크 주가",
+    "us_top10": "매그니피센트7 빅테크 뉴욕증시",
+}
 
 
 def _num(x):
@@ -541,6 +829,102 @@ def fetch_us_morning_news(limit=10):
     ]
 
 
+def fetch_theme_kr_news(theme_id, query, limit=3):
+    """특정 미국 테마 관련 최신 한국어 뉴스 헤드라인 수집 (Google News KR RSS)"""
+    kst = timezone(timedelta(hours=9))
+    try:
+        url = (
+            "https://news.google.com/rss/search?"
+            f"q={urllib.parse.quote(query + ' when:7d')}&hl=ko&gl=KR&ceid=KR:ko"
+        )
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=9)
+        if r.status_code != 200:
+            return theme_id, []
+        root = ET.fromstring(r.text)
+        items = []
+        seen = set()
+        for it in root.findall("./channel/item"):
+            raw_title = (it.findtext("title") or "").strip()
+            link = (it.findtext("link") or "").strip()
+            pub_raw = (it.findtext("pubDate") or "").strip()
+            source_el = it.find("source")
+            press = (source_el.text or "").strip() if source_el is not None else ""
+            title = raw_title
+            if " - " in raw_title:
+                t_part, p_part = raw_title.rsplit(" - ", 1)
+                if t_part.strip():
+                    title = t_part.strip()
+                if not press and p_part.strip():
+                    press = p_part.strip()
+            if not title or not link:
+                continue
+            norm = re.sub(r"[^0-9A-Za-z가-힣]", "", title)[:16]
+            if not norm or norm in seen:
+                continue
+            seen.add(norm)
+            pub_ts = 0
+            pub_kst = ""
+            if pub_raw:
+                try:
+                    dt = parsedate_to_datetime(pub_raw).astimezone(kst)
+                    pub_ts = int(dt.timestamp())
+                    pub_kst = dt.strftime("%m/%d %H:%M")
+                except Exception:
+                    pass
+            items.append({
+                "title": title,
+                "press": press or "뉴스",
+                "link": link,
+                "pubKst": pub_kst,
+                "pubTs": pub_ts,
+            })
+        items.sort(key=lambda x: x["pubTs"], reverse=True)
+        return theme_id, [
+            {"title": x["title"], "press": x["press"], "link": x["link"], "pubKst": x["pubKst"]}
+            for x in items[:limit]
+        ]
+    except Exception:
+        return theme_id, []
+
+
+def fetch_yahoo_stock_news(symbol):
+    """개별 미국 종목 최신 영문 뉴스 헤드라인 1건 조회 (Yahoo Finance Search API)"""
+    kst = timezone(timedelta(hours=9))
+    try:
+        r = requests.get(
+            "https://query1.finance.yahoo.com/v1/finance/search",
+            params={"q": symbol, "quotesCount": 0, "newsCount": 2},
+            headers={"User-Agent": UA},
+            timeout=8,
+        )
+        if r.status_code != 200:
+            return symbol, None
+        news_list = (r.json() or {}).get("news") or []
+        if not news_list:
+            return symbol, None
+        n = news_list[0]
+        title = str(n.get("title") or "").strip()
+        link = str(n.get("link") or "").strip()
+        pub = str(n.get("publisher") or "").strip()
+        ts = n.get("providerPublishTime")
+        pub_kst = ""
+        if ts:
+            try:
+                pub_kst = datetime.fromtimestamp(int(ts), tz=kst).strftime("%m/%d %H:%M")
+            except Exception:
+                pass
+        if not title or not link:
+            return symbol, None
+        return symbol, {
+            "title": title,
+            "press": pub or "Yahoo",
+            "link": link,
+            "pubKst": pub_kst,
+        }
+    except Exception:
+        return symbol, None
+
+
 def build_morning_briefing(major_indices, macro_indicators, fear_greed, big_tech, sector_etfs):
     """수집된 미국 마감 지수·매크로·심리·섹터 데이터를 기반으로 한국어 아침 시황 브리핑 자동 생성"""
     idx_map = {x["symbol"]: x for x in major_indices}
@@ -730,18 +1114,33 @@ def collect_us_market(here=HERE):
     )
     all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms) | set(morning_syms))
 
-    print(f"[2/3] Yahoo Finance 일봉 + CNN 공포탐욕 + 모닝뉴스 병렬 조회 중 (총 {len(all_fetch_syms)}티커)...")
+    print(f"[2/3] Yahoo Finance 일봉 + 종목뉴스 + 테마 한국어뉴스 + CNN 공포탐욕 병렬 조회 중 (총 {len(all_fetch_syms)}티커)...")
     yahoo_stats = {}
+    stock_news_map = {}
+    theme_news_map = {}
     fear_greed = None
     morning_news = []
-    with ThreadPoolExecutor(max_workers=20) as ex:
+    with ThreadPoolExecutor(max_workers=22) as ex:
         fut_fg = ex.submit(fetch_cnn_fear_greed)
         fut_news = ex.submit(fetch_us_morning_news, 10)
-        futs = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
-        for fut in as_completed(futs):
+        futs_chart = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
+        futs_snews = [ex.submit(fetch_yahoo_stock_news, sym) for sym in theme_syms]
+        futs_tnews = [
+            ex.submit(fetch_theme_kr_news, tid, THEME_NEWS_QUERIES.get(tid, f"{tname} 미국 주가"), 3)
+            for tid, tname, _ico, _kr, _mems in THEME_BASKETS
+        ]
+        for fut in as_completed(futs_chart):
             sym, st = fut.result()
             if st:
                 yahoo_stats[sym] = st
+        for fut in as_completed(futs_snews):
+            sym, sn = fut.result()
+            if sn:
+                stock_news_map[sym] = sn
+        for fut in as_completed(futs_tnews):
+            tid, tlist = fut.result()
+            if tlist:
+                theme_news_map[tid] = tlist
         try:
             fear_greed = fut_fg.result()
         except Exception:
@@ -751,9 +1150,10 @@ def collect_us_market(here=HERE):
         except Exception:
             morning_news = []
     print(
-        f"  - Yahoo 일봉 조회: {len(yahoo_stats)}/{len(all_fetch_syms)}개 · "
-        f"CNN 공포탐욕: {fear_greed['score'] if fear_greed else 'N/A'} · "
-        f"모닝뉴스: {len(morning_news)}건"
+        f"  - Yahoo 일봉: {len(yahoo_stats)}/{len(all_fetch_syms)}개 · "
+        f"종목뉴스: {len(stock_news_map)}/{len(theme_syms)}개 · "
+        f"테마 한국어뉴스: {len(theme_news_map)}/{len(THEME_BASKETS)}개 · "
+        f"CNN 공포탐욕: {fear_greed['score'] if fear_greed else 'N/A'}"
     )
 
     # Yahoo 최신 거래일 종가/거래대금/등락률을 universe에 우선 반영 (조기폐장/장마감 직후 Nasdaq 지연 보정)
@@ -954,13 +1354,17 @@ def collect_us_market(here=HERE):
             dv_b = st.get("dollarVolB") if st.get("dollarVolB") is not None else base.get("dollarVolB")
             if price is None and chg1d is None:
                 continue
+            desc = US_STOCK_DESC_KO.get(sym) or base.get("industry") or base.get("sectorKo") or ""
             mem_rows.append({
                 "symbol": sym,
                 "nameKo": mname,
+                "engName": base.get("name") or sym,
+                "desc": desc,
                 "price": price,
                 "chg1d": chg1d,
                 "chg5d": chg5d,
                 "dollarVolB": dv_b,
+                "news": stock_news_map.get(sym),
             })
         if not mem_rows:
             continue
@@ -981,6 +1385,7 @@ def collect_us_market(here=HERE):
             "upCount": up_cnt,
             "downCount": dn_cnt,
             "count": len(mem_rows),
+            "news": theme_news_map.get(tid) or [],
             "stocks": mem_rows,
         })
     sector_strength_out.sort(key=lambda x: abs(x["avgChg1d"]), reverse=True)
