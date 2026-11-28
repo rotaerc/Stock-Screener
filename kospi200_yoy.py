@@ -5399,17 +5399,346 @@ def build_web_dashboard(here):
       overflow: hidden;
       display: flex;
     }}
+    /* ===== 미국 모닝 브리핑 (모바일 + PC 최적화) ===== */
+    .usm-hero {{
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(15,23,42,0.05);
+    }}
+    .usm-hero-head {{
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #1e3a8a 100%);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }}
+    .usm-hero-title {{
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .usm-hero-pills {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }}
+    .usm-pill {{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+    .usm-pill.bull {{ background: rgba(239,68,68,0.22); color: #fecaca; border: 1px solid rgba(248,113,113,0.45); }}
+    .usm-pill.bear {{ background: rgba(59,130,246,0.24); color: #bfdbfe; border: 1px solid rgba(96,165,250,0.45); }}
+    .usm-pill.neu {{ background: rgba(148,163,184,0.22); color: #e2e8f0; border: 1px solid rgba(203,213,225,0.35); }}
+    .usm-pill.kr-pos {{ background: rgba(16,185,129,0.22); color: #a7f3d0; border: 1px solid rgba(52,211,153,0.45); }}
+    .usm-pill.kr-neg {{ background: rgba(245,158,11,0.24); color: #fde68a; border: 1px solid rgba(251,191,36,0.45); }}
+    .usm-bullets {{
+      padding: 13px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      background: #fff;
+    }}
+    .usm-bullet {{
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      line-height: 1.58;
+      color: #1e293b;
+      font-weight: 500;
+    }}
+    .usm-btag {{
+      flex-shrink: 0;
+      min-width: 72px;
+      text-align: center;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      margin-top: 2px;
+    }}
+    .usm-btag.kr {{ background: #ecfdf5; color: #047857; border-color: #a7f3d0; }}
+    .usm-btag.mac {{ background: #fef3c7; color: #b45309; border-color: #fde68a; }}
+    .usm-btag.sec {{ background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe; }}
+    .usm-sec-title {{
+      font-size: 14px;
+      font-weight: 900;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }}
+    .usm-idx-grid {{
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .usm-idx-card {{
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #94a3b8;
+      border-radius: 12px;
+      padding: 12px 13px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.12s, box-shadow 0.12s;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+    }}
+    .usm-idx-card:hover {{ transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,23,42,0.08); }}
+    .usm-idx-card.up {{ border-top-color: #dc2626; background: linear-gradient(180deg, #fffafa 0%, #ffffff 42%); }}
+    .usm-idx-card.dn {{ border-top-color: #2563eb; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 42%); }}
+    .usm-idx-name {{ font-size: 12.5px; font-weight: 900; color: #0f172a; display: flex; justify-content: space-between; align-items: center; gap: 4px; }}
+    .usm-idx-val {{ font-size: 19px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }}
+    .usm-idx-chg {{ font-size: 13.5px; font-weight: 900; display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }}
+    .usm-idx-meta {{ font-size: 11px; color: #64748b; font-weight: 700; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }}
+    .usm-split {{
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }}
+    .usm-card {{
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+    }}
+    .usm-macro-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }}
+    .usm-macro-tile {{
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #f8fafc;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: background 0.12s, border-color 0.12s;
+    }}
+    .usm-macro-tile:hover {{ background: #eff6ff; border-color: #93c5fd; }}
+    .usm-macro-cat {{ font-size: 10px; font-weight: 800; color: #64748b; display: flex; justify-content: space-between; }}
+    .usm-macro-lbl {{ font-size: 11.5px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+    .usm-macro-val {{ font-size: 15.5px; font-weight: 900; color: #0f172a; font-variant-numeric: tabular-nums; }}
+    .usm-macro-chg {{ font-size: 11.5px; font-weight: 800; font-variant-numeric: tabular-nums; }}
+    .usm-fg-wrap {{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      gap: 12px;
+    }}
+    .usm-fg-score-row {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }}
+    .usm-fg-num {{ font-size: 38px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }}
+    .usm-fg-badge {{
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 900;
+    }}
+    .usm-fg-bar-wrap {{ position: relative; padding-top: 14px; padding-bottom: 4px; }}
+    .usm-fg-bar {{
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #dc2626 0%, #f97316 25%, #94a3b8 50%, #22c55e 75%, #15803d 100%);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+    }}
+    .usm-fg-pin {{
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 11px solid #0f172a;
+    }}
+    .usm-fg-ticks {{
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      margin-top: 5px;
+    }}
+    .usm-fg-hist {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+    }}
+    .usm-fg-hbox {{
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 7px 6px;
+      text-align: center;
+    }}
+    .usm-fg-hlbl {{ font-size: 10.5px; color: #64748b; font-weight: 700; }}
+    .usm-fg-hval {{ font-size: 14px; color: #0f172a; font-weight: 900; margin-top: 2px; font-variant-numeric: tabular-nums; }}
+    .usm-bt-grid {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }}
+    .usm-bt-tile {{
+      border-radius: 10px;
+      padding: 9px 10px;
+      border: 1px solid #e2e8f0;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }}
+    .usm-bt-tile:hover {{ transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15,23,42,0.08); }}
+    .usm-bt-tile.up2 {{ background: #fee2e2; border-color: #fca5a5; color: #991b1b; }}
+    .usm-bt-tile.up1 {{ background: #fef2f2; border-color: #fecaca; color: #b91c1c; }}
+    .usm-bt-tile.flat {{ background: #f8fafc; border-color: #e2e8f0; color: #334155; }}
+    .usm-bt-tile.dn1 {{ background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }}
+    .usm-bt-tile.dn2 {{ background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }}
+    .usm-two-col {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }}
+    .usm-mini-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+    .usm-mini-row {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      font-size: 12.5px;
+      text-decoration: none;
+      color: inherit;
+    }}
+    .usm-mini-row:hover {{ background: #eff6ff; border-color: #bfdbfe; }}
+    .usm-news-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }}
+    .usm-news-item {{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      text-decoration: none;
+      color: #0f172a;
+      transition: background 0.12s, border-color 0.12s;
+    }}
+    .usm-news-item:hover {{ background: #f8fafc; border-color: #93c5fd; }}
+    .usm-news-title {{
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.48;
+      color: #0f172a;
+      word-break: keep-all;
+    }}
+    .usm-news-meta {{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 700;
+    }}
+    .usm-press-badge {{
+      padding: 1px 7px;
+      border-radius: 5px;
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 800;
+    }}
+    .usm-link-btn {{
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #1d4ed8;
+      border-radius: 7px;
+      padding: 3px 9px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+    }}
+    .usm-link-btn:hover {{ background: #eff6ff; border-color: #93c5fd; }}
     @media (max-width: 1150px) {{
       .us-etf-grid {{ grid-template-columns: repeat(4, minmax(0, 1fr)); }}
+      .usm-idx-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+      .usm-split {{ grid-template-columns: 1fr; }}
+      .usm-bt-grid {{ grid-template-columns: repeat(4, minmax(0, 1fr)); }}
     }}
     @media (max-width: 900px) {{
       .us-idx-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .us-etf-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+      .usm-two-col {{ grid-template-columns: 1fr; }}
     }}
-    @media (max-width: 600px) {{
+    @media (max-width: 640px) {{
       .us-idx-grid {{ grid-template-columns: 1fr; }}
       .us-etf-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .us-flow-row {{ grid-template-columns: 1fr; gap: 3px; }}
+      #usMarketView .controls-panel {{ padding: 8px 10px; }}
+      #usMarketView .filter-left {{ width: 100%; }}
+      #usSubTabs {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 4px; }}
+      #usSubTabs .flow-mode-btn {{ text-align: center; justify-content: center; padding: 7px 6px; font-size: 12px; }}
+      .usm-sec-title {{ flex-wrap: wrap; gap: 4px; }}
+      .usm-hero-head {{ padding: 12px 14px; }}
+      .usm-hero-title {{ font-size: 15px; }}
+      .usm-bullets {{ padding: 11px 13px; gap: 8px; }}
+      .usm-bullet {{ flex-direction: column; gap: 4px; font-size: 13px; }}
+      .usm-btag {{ min-width: 0; align-self: flex-start; }}
+      .usm-idx-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }}
+      .usm-idx-card.span-mob {{ grid-column: 1 / -1; }}
+      .usm-idx-val {{ font-size: 17px; }}
+      .usm-macro-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }}
+      .usm-bt-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }}
+      .usm-card {{ padding: 12px; }}
+      .usm-news-item {{ padding: 10px; }}
+      .usm-news-title {{ font-size: 13px; }}
     }}
     @media (max-width: 1080px) {{
       .semi-kpi-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
@@ -5446,6 +5775,7 @@ def build_web_dashboard(here):
         display: block;
       }}
       .container {{ flex: none; width: 100%; overflow: visible; }}
+      .us-view, .us-body-wrap, .semi-view, .semi-body-wrap {{ overflow: visible; padding-right: 0; }}
       .table-wrap {{ max-height: 68vh; min-height: 320px; }}
       .search-input {{ width: 150px; }}
       .reports-grid {{ grid-template-columns: 1fr; }}
@@ -5717,7 +6047,8 @@ def build_web_dashboard(here):
       <div class="controls-panel" style="margin-bottom:10px;">
         <div class="filter-left">
           <div class="flow-mode-group" id="usSubTabs">
-            <button class="flow-mode-btn active" id="btnUsTabVol" onclick="setUsTab('VOLUME')">🔥 거래대금 TOP</button>
+            <button class="flow-mode-btn active" id="btnUsTabMorning" onclick="setUsTab('MORNING')">🌅 모닝 브리핑</button>
+            <button class="flow-mode-btn" id="btnUsTabVol" onclick="setUsTab('VOLUME')">🔥 거래대금 TOP</button>
             <button class="flow-mode-btn" id="btnUsTabSurge" onclick="setUsTab('SURGE')">⚡ 거래량 급증 · 매집</button>
             <button class="flow-mode-btn" id="btnUsTabSector" onclick="setUsTab('SECTOR')">🧭 섹터 자금 흐름</button>
           </div>
@@ -5734,7 +6065,7 @@ def build_web_dashboard(here):
             <option value="turnover">정렬: 시총 회전율(%)순</option>
           </select>
         </div>
-        <div class="group-right">
+        <div class="group-right" id="usEtfPeriodWrap">
           <div class="flow-mode-group" title="섹터 ETF 히트맵 수익률 기준">
             <button class="flow-mode-btn active" id="btnUsEtf1D" onclick="setUsEtfPeriod('1D')">1일</button>
             <button class="flow-mode-btn" id="btnUsEtf5D" onclick="setUsEtfPeriod('5D')">5일</button>
@@ -6378,7 +6709,10 @@ def build_web_dashboard(here):
         <div class="nav-divider"></div>
         <div class="nav-section">
           <div class="nav-section-title">미국 시장</div>
-          <button class="nav-item ${{currentViewMode === 'US' ? 'active' : ''}}" onclick="selectUsMarketView('VOLUME')">
+          <button class="nav-item ${{currentViewMode === 'US' && currentUsTab === 'MORNING' ? 'active' : ''}}" onclick="selectUsMarketView('MORNING')">
+            <span class="nav-item-left"><span>🌅</span><span>미국 모닝 브리핑</span></span>
+          </button>
+          <button class="nav-item ${{currentViewMode === 'US' && currentUsTab !== 'MORNING' ? 'active' : ''}}" onclick="selectUsMarketView('VOLUME')">
             <span class="nav-item-left"><span>🇺🇸</span><span>미국 거래대금 · 섹터</span></span>
           </button>
         </div>
@@ -6427,8 +6761,8 @@ def build_web_dashboard(here):
       if (uv) uv.classList.toggle('active', showUs);
     }}
 
-    // ================= 미국 거래대금 · 모멘텀 · 섹터 자금 흐름 =================
-    let currentUsTab = 'VOLUME'; // 'VOLUME' | 'SURGE' | 'SECTOR'
+    // ================= 미국 모닝 브리핑 · 거래대금 · 모멘텀 · 섹터 자금 흐름 =================
+    let currentUsTab = 'MORNING'; // 'MORNING' | 'VOLUME' | 'SURGE' | 'SECTOR'
     let currentUsSector = '';
     let currentUsEtfPeriod = '1D'; // '1D' | '5D' | '1M'
 
@@ -6455,13 +6789,14 @@ def build_web_dashboard(here):
     }}
 
     function setUsTab(tab) {{
-      currentUsTab = tab || 'VOLUME';
+      currentUsTab = tab || 'MORNING';
       const sortSel = document.getElementById('usSortSelect');
       if (sortSel) {{
         if (currentUsTab === 'SURGE') sortSel.value = 'rvol';
         else if (currentUsTab === 'VOLUME') sortSel.value = 'dollarVol';
       }}
       updateUsControlButtons();
+      renderSidebar();
       renderUsMarketView();
       pushNavHistory();
     }}
@@ -6484,12 +6819,19 @@ def build_web_dashboard(here):
     }}
 
     function updateUsControlButtons() {{
+      const bM = document.getElementById('btnUsTabMorning');
       const bV = document.getElementById('btnUsTabVol');
       const bS = document.getElementById('btnUsTabSurge');
       const bSec = document.getElementById('btnUsTabSector');
+      if (bM) bM.classList.toggle('active', currentUsTab === 'MORNING');
       if (bV) bV.classList.toggle('active', currentUsTab === 'VOLUME');
       if (bS) bS.classList.toggle('active', currentUsTab === 'SURGE');
       if (bSec) bSec.classList.toggle('active', currentUsTab === 'SECTOR');
+      const isMorning = (currentUsTab === 'MORNING');
+      ['usSectorSelect', 'usSearchInput', 'usSortSelect', 'usEtfPeriodWrap'].forEach(id => {{
+        const el = document.getElementById(id);
+        if (el) el.style.display = isMorning ? 'none' : '';
+      }});
       const e1 = document.getElementById('btnUsEtf1D');
       const e5 = document.getElementById('btnUsEtf5D');
       const em = document.getElementById('btnUsEtf1M');
@@ -6509,10 +6851,307 @@ def build_web_dashboard(here):
       return Number(v) > 0 ? 'pct-up' : (Number(v) < 0 ? 'pct-down' : '');
     }}
 
+    function _usFmtMacroPrice(m) {{
+      if (m.price === null || m.price === undefined) return '-';
+      const p = Number(m.price);
+      if (m.symbol === 'KRW=X') return `${{p.toLocaleString('ko-KR', {{ maximumFractionDigits: 1 }})}}원`;
+      if (m.symbol === '^TNX') return `${{p.toFixed(2)}}%`;
+      if (m.symbol === 'BTC-USD') return `$${{Math.round(p).toLocaleString('en-US')}}`;
+      if (m.unit === '$') return `$${{p.toLocaleString('en-US', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`;
+      return p.toLocaleString('en-US', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }});
+    }}
+
+    function _usFmtMacroChg(m) {{
+      if (m.chgMode === 'bp' && m.absChg !== null && m.absChg !== undefined) {{
+        const bp = Math.round(Number(m.absChg) * 100);
+        return `${{bp > 0 ? '+' : ''}}${{bp}}bp (${{_usFmtPct(m.chg1d)}})`;
+      }}
+      if (m.chgMode === 'krw' && m.absChg !== null && m.absChg !== undefined) {{
+        const d = Number(m.absChg);
+        return `${{d > 0 ? '+' : ''}}${{d.toFixed(1)}}원 (${{_usFmtPct(m.chg1d)}})`;
+      }}
+      if (m.chgMode === 'pt' && m.absChg !== null && m.absChg !== undefined) {{
+        const d = Number(m.absChg);
+        return `${{d > 0 ? '+' : ''}}${{d.toFixed(2)}} (${{_usFmtPct(m.chg1d)}})`;
+      }}
+      return _usFmtPct(m.chg1d);
+    }}
+
+    function renderUsMorningView(ud, wrap) {{
+      const m = ud.morning || {{}};
+      const majors = m.majorIndices || [];
+      const macros = m.macroIndicators || [];
+      const fg = m.fearGreed || null;
+      const bigTech = m.bigTech || [];
+      const news = m.news || [];
+      const bullets = m.bullets || [];
+      const etfs = [...(ud.sectorEtfs || [])].sort((a, b) => (Number(b.chg1d) || -999) - (Number(a.chg1d) || -999));
+      const topVolStocks = (ud.stocks || []).slice(0, 6);
+
+      document.getElementById('pageTitle').textContent = '🌅 미국 증시 모닝 브리핑';
+      document.getElementById('pageSubtitle').textContent = '뉴욕 5대 지수 마감 · 채권·환율·원자재·VIX · CNN 공포탐욕 지수 · 빅테크/반도체 · 밤사이 주요 뉴스 (매일 장 마감 후 자동 갱신)';
+      document.getElementById('metaBadges').innerHTML = `
+        <span class="meta-pill">📅 미국 거래일: ${{ud.tradeDate || '-'}}</span>
+        <span class="meta-pill">🕒 업데이트: ${{ud.updatedAt || '-'}}</span>
+        ${{m.regimeKo ? `<span class="meta-pill ${{m.regime === 'BULL' || m.regime === 'MILD_UP' ? 'up' : (m.regime === 'BEAR' || m.regime === 'MILD_DN' ? 'down' : '')}}">${{escapeHtml(m.regimeKo)}}</span>` : ''}}
+        ${{fg ? `<span class="meta-pill">🧭 공포·탐욕 ${{Math.round(fg.score)}}점 (${{escapeHtml(fg.ratingKo)}})</span>` : ''}}
+      `;
+
+      if (!majors.length) {{
+        wrap.innerHTML = `<div class="flow-empty-guide"><h3>🌅 미국 모닝 브리핑 데이터가 아직 수집되지 않았습니다</h3><p><code>python us_market.py</code> 실행 시 지수·거시지표·CNN 공포탐욕·뉴스가 자동 반영됩니다.</p></div>`;
+        return;
+      }}
+
+      // 1) 모닝 브리핑 히어로 요약 카드
+      const regCls = (m.regime === 'BULL' || m.regime === 'MILD_UP') ? 'bull' : ((m.regime === 'BEAR' || m.regime === 'MILD_DN') ? 'bear' : 'neu');
+      const krCls = m.krImpact === 'POS' ? 'kr-pos' : (m.krImpact === 'NEG' ? 'kr-neg' : 'neu');
+      const tagClsMap = {{ '지수 마감': '', '한국장 영향': 'kr', '거시·심리': 'mac', '섹터·주도주': 'sec' }};
+      const heroHtml = `
+        <div class="usm-hero">
+          <div class="usm-hero-head">
+            <div class="usm-hero-title">🌅 ${{escapeHtml(ud.tradeDate || '')}} 뉴욕증시 마감 핵심 브리핑</div>
+            <div class="usm-hero-pills">
+              <span class="usm-pill ${{regCls}}">📈 ${{escapeHtml(m.regimeKo || '마감 요약')}}</span>
+              <span class="usm-pill ${{krCls}}">🇰🇷 ${{escapeHtml(m.krImpactKo || '한국장 중립')}}</span>
+            </div>
+          </div>
+          <div class="usm-bullets">
+            ${{bullets.map(b => `
+              <div class="usm-bullet">
+                <span class="usm-btag ${{tagClsMap[b.tag] || ''}}">${{escapeHtml(b.tag || '요약')}}</span>
+                <span>${{escapeHtml(b.text || '')}}</span>
+              </div>
+            `).join('')}}
+          </div>
+        </div>
+      `;
+
+      // 2) 미국 5대 주요 지수 마감 카드 (PC 5열 / 모바일 2열 + 반도체 풀폭)
+      const idxHtml = `
+        <div>
+          <div class="usm-sec-title">
+            <span>📊 미국 주요 지수 마감 시황</span>
+            <span style="font-size:11px; color:#64748b; font-weight:600;">카드 클릭 → TradingView 차트</span>
+          </div>
+          <div class="usm-idx-grid">
+            ${{majors.map((x, idx) => {{
+              const c = x.chg1d;
+              const dirCls = (c > 0) ? 'up' : ((c < 0) ? 'dn' : '');
+              const absTxt = (x.absChg !== null && x.absChg !== undefined)
+                ? `${{Number(x.absChg) > 0 ? '+' : ''}}${{Number(x.absChg).toLocaleString('en-US', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`
+                : '';
+              const priceTxt = (x.price !== null && x.price !== undefined)
+                ? Number(x.price).toLocaleString('en-US', {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }})
+                : '-';
+              const mobSpan = (idx === majors.length - 1 && majors.length % 2 === 1) ? 'span-mob' : '';
+              return `<a class="usm-idx-card ${{dirCls}} ${{mobSpan}}" href="https://www.tradingview.com/symbols/${{encodeURIComponent(x.tvSymbol || x.symbol)}}/" target="_blank">
+                <div class="usm-idx-name">
+                  <span>${{escapeHtml(x.label)}}</span>
+                  <span style="font-size:10.5px; color:#64748b; font-weight:700;">${{escapeHtml(x.symbol.replace('^',''))}}</span>
+                </div>
+                <div class="usm-idx-val">${{priceTxt}}</div>
+                <div class="usm-idx-chg ${{_usPctCls(c)}}">
+                  <span>${{_usFmtPct(c)}}</span>
+                  <span style="font-size:11.5px; opacity:0.85;">${{absTxt}}</span>
+                </div>
+                <div class="usm-idx-meta">
+                  <span>5일 <b class="${{_usPctCls(x.chg5d)}}">${{_usFmtPct(x.chg5d)}}</b></span>
+                  <span>1개월 <b class="${{_usPctCls(x.chg1m)}}">${{_usFmtPct(x.chg1m)}}</b></span>
+                </div>
+              </a>`;
+            }}).join('')}}
+          </div>
+        </div>
+      `;
+
+      // 3) 핵심 시장·거시 지표 8종 + CNN 공포·탐욕 지수 게이지
+      const fgScore = fg ? Math.max(0, Math.min(100, Number(fg.score))) : null;
+      const fgColor = fgScore === null ? '#64748b' : (fgScore < 25 ? '#dc2626' : (fgScore < 45 ? '#ea580c' : (fgScore <= 55 ? '#475569' : (fgScore < 75 ? '#16a34a' : '#15803d'))));
+      const fgBg = fgScore === null ? '#f1f5f9' : (fgScore < 25 ? '#fee2e2' : (fgScore < 45 ? '#ffedd5' : (fgScore <= 55 ? '#f1f5f9' : (fgScore < 75 ? '#dcfce7' : '#bbf7d0'))));
+      const fgHtml = fg ? `
+        <div class="usm-card">
+          <div class="usm-fg-wrap">
+            <div>
+              <div class="usm-sec-title" style="margin-bottom:8px;">
+                <span>🧭 CNN 공포·탐욕 지수</span>
+                <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank" style="font-size:11px; color:#2563eb; text-decoration:none; font-weight:700;">CNN 원문 ↗</a>
+              </div>
+              <div class="usm-fg-score-row">
+                <div class="usm-fg-num" style="color:${{fgColor}};">${{Math.round(fgScore)}}</div>
+                <span class="usm-fg-badge" style="background:${{fgBg}}; color:${{fgColor}};">${{escapeHtml(fg.ratingKo)}}</span>
+              </div>
+              <div class="usm-fg-bar-wrap">
+                <div class="usm-fg-pin" style="left:${{fgScore.toFixed(1)}}%;"></div>
+                <div class="usm-fg-bar"></div>
+                <div class="usm-fg-ticks">
+                  <span>0 극공포</span><span>25 공포</span><span>50 중립</span><span>75 탐욕</span><span>100</span>
+                </div>
+              </div>
+            </div>
+            <div class="usm-fg-hist">
+              <div class="usm-fg-hbox">
+                <div class="usm-fg-hlbl">직전 마감</div>
+                <div class="usm-fg-hval">${{fg.prevClose !== null && fg.prevClose !== undefined ? Math.round(fg.prevClose) : '-'}}</div>
+              </div>
+              <div class="usm-fg-hbox">
+                <div class="usm-fg-hlbl">1주일 전</div>
+                <div class="usm-fg-hval">${{fg.prev1Week !== null && fg.prev1Week !== undefined ? Math.round(fg.prev1Week) : '-'}}</div>
+              </div>
+              <div class="usm-fg-hbox">
+                <div class="usm-fg-hlbl">1개월 전</div>
+                <div class="usm-fg-hval">${{fg.prev1Month !== null && fg.prev1Month !== undefined ? Math.round(fg.prev1Month) : '-'}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : '';
+
+      const macroSplitHtml = `
+        <div class="usm-split" style="${{fg ? '' : 'grid-template-columns:1fr;'}}">
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>🌐 핵심 시장 · 거시 지표 (금리 · 환율 · 원자재 · 한국장 선행)</span>
+              <span style="font-size:11px; color:#64748b; font-weight:600;">클릭 → 차트</span>
+            </div>
+            <div class="usm-macro-grid">
+              ${{macros.map(x => `
+                <a class="usm-macro-tile" href="https://www.tradingview.com/symbols/${{encodeURIComponent(x.tvSymbol || x.symbol)}}/" target="_blank">
+                  <div class="usm-macro-cat">
+                    <span>${{escapeHtml(x.category)}}</span>
+                    <span>5일 <b class="${{_usPctCls(x.chg5d)}}">${{_usFmtPct(x.chg5d)}}</b></span>
+                  </div>
+                  <div class="usm-macro-lbl">${{escapeHtml(x.label)}}</div>
+                  <div class="usm-macro-val">${{_usFmtMacroPrice(x)}}</div>
+                  <div class="usm-macro-chg ${{_usPctCls(x.chg1d)}}">${{_usFmtMacroChg(x)}}</div>
+                </a>
+              `).join('')}}
+            </div>
+          </div>
+          ${{fgHtml}}
+        </div>
+      `;
+
+      // 4) 빅테크 M7 + 반도체 핵심주 11종 히트맵 타일
+      const btHtml = `
+        <div class="usm-card">
+          <div class="usm-sec-title">
+            <span>💻 빅테크 M7 · 미국 반도체 핵심주 마감 등락</span>
+            <button class="usm-link-btn" onclick="setUsTab('VOLUME')">전체 거래대금 TOP →</button>
+          </div>
+          <div class="usm-bt-grid">
+            ${{bigTech.map(b => {{
+              const v = b.chg1d;
+              const cls = (v === null || v === undefined) ? 'flat'
+                : (v >= 2.0 ? 'up2' : (v > 0.1 ? 'up1' : (v <= -2.0 ? 'dn2' : (v < -0.1 ? 'dn1' : 'flat'))));
+              return `<a class="usm-bt-tile ${{cls}}" href="https://www.tradingview.com/symbols/${{b.symbol}}/" target="_blank" title="${{b.symbol}} (${{b.nameKo}}) · 5일 ${{_usFmtPct(b.chg5d)}} · 대금 $${{b.dollarVolB ? b.dollarVolB.toFixed(1) : '-'}}B">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; font-weight:900;">
+                  <span>${{b.symbol}}</span>
+                  <span style="font-size:10px; opacity:0.8;">${{escapeHtml(b.group)}}</span>
+                </div>
+                <div style="font-size:11px; font-weight:700; opacity:0.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${{escapeHtml(b.nameKo)}}</div>
+                <div style="font-size:15px; font-weight:900; margin-top:2px;">${{_usFmtPct(v)}}</div>
+                <div style="font-size:10.5px; opacity:0.82; font-weight:700;">$${{b.price ? Number(b.price).toFixed(2) : '-'}}</div>
+              </a>`;
+            }}).join('')}}
+          </div>
+        </div>
+      `;
+
+      // 5) 섹터 강약 요약 + 거래대금 TOP 6 이슈 종목 (2열 PC / 1열 모바일)
+      const topSec = etfs.slice(0, 4);
+      const botSec = etfs.slice(-3).reverse();
+      const secAndStocksHtml = `
+        <div class="usm-two-col">
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>🧭 섹터 ETF 강세 · 약세 요약</span>
+              <button class="usm-link-btn" onclick="setUsTab('SECTOR')">섹터 자금 흐름 →</button>
+            </div>
+            <div style="font-size:11px; font-weight:800; color:#dc2626; margin-bottom:5px;">▲ 강세 상위 섹터</div>
+            <div class="usm-mini-list" style="margin-bottom:10px;">
+              ${{topSec.map(e => `
+                <div class="usm-mini-row" style="cursor:pointer;" onclick="currentUsSector='${{e.symbol === 'SMH' ? 'SEMICON' : e.sector}}'; setUsTab('VOLUME');">
+                  <span style="font-weight:800; color:#0f172a;"><b style="color:#1d4ed8;">${{e.symbol}}</b> · ${{escapeHtml(e.label)}}</span>
+                  <span style="display:flex; gap:10px; align-items:center;">
+                    <span style="font-size:11px; color:#64748b;">5일 ${{_usFmtPct(e.chg5d)}}</span>
+                    <b class="${{_usPctCls(e.chg1d)}}" style="min-width:56px; text-align:right;">${{_usFmtPct(e.chg1d)}}</b>
+                  </span>
+                </div>
+              `).join('')}}
+            </div>
+            <div style="font-size:11px; font-weight:800; color:#2563eb; margin-bottom:5px;">▼ 상대 약세 / 하위 섹터</div>
+            <div class="usm-mini-list">
+              ${{botSec.map(e => `
+                <div class="usm-mini-row" style="cursor:pointer;" onclick="currentUsSector='${{e.symbol === 'SMH' ? 'SEMICON' : e.sector}}'; setUsTab('VOLUME');">
+                  <span style="font-weight:800; color:#0f172a;"><b style="color:#1d4ed8;">${{e.symbol}}</b> · ${{escapeHtml(e.label)}}</span>
+                  <span style="display:flex; gap:10px; align-items:center;">
+                    <span style="font-size:11px; color:#64748b;">5일 ${{_usFmtPct(e.chg5d)}}</span>
+                    <b class="${{_usPctCls(e.chg1d)}}" style="min-width:56px; text-align:right;">${{_usFmtPct(e.chg1d)}}</b>
+                  </span>
+                </div>
+              `).join('')}}
+            </div>
+          </div>
+
+          <div class="usm-card">
+            <div class="usm-sec-title">
+              <span>🔥 밤사이 거래대금 TOP 6 핵심주</span>
+              <button class="usm-link-btn" onclick="setUsTab('VOLUME')">60종목 전체 →</button>
+            </div>
+            <div class="usm-mini-list">
+              ${{topVolStocks.map((s, idx) => `
+                <a class="usm-mini-row" href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank">
+                  <span style="display:flex; align-items:center; gap:7px; min-width:0;">
+                    <span style="font-size:11px; font-weight:900; color:#64748b; width:16px;">${{idx + 1}}</span>
+                    <b style="color:#1d4ed8;">${{s.symbol}}</b>
+                    <span style="font-weight:700; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${{escapeHtml(s.name)}}</span>
+                  </span>
+                  <span style="display:flex; align-items:center; gap:9px; flex-shrink:0;">
+                    <span style="font-size:11.5px; color:#475569; font-weight:800;">$${{s.dollarVolB ? s.dollarVolB.toFixed(1) : '-'}}B</span>
+                    <b class="${{_usPctCls(s.chg1d)}}" style="min-width:56px; text-align:right;">${{_usFmtPct(s.chg1d)}}</b>
+                  </span>
+                </a>
+              `).join('')}}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 6) 밤사이 미국 마감 주요 뉴스 · 이슈 (TOP 10)
+      const newsHtml = `
+        <div class="usm-card">
+          <div class="usm-sec-title">
+            <span>📰 밤사이 뉴욕증시 마감 주요 뉴스 · 이슈</span>
+            <span style="font-size:11px; color:#64748b; font-weight:600;">Google 뉴스 한국어 자동 수집</span>
+          </div>
+          <div class="usm-news-list">
+            ${{news.length ? news.map((n, idx) => `
+              <a class="usm-news-item" href="${{escapeHtml(n.link)}}" target="_blank" rel="noopener noreferrer">
+                <div style="min-width:0; flex:1;">
+                  <div class="usm-news-title"><span style="color:#2563eb; font-weight:900; margin-right:6px;">${{idx + 1}}.</span>${{escapeHtml(n.title)}}</div>
+                  <div class="usm-news-meta">
+                    <span class="usm-press-badge">${{escapeHtml(n.press)}}</span>
+                    <span>${{escapeHtml(n.pubKst || '')}}</span>
+                  </div>
+                </div>
+                <span style="color:#94a3b8; font-size:14px; font-weight:800; flex-shrink:0;">↗</span>
+              </a>
+            `).join('') : '<div style="padding:18px; text-align:center; color:#94a3b8; font-size:13px;">수집된 마감 뉴스가 없습니다.</div>'}}
+          </div>
+        </div>
+      `;
+
+      wrap.innerHTML = heroHtml + idxHtml + macroSplitHtml + btHtml + secAndStocksHtml + newsHtml;
+    }}
+
     function renderUsMarketView() {{
       const wrap = document.getElementById('usMarketBodyWrap');
       if (!wrap) return;
-      const ud = US_DATA || {{ indices: [], sectorEtfs: [], sectorFlows: [], stocks: [], summary: {{}} }};
+      const ud = US_DATA || {{ indices: [], sectorEtfs: [], sectorFlows: [], stocks: [], summary: {{}}, morning: {{}} }};
+      if (currentUsTab === 'MORNING') {{
+        renderUsMorningView(ud, wrap);
+        return;
+      }}
       const stocks = ud.stocks || [];
       const sum = ud.summary || {{}};
       const tabTitle = currentUsTab === 'SURGE'

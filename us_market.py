@@ -17,8 +17,11 @@ import os
 import re
 import sys
 import time
+import urllib.parse
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
+from email.utils import parsedate_to_datetime
 
 import requests
 
@@ -66,6 +69,50 @@ SECTOR_ETFS = [
     ("XLB", "소재", "Basic Materials"),
     ("XLRE", "부동산", "Real Estate"),
 ]
+
+# 미국 모닝 브리핑: 5대 주요 지수 (티커, 한글명, 보조설명, TradingView 심볼)
+MAJOR_INDICES = [
+    ("^GSPC", "S&P 500", "미국 대형주 500", "SP:SPX"),
+    ("^IXIC", "나스닥 종합", "기술·성장주 지수", "NASDAQ:IXIC"),
+    ("^DJI", "다우존스", "우량주 30종목", "DJ:DJI"),
+    ("^RUT", "러셀 2000", "중소형주 지수", "TVC:RUT"),
+    ("^SOX", "필라델피아 반도체", "한국장 핵심 선행", "NASDAQ:SOX"),
+]
+
+# 미국 모닝 브리핑: 핵심 매크로·시장 지표 8종 (티커, 한글명, 분류, 단위, TradingView 심볼, 변동표시타입)
+MACRO_INDICATORS = [
+    ("^TNX", "미 10년물 금리", "채권", "%", "TVC:US10Y", "bp"),
+    ("^VIX", "VIX 공포지수", "변동성", "", "TVC:VIX", "pt"),
+    ("DX-Y.NYB", "달러 인덱스", "환율", "", "TVC:DXY", "pct"),
+    ("KRW=X", "원/달러 환율", "환율", "원", "FX_IDC:USDKRW", "krw"),
+    ("EWY", "MSCI 한국 ETF", "한국선행", "$", "AMEX:EWY", "pct"),
+    ("CL=F", "WTI 국제유가", "원자재", "$", "TVC:USOIL", "pct"),
+    ("GC=F", "국제 금 (Gold)", "원자재", "$", "TVC:GOLD", "pct"),
+    ("BTC-USD", "비트코인 (BTC)", "크립토", "$", "BINANCE:BTCUSDT", "pct"),
+]
+
+# 빅테크 M7 + 반도체 핵심주 11종 (항상 수집 보장)
+BIG_TECH_CORE = [
+    ("NVDA", "엔비디아", "반도체"),
+    ("AAPL", "애플", "빅테크"),
+    ("MSFT", "마이크로소프트", "빅테크"),
+    ("GOOGL", "알파벳", "빅테크"),
+    ("AMZN", "아마존", "빅테크"),
+    ("META", "메타", "빅테크"),
+    ("TSLA", "테슬라", "빅테크"),
+    ("AVGO", "브로드컴", "반도체"),
+    ("TSM", "TSMC", "반도체"),
+    ("MU", "마이크론", "반도체"),
+    ("AMD", "AMD", "반도체"),
+]
+
+FEAR_GREED_KO = {
+    "extreme fear": "극단적 공포",
+    "fear": "공포",
+    "neutral": "중립",
+    "greed": "탐욕",
+    "extreme greed": "극단적 탐욕",
+}
 
 
 def _num(x):
@@ -226,7 +273,9 @@ def fetch_yahoo_1mo_stats(symbol):
 
         return symbol, {
             "tradeDate": last_dt,
-            "price": round(last_c, 2),
+            "price": round(last_c, 3 if last_c < 20 else 2),
+            "prevClose": round(prev_c, 3 if prev_c < 20 else 2),
+            "absChg": round(last_c - prev_c, 3 if last_c < 20 else 2),
             "volume": int(round(last_v)),
             "avgVol20": int(round(avg_vol20)) if avg_vol20 else None,
             "rvol": rvol,
@@ -237,6 +286,249 @@ def fetch_yahoo_1mo_stats(symbol):
         }
     except Exception:
         return symbol, None
+
+
+def fetch_cnn_fear_greed():
+    """CNN 공포·탐욕 지수 (Fear & Greed Index) 실시간 조회"""
+    try:
+        r = requests.get(
+            "https://production.dataviz.cnn.io/index/fearandgreed/graphdata",
+            headers={
+                "User-Agent": UA,
+                "Accept": "application/json, text/plain, */*",
+                "Referer": "https://edition.cnn.com/",
+                "Origin": "https://edition.cnn.com",
+            },
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return None
+        fg = (r.json() or {}).get("fear_and_greed") or {}
+        score = _num(fg.get("score"))
+        if score is None:
+            return None
+        rating_raw = str(fg.get("rating") or "").strip().lower()
+        return {
+            "score": round(score, 1),
+            "rating": rating_raw,
+            "ratingKo": FEAR_GREED_KO.get(rating_raw, rating_raw or "중립"),
+            "prevClose": round(_num(fg.get("previous_close")), 1) if _num(fg.get("previous_close")) is not None else None,
+            "prev1Week": round(_num(fg.get("previous_1_week")), 1) if _num(fg.get("previous_1_week")) is not None else None,
+            "prev1Month": round(_num(fg.get("previous_1_month")), 1) if _num(fg.get("previous_1_month")) is not None else None,
+            "prev1Year": round(_num(fg.get("previous_1_year")), 1) if _num(fg.get("previous_1_year")) is not None else None,
+            "timestamp": str(fg.get("timestamp") or "")[:19],
+        }
+    except Exception:
+        return None
+
+
+def fetch_us_morning_news(limit=10):
+    """Google News KR RSS에서 밤사이 뉴욕증시 마감 주요 한국어 헤드라인 수집"""
+    kst = timezone(timedelta(hours=9))
+    queries = [
+        "뉴욕증시 마감 when:2d",
+        "미국증시 마감 when:2d",
+    ]
+    items = []
+    seen_keys = set()
+    for q in queries:
+        if len(items) >= limit:
+            break
+        try:
+            url = (
+                "https://news.google.com/rss/search?"
+                f"q={urllib.parse.quote(q)}&hl=ko&gl=KR&ceid=KR:ko"
+            )
+            r = requests.get(url, headers={"User-Agent": UA}, timeout=12)
+            if r.status_code != 200:
+                continue
+            root = ET.fromstring(r.text)
+            for it in root.findall("./channel/item"):
+                raw_title = (it.findtext("title") or "").strip()
+                link = (it.findtext("link") or "").strip()
+                pub_raw = (it.findtext("pubDate") or "").strip()
+                source_el = it.find("source")
+                press = (source_el.text or "").strip() if source_el is not None else ""
+                title = raw_title
+                if " - " in raw_title:
+                    t_part, p_part = raw_title.rsplit(" - ", 1)
+                    if t_part.strip():
+                        title = t_part.strip()
+                    if not press and p_part.strip():
+                        press = p_part.strip()
+                if not title or not link:
+                    continue
+                # 유사 제목 중복 제거 (공백·기호 제거 후 앞 18자 비교)
+                norm = re.sub(r"[^0-9A-Za-z가-힣]", "", title)[:18]
+                if not norm or norm in seen_keys:
+                    continue
+                seen_keys.add(norm)
+
+                pub_ts = 0
+                pub_kst = ""
+                if pub_raw:
+                    try:
+                        dt = parsedate_to_datetime(pub_raw).astimezone(kst)
+                        pub_ts = int(dt.timestamp())
+                        pub_kst = dt.strftime("%m/%d %H:%M")
+                    except Exception:
+                        pass
+
+                items.append({
+                    "title": title,
+                    "press": press or "뉴스",
+                    "link": link,
+                    "pubKst": pub_kst,
+                    "pubTs": pub_ts,
+                })
+        except Exception:
+            continue
+
+    items.sort(key=lambda x: x["pubTs"], reverse=True)
+    return [
+        {"title": x["title"], "press": x["press"], "link": x["link"], "pubKst": x["pubKst"]}
+        for x in items[:limit]
+    ]
+
+
+def build_morning_briefing(major_indices, macro_indicators, fear_greed, big_tech, sector_etfs):
+    """수집된 미국 마감 지수·매크로·심리·섹터 데이터를 기반으로 한국어 아침 시황 브리핑 자동 생성"""
+    idx_map = {x["symbol"]: x for x in major_indices}
+    mac_map = {x["symbol"]: x for x in macro_indicators}
+
+    def _pct(v):
+        if v is None:
+            return "-"
+        return f"{v:+.2f}%"
+
+    spx = idx_map.get("^GSPC") or {}
+    ixic = idx_map.get("^IXIC") or {}
+    dji = idx_map.get("^DJI") or {}
+    sox = idx_map.get("^SOX") or {}
+    tnx = mac_map.get("^TNX") or {}
+    vix = mac_map.get("^VIX") or {}
+    dxy = mac_map.get("DX-Y.NYB") or {}
+    krw = mac_map.get("KRW=X") or {}
+    ewy = mac_map.get("EWY") or {}
+    wti = mac_map.get("CL=F") or {}
+
+    spx_c = spx.get("chg1d")
+    ixic_c = ixic.get("chg1d")
+    sox_c = sox.get("chg1d")
+    ewy_c = ewy.get("chg1d")
+    krw_c = krw.get("chg1d")
+
+    avg_main = None
+    vals = [v for v in (spx_c, ixic_c) if v is not None]
+    if vals:
+        avg_main = sum(vals) / len(vals)
+
+    if avg_main is None:
+        regime, regime_ko = "NEU", "미국장 마감 요약"
+    elif avg_main >= 1.0:
+        regime, regime_ko = "BULL", "강세 마감"
+    elif avg_main >= 0.25:
+        regime, regime_ko = "MILD_UP", "소폭 상승 마감"
+    elif avg_main <= -1.0:
+        regime, regime_ko = "BEAR", "약세 마감"
+    elif avg_main <= -0.25:
+        regime, regime_ko = "MILD_DN", "소폭 하락 마감"
+    else:
+        regime, regime_ko = "MIXED", "혼조 마감"
+
+    # 한국 증시 영향 스코어 (EWY + SOX + 원달러)
+    kr_score = 0
+    if ewy_c is not None:
+        kr_score += 2 if ewy_c >= 0.8 else (1 if ewy_c >= 0.2 else (-2 if ewy_c <= -0.8 else (-1 if ewy_c <= -0.2 else 0)))
+    if sox_c is not None:
+        kr_score += 2 if sox_c >= 1.5 else (1 if sox_c >= 0.4 else (-2 if sox_c <= -1.5 else (-1 if sox_c <= -0.4 else 0)))
+    if krw_c is not None:
+        kr_score += 1 if krw_c <= -0.3 else (-1 if krw_c >= 0.4 else 0)
+
+    if kr_score >= 2:
+        kr_impact, kr_impact_ko = "POS", "한국장 우호적 · 반도체/외인 수급 기대"
+    elif kr_score <= -2:
+        kr_impact, kr_impact_ko = "NEG", "한국장 경계 · 변동성·약세 출발 유의"
+    else:
+        kr_impact, kr_impact_ko = "NEU", "한국장 중립 · 업종/종목 차별화 예상"
+
+    bullets = []
+
+    # 1) 미국 주요 지수 요약
+    b1 = (
+        f"뉴욕증시는 S&P 500 {_pct(spx_c)}, 나스닥 {_pct(ixic_c)}, 다우 {_pct(dji.get('chg1d'))}로 "
+        f"{regime_ko}했습니다."
+    )
+    if sox_c is not None:
+        sox_tone = "강하게 반등하며 기술주 투자심리를 견인했습니다." if sox_c >= 1.5 else (
+            "상승 흐름을 보였습니다." if sox_c > 0.2 else (
+                "약세를 보이며 반도체 섹터에 부담을 주었습니다." if sox_c <= -1.5 else "보합권 흐름을 나타냈습니다."
+            )
+        )
+        b1 += f" 필라델피아 반도체(SOX)는 {_pct(sox_c)}로 {sox_tone}"
+    bullets.append({"tag": "지수 마감", "text": b1})
+
+    # 2) 한국 증시 개장 영향 체크
+    kr_parts = []
+    if ewy.get("price") is not None:
+        kr_parts.append(f"MSCI 한국 ETF(EWY) {_pct(ewy_c)}")
+    if krw.get("price") is not None:
+        kr_parts.append(f"원/달러 환율 {krw['price']:,.1f}원({_pct(krw_c)})")
+    if sox_c is not None:
+        kr_parts.append(f"SOX {_pct(sox_c)}")
+    if kr_parts:
+        bullets.append({
+            "tag": "한국장 영향",
+            "text": f"{' · '.join(kr_parts)} 흐름으로, 금일 국내 증시는 '{kr_impact_ko}' 여건입니다.",
+        })
+
+    # 3) 금리 · VIX · 달러 · 유가 · 심리
+    mac_parts = []
+    if tnx.get("price") is not None:
+        bp = round((tnx.get("absChg") or 0) * 100)
+        mac_parts.append(f"미 10년물 금리 {tnx['price']:.2f}%({bp:+d}bp)")
+    if vix.get("price") is not None:
+        mac_parts.append(f"VIX {vix['price']:.2f}({_pct(vix.get('chg1d'))})")
+    if dxy.get("price") is not None:
+        mac_parts.append(f"달러인덱스 {dxy['price']:.2f}({_pct(dxy.get('chg1d'))})")
+    if wti.get("price") is not None:
+        mac_parts.append(f"WTI 유가 ${wti['price']:.2f}({_pct(wti.get('chg1d'))})")
+    b3 = ", ".join(mac_parts) + "." if mac_parts else ""
+    if fear_greed and fear_greed.get("score") is not None:
+        b3 += f" CNN 공포·탐욕 지수는 {fear_greed['score']:.0f}점({fear_greed['ratingKo']}) 구간입니다."
+    if b3.strip():
+        bullets.append({"tag": "거시·심리", "text": b3.strip()})
+
+    # 4) 주도 섹터 & 빅테크/반도체 핵심 종목
+    valid_etfs = [e for e in sector_etfs if e.get("chg1d") is not None]
+    valid_etfs.sort(key=lambda x: x["chg1d"], reverse=True)
+    top_sec = ", ".join(f"{e['label']}({_pct(e['chg1d'])})" for e in valid_etfs[:3])
+    bot_sec = ", ".join(f"{e['label']}({_pct(e['chg1d'])})" for e in valid_etfs[-2:]) if len(valid_etfs) >= 4 else ""
+
+    valid_bt = [b for b in big_tech if b.get("chg1d") is not None]
+    valid_bt.sort(key=lambda x: x["chg1d"], reverse=True)
+    top_bt = ", ".join(f"{b['symbol']}({_pct(b['chg1d'])})" for b in valid_bt[:3])
+    bot_bt = ", ".join(f"{b['symbol']}({_pct(b['chg1d'])})" for b in valid_bt[-2:] if b["chg1d"] < 0)
+
+    b4_parts = []
+    if top_sec:
+        b4_parts.append(f"강세 섹터는 {top_sec}")
+    if bot_sec:
+        b4_parts.append(f"상대 약세는 {bot_sec}")
+    if top_bt:
+        b4_parts.append(f"빅테크·반도체 강세 주도주는 {top_bt}")
+    if bot_bt:
+        b4_parts.append(f"약세 종목은 {bot_bt}")
+    if b4_parts:
+        bullets.append({"tag": "섹터·주도주", "text": " / ".join(b4_parts) + "입니다."})
+
+    return {
+        "regime": regime,
+        "regimeKo": regime_ko,
+        "krImpact": kr_impact,
+        "krImpactKo": kr_impact_ko,
+        "bullets": bullets,
+    }
 
 
 def classify_us_signal(chg1d, rvol):
@@ -272,18 +564,45 @@ def collect_us_market(here=HERE):
     for s in momo_pool[:35]:
         cand_map.setdefault(s["symbol"], s)
 
-    etf_syms = sorted({x[0] for x in BENCHMARK_ETFS} | {x[0] for x in SECTOR_ETFS})
-    all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms))
+    # 빅테크 M7 + 반도체 핵심 11종은 항상 cand_map 및 Yahoo 조회 대상에 포함
+    uni_by_sym = {s["symbol"]: s for s in universe}
+    for sym, _ko, _grp in BIG_TECH_CORE:
+        if sym in uni_by_sym:
+            cand_map.setdefault(sym, uni_by_sym[sym])
 
-    print(f"[2/3] Yahoo Finance 일봉 조회 중 (ETF {len(etf_syms)}개 + 핵심 종목 {len(cand_map)}개)...")
+    etf_syms = sorted({x[0] for x in BENCHMARK_ETFS} | {x[0] for x in SECTOR_ETFS})
+    morning_syms = sorted(
+        {x[0] for x in MAJOR_INDICES}
+        | {x[0] for x in MACRO_INDICATORS}
+        | {x[0] for x in BIG_TECH_CORE}
+    )
+    all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms) | set(morning_syms))
+
+    print(f"[2/3] Yahoo Finance 일봉 + CNN 공포탐욕 + 모닝뉴스 병렬 조회 중 (총 {len(all_fetch_syms)}티커)...")
     yahoo_stats = {}
-    with ThreadPoolExecutor(max_workers=14) as ex:
+    fear_greed = None
+    morning_news = []
+    with ThreadPoolExecutor(max_workers=16) as ex:
+        fut_fg = ex.submit(fetch_cnn_fear_greed)
+        fut_news = ex.submit(fetch_us_morning_news, 10)
         futs = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
         for fut in as_completed(futs):
             sym, st = fut.result()
             if st:
                 yahoo_stats[sym] = st
-    print(f"  - 일봉 지표(RVOL·5일·1개월) 조회 성공: {len(yahoo_stats)} / {len(all_fetch_syms)}개")
+        try:
+            fear_greed = fut_fg.result()
+        except Exception:
+            fear_greed = None
+        try:
+            morning_news = fut_news.result() or []
+        except Exception:
+            morning_news = []
+    print(
+        f"  - Yahoo 일봉 조회: {len(yahoo_stats)}/{len(all_fetch_syms)}개 · "
+        f"CNN 공포탐욕: {fear_greed['score'] if fear_greed else 'N/A'} · "
+        f"모닝뉴스: {len(morning_news)}건"
+    )
 
     # Yahoo 최신 거래일 종가/거래대금/등락률을 universe에 우선 반영 (조기폐장/장마감 직후 Nasdaq 지연 보정)
     for s in universe:
@@ -419,6 +738,65 @@ def collect_us_market(here=HERE):
     dist_cnt = sum(1 for x in stocks_out if x["signal"] == "DIST")
     surge_cnt = sum(1 for x in stocks_out if (x["rvol"] or 0) >= 1.5)
 
+    # 미국 모닝 브리핑 데이터 조립
+    major_indices_out = []
+    for sym, label, desc, tv_sym in MAJOR_INDICES:
+        st = yahoo_stats.get(sym) or {}
+        major_indices_out.append({
+            "symbol": sym,
+            "label": label,
+            "desc": desc,
+            "tvSymbol": tv_sym,
+            "price": st.get("price"),
+            "prevClose": st.get("prevClose"),
+            "absChg": st.get("absChg"),
+            "chg1d": st.get("chg1d"),
+            "chg5d": st.get("chg5d"),
+            "chg1m": st.get("chg1m"),
+            "tradeDate": st.get("tradeDate"),
+        })
+
+    macro_indicators_out = []
+    for sym, label, cat, unit, tv_sym, chg_mode in MACRO_INDICATORS:
+        st = yahoo_stats.get(sym) or {}
+        macro_indicators_out.append({
+            "symbol": sym,
+            "label": label,
+            "category": cat,
+            "unit": unit,
+            "tvSymbol": tv_sym,
+            "chgMode": chg_mode,
+            "price": st.get("price"),
+            "prevClose": st.get("prevClose"),
+            "absChg": st.get("absChg"),
+            "chg1d": st.get("chg1d"),
+            "chg5d": st.get("chg5d"),
+            "tradeDate": st.get("tradeDate"),
+        })
+
+    big_tech_out = []
+    for sym, ko_name, grp in BIG_TECH_CORE:
+        st = yahoo_stats.get(sym) or {}
+        base = uni_by_sym.get(sym) or {}
+        big_tech_out.append({
+            "symbol": sym,
+            "nameKo": ko_name,
+            "group": grp,
+            "price": st.get("price") or base.get("price"),
+            "chg1d": st.get("chg1d") if st.get("chg1d") is not None else base.get("chg1d"),
+            "chg5d": st.get("chg5d"),
+            "dollarVolB": st.get("dollarVolB") if st.get("dollarVolB") is not None else base.get("dollarVolB"),
+            "rvol": st.get("rvol"),
+        })
+
+    briefing_meta = build_morning_briefing(
+        major_indices_out,
+        macro_indicators_out,
+        fear_greed,
+        big_tech_out,
+        sector_etfs_out,
+    )
+
     payload = {
         "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "tradeDate": trade_date,
@@ -431,6 +809,18 @@ def collect_us_market(here=HERE):
             "accumCount": accum_cnt,
             "distCount": dist_cnt,
             "surgeCount": surge_cnt,
+        },
+        "morning": {
+            "regime": briefing_meta["regime"],
+            "regimeKo": briefing_meta["regimeKo"],
+            "krImpact": briefing_meta["krImpact"],
+            "krImpactKo": briefing_meta["krImpactKo"],
+            "bullets": briefing_meta["bullets"],
+            "majorIndices": major_indices_out,
+            "macroIndicators": macro_indicators_out,
+            "fearGreed": fear_greed,
+            "bigTech": big_tech_out,
+            "news": morning_news,
         },
     }
 
