@@ -5706,6 +5706,126 @@ def build_web_dashboard(here):
       cursor: pointer;
     }}
     .usm-link-btn:hover {{ background: #eff6ff; border-color: #93c5fd; }}
+    /* ===== 섹터 강도 보드 (SECTOR STRENGTH) ===== */
+    .usm-ss-badge {{
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }}
+    .usm-ss-toolbar {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 11px;
+    }}
+    .usm-ss-filters {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }}
+    .usm-ss-pill {{
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.12s;
+    }}
+    .usm-ss-pill:hover {{ border-color: #94a3b8; }}
+    .usm-ss-pill.active-all {{ background: #0f172a; color: #fff; border-color: #0f172a; }}
+    .usm-ss-pill.up {{ background: #fef2f2; color: #dc2626; border-color: #fecaca; }}
+    .usm-ss-pill.active-up {{ background: #dc2626; color: #fff; border-color: #dc2626; }}
+    .usm-ss-pill.dn {{ background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }}
+    .usm-ss-pill.active-dn {{ background: #2563eb; color: #fff; border-color: #2563eb; }}
+    .usm-ss-grid {{
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 7px;
+    }}
+    .usm-ss-tile {{
+      border-radius: 10px;
+      padding: 10px 10px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 82px;
+      border: 1px solid transparent;
+      transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+      user-select: none;
+    }}
+    .usm-ss-tile:hover {{ transform: translateY(-2px); box-shadow: 0 5px 14px rgba(15,23,42,0.12); filter: brightness(0.98); }}
+    .usm-ss-tname {{
+      font-size: 11.5px;
+      font-weight: 900;
+      line-height: 1.25;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      word-break: keep-all;
+    }}
+    .usm-ss-tpct {{
+      font-size: 15.5px;
+      font-weight: 900;
+      margin: 4px 0 2px;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }}
+    .usm-ss-tcnt {{
+      font-size: 10px;
+      font-weight: 700;
+      opacity: 0.82;
+    }}
+    .usm-ss-tile.lvl-u4 {{ background: #ef4444; color: #fff; border-color: #dc2626; }}
+    .usm-ss-tile.lvl-u3 {{ background: #f87171; color: #fff; border-color: #ef4444; }}
+    .usm-ss-tile.lvl-u2 {{ background: #fca5a5; color: #7f1d1d; border-color: #f87171; }}
+    .usm-ss-tile.lvl-u1 {{ background: #fecaca; color: #991b1b; border-color: #fca5a5; }}
+    .usm-ss-tile.lvl-u0 {{ background: #fff1f2; color: #be123c; border-color: #fecdd3; }}
+    .usm-ss-tile.lvl-flat {{ background: #f8fafc; color: #475569; border-color: #e2e8f0; }}
+    .usm-ss-tile.lvl-d0 {{ background: #eff6ff; color: #1d4ed8; border-color: #dbeafe; }}
+    .usm-ss-tile.lvl-d1 {{ background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }}
+    .usm-ss-tile.lvl-d2 {{ background: #93c5fd; color: #1e3a8a; border-color: #60a5fa; }}
+    .usm-ss-tile.lvl-d3 {{ background: #3b82f6; color: #fff; border-color: #2563eb; }}
+    .usm-ss-tile.lvl-d4 {{ background: #1d4ed8; color: #fff; border-color: #1e40af; }}
+    .usm-kr-box {{
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }}
+    .usm-kr-title {{ font-size: 11.5px; font-weight: 900; color: #065f46; margin-bottom: 6px; }}
+    .usm-kr-chips {{ display: flex; flex-wrap: wrap; gap: 6px; }}
+    .usm-kr-chip {{
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }}
+    .usm-kr-chip:hover {{ background: #059669; color: #fff; border-color: #059669; }}
+    @media (max-width: 1280px) {{
+      .usm-ss-grid {{ grid-template-columns: repeat(5, minmax(0, 1fr)); }}
+    }}
     @media (max-width: 1150px) {{
       .us-etf-grid {{ grid-template-columns: repeat(4, minmax(0, 1fr)); }}
       .usm-idx-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
@@ -5716,6 +5836,7 @@ def build_web_dashboard(here):
       .us-idx-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .us-etf-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
       .usm-two-col {{ grid-template-columns: 1fr; }}
+      .usm-ss-grid {{ grid-template-columns: repeat(4, minmax(0, 1fr)); }}
     }}
     @media (max-width: 640px) {{
       .us-idx-grid {{ grid-template-columns: 1fr; }}
@@ -5736,6 +5857,10 @@ def build_web_dashboard(here):
       .usm-idx-val {{ font-size: 17px; }}
       .usm-macro-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }}
       .usm-bt-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }}
+      .usm-ss-grid {{ grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }}
+      .usm-ss-tile {{ min-height: 74px; padding: 8px 8px 7px; }}
+      .usm-ss-tname {{ font-size: 11px; }}
+      .usm-ss-tpct {{ font-size: 13.5px; }}
       .usm-card {{ padding: 12px; }}
       .usm-news-item {{ padding: 10px; }}
       .usm-news-title {{ font-size: 13px; }}
@@ -6080,6 +6205,15 @@ def build_web_dashboard(here):
 
   <div class="tooltip-box" id="tooltipBox"></div>
   <div class="live-quote-box" id="liveQuoteBox"></div>
+  <div class="wl-modal-backdrop" id="usThemeModal" onclick="if(event.target===this)closeUsThemeModal()">
+    <div class="wl-modal" style="max-width:560px;">
+      <div class="wl-modal-head">
+        <div class="wl-modal-title" id="usThemeModalTitle">테마 상세</div>
+        <button class="wl-modal-close" onclick="closeUsThemeModal()" title="닫기">✕</button>
+      </div>
+      <div class="wl-modal-body" id="usThemeModalBody" style="max-height:76vh; overflow-y:auto;"></div>
+    </div>
+  </div>
   <div class="wl-modal-backdrop" id="watchlistModal" onclick="if(event.target===this)closeWatchlistModal()">
     <div class="wl-modal">
       <div class="wl-modal-head">
@@ -6765,6 +6899,193 @@ def build_web_dashboard(here):
     let currentUsTab = 'MORNING'; // 'MORNING' | 'VOLUME' | 'SURGE' | 'SECTOR'
     let currentUsSector = '';
     let currentUsEtfPeriod = '1D'; // '1D' | '5D' | '1M'
+    let currentUsSsFilter = 'ALL'; // 'ALL' | 'UP' | 'DN'
+    let currentUsSsSort = 'ABS'; // 'ABS' | 'DESC' | 'ASC' | 'NAME'
+    let currentUsSsPeriod = '1D'; // '1D' | '5D'
+    let currentUsSsQuery = '';
+
+    function _usSsLevelClass(v) {{
+      if (v === null || v === undefined || isNaN(Number(v))) return 'lvl-flat';
+      const n = Number(v);
+      if (n >= 6.0) return 'lvl-u4';
+      if (n >= 3.5) return 'lvl-u3';
+      if (n >= 1.8) return 'lvl-u2';
+      if (n >= 0.5) return 'lvl-u1';
+      if (n > 0) return 'lvl-u0';
+      if (n === 0) return 'lvl-flat';
+      if (n > -0.5) return 'lvl-d0';
+      if (n > -1.8) return 'lvl-d1';
+      if (n > -3.5) return 'lvl-d2';
+      if (n > -6.0) return 'lvl-d3';
+      return 'lvl-d4';
+    }}
+
+    function setUsSsFilter(f) {{ currentUsSsFilter = f || 'ALL'; renderUsSectorStrengthBoard(); }}
+    function setUsSsPeriod(p) {{ currentUsSsPeriod = p || '1D'; renderUsSectorStrengthBoard(); }}
+    function setUsSsSort(s) {{ currentUsSsSort = s || 'ABS'; renderUsSectorStrengthBoard(); }}
+    function setUsSsQuery(q) {{ currentUsSsQuery = q || ''; renderUsSectorStrengthBoard(); }}
+
+    function _findKrCodeByName(name) {{
+      if (!name) return null;
+      const target = String(name).trim().replace(/\\s+/g, '');
+      const markets = ['KOSPI', 'KOSDAQ'];
+      for (const mk of markets) {{
+        const sheets = (DATA && DATA[mk]) ? DATA[mk] : [];
+        for (const sh of sheets) {{
+          for (const row of (sh.rows || [])) {{
+            const nm = String(row['종목명'] || '').trim().replace(/\\s+/g, '');
+            const cd = String(row['종목코드'] || '').trim();
+            if (nm === target && /^\\d{{6}}$/.test(cd)) return cd;
+          }}
+        }}
+      }}
+      if (FLOW_DATA && FLOW_DATA.daily) {{
+        const latestDay = (FLOW_DATA.dailyDates || [])[0];
+        const dayObj = latestDay ? FLOW_DATA.daily[latestDay] : null;
+        if (dayObj) {{
+          for (const inv of Object.keys(dayObj)) {{
+            for (const side of ['buy', 'sell']) {{
+              for (const it of (dayObj[inv][side] || [])) {{
+                if (String(it.name || '').trim().replace(/\\s+/g, '') === target && it.code) return it.code;
+              }}
+            }}
+          }}
+        }}
+      }}
+      return null;
+    }}
+
+    function openUsThemeModal(themeId) {{
+      const list = ((US_DATA && US_DATA.morning && US_DATA.morning.sectorStrength) || []);
+      const item = list.find(x => x.id === themeId);
+      if (!item) return;
+      const modal = document.getElementById('usThemeModal');
+      const titleEl = document.getElementById('usThemeModalTitle');
+      const bodyEl = document.getElementById('usThemeModalBody');
+      if (!modal || !titleEl || !bodyEl) return;
+
+      titleEl.innerHTML = `${{item.icon || '📊'}} ${{escapeHtml(item.name)}} <span class="${{_usPctCls(item.avgChg1d)}}" style="margin-left:6px; font-size:14px;">1일 ${{_usFmtPct(item.avgChg1d)}}</span> <span style="font-size:12px; color:#64748b; font-weight:700; margin-left:4px;">(5일 ${{_usFmtPct(item.avgChg5d)}})</span>`;
+
+      const krList = String(item.krStocks || '').split('·').map(s => s.trim()).filter(Boolean);
+      const krHtml = krList.length ? `
+        <div class="usm-kr-box">
+          <div class="usm-kr-title">🇰🇷 한국 증시 연동 · 국내 대표 관련주 (클릭 시 네이버 금융 바로가기)</div>
+          <div class="usm-kr-chips">
+            ${{krList.map(kn => {{
+              const cleanName = kn.replace(/\\(.*?\\)/g, '').trim();
+              const cd = _findKrCodeByName(cleanName);
+              const href = cd
+                ? `https://finance.naver.com/item/main.naver?code=${{cd}}`
+                : `https://finance.naver.com/search/searchList.naver?query=${{encodeURIComponent(cleanName)}}`;
+              return `<a class="usm-kr-chip" href="${{href}}" target="_blank" rel="noopener noreferrer">${{escapeHtml(kn)}} ↗</a>`;
+            }}).join('')}}
+          </div>
+        </div>
+      ` : '';
+
+      const rowsHtml = (item.stocks || []).map((s, idx) => `
+        <a class="usm-mini-row" href="https://www.tradingview.com/symbols/${{s.symbol}}/" target="_blank" rel="noopener noreferrer">
+          <span style="display:flex; align-items:center; gap:7px; min-width:0;">
+            <span style="font-size:11px; color:#64748b; font-weight:800; width:16px;">${{idx + 1}}</span>
+            <b style="color:#1d4ed8;">${{s.symbol}}</b>
+            <span style="font-weight:700; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${{escapeHtml(s.nameKo || '')}}</span>
+          </span>
+          <span style="display:flex; align-items:center; gap:10px; flex-shrink:0; font-variant-numeric:tabular-nums;">
+            <span style="font-size:12px; font-weight:700; color:#334155;">$${{s.price ? Number(s.price).toFixed(2) : '-'}}</span>
+            <span style="font-size:11px; color:#64748b;">5일 <b class="${{_usPctCls(s.chg5d)}}">${{_usFmtPct(s.chg5d)}}</b></span>
+            <b class="${{_usPctCls(s.chg1d)}}" style="min-width:58px; text-align:right; font-size:13px;">${{_usFmtPct(s.chg1d)}}</b>
+          </span>
+        </a>
+      `).join('');
+
+      bodyEl.innerHTML = `
+        ${{krHtml}}
+        <div style="font-size:12px; font-weight:900; color:#0f172a; margin-bottom:7px; display:flex; justify-content:space-between;">
+          <span>🇺🇸 미국 테마 구성 종목 (${{(item.stocks || []).length}}종목 · 상승 ${{item.upCount || 0}} / 하락 ${{item.downCount || 0}})</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">클릭 → TradingView</span>
+        </div>
+        <div class="usm-mini-list">${{rowsHtml}}</div>
+      `;
+      modal.classList.add('show');
+    }}
+
+    function closeUsThemeModal() {{
+      const modal = document.getElementById('usThemeModal');
+      if (modal) modal.classList.remove('show');
+    }}
+
+    function renderUsSectorStrengthBoard() {{
+      const host = document.getElementById('usmSectorStrengthBody');
+      if (!host) return;
+      const all = ((US_DATA && US_DATA.morning && US_DATA.morning.sectorStrength) || []);
+      if (!all.length) {{
+        host.innerHTML = `<div style="padding:18px; text-align:center; color:#94a3b8; font-size:13px;">섹터 강도 데이터가 없습니다.</div>`;
+        return;
+      }}
+      const fld = currentUsSsPeriod === '5D' ? 'avgChg5d' : 'avgChg1d';
+      const upAll = all.filter(x => (Number(x[fld]) || 0) > 0).length;
+      const dnAll = all.filter(x => (Number(x[fld]) || 0) < 0).length;
+
+      const q = (currentUsSsQuery || '').trim().toLowerCase();
+      let list = all.filter(x => {{
+        const v = Number(x[fld]) || 0;
+        if (currentUsSsFilter === 'UP' && v <= 0) return false;
+        if (currentUsSsFilter === 'DN' && v >= 0) return false;
+        if (q) {{
+          const hay = `${{x.name}} ${{x.krStocks || ''}} ${{(x.stocks || []).map(s => s.symbol + ' ' + s.nameKo).join(' ')}}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }}
+        return true;
+      }});
+
+      list.sort((a, b) => {{
+        const va = Number(a[fld]) || 0;
+        const vb = Number(b[fld]) || 0;
+        if (currentUsSsSort === 'DESC') return vb - va;
+        if (currentUsSsSort === 'ASC') return va - vb;
+        if (currentUsSsSort === 'NAME') return String(a.name).localeCompare(String(b.name), 'ko');
+        return Math.abs(vb) - Math.abs(va);
+      }});
+
+      const toolbarHtml = `
+        <div class="usm-ss-toolbar">
+          <div class="usm-ss-filters">
+            <button class="usm-ss-pill ${{currentUsSsFilter === 'ALL' ? 'active-all' : ''}}" onclick="setUsSsFilter('ALL')">전체 ${{all.length}}</button>
+            <button class="usm-ss-pill up ${{currentUsSsFilter === 'UP' ? 'active-up' : ''}}" onclick="setUsSsFilter('UP')">▲ 상승 ${{upAll}}</button>
+            <button class="usm-ss-pill dn ${{currentUsSsFilter === 'DN' ? 'active-dn' : ''}}" onclick="setUsSsFilter('DN')">▼ 하락 ${{dnAll}}</button>
+            <div class="flow-mode-group" style="margin-left:2px;">
+              <button class="flow-mode-btn ${{currentUsSsPeriod === '1D' ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setUsSsPeriod('1D')">1일</button>
+              <button class="flow-mode-btn ${{currentUsSsPeriod === '5D' ? 'active' : ''}}" style="padding:3px 9px; font-size:11.5px;" onclick="setUsSsPeriod('5D')">5일</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <input type="text" class="search-input" style="width:155px; padding:4px 9px; font-size:12px;" placeholder="🔍 테마·한국종목 검색" value="${{escapeHtml(currentUsSsQuery)}}" oninput="setUsSsQuery(this.value)" />
+            <select class="select-box" style="padding:4px 8px; font-size:12px; font-weight:700;" onchange="setUsSsSort(this.value)">
+              <option value="ABS" ${{currentUsSsSort === 'ABS' ? 'selected' : ''}}>등락폭 큰 순</option>
+              <option value="DESC" ${{currentUsSsSort === 'DESC' ? 'selected' : ''}}>상승률 높은 순</option>
+              <option value="ASC" ${{currentUsSsSort === 'ASC' ? 'selected' : ''}}>하락률 큰 순</option>
+              <option value="NAME" ${{currentUsSsSort === 'NAME' ? 'selected' : ''}}>가나다 순</option>
+            </select>
+          </div>
+        </div>
+      `;
+
+      const gridHtml = list.length ? `
+        <div class="usm-ss-grid">
+          ${{list.map(x => {{
+            const v = x[fld];
+            const lvl = _usSsLevelClass(v);
+            return `<div class="usm-ss-tile ${{lvl}}" onclick="openUsThemeModal('${{x.id}}')" title="${{escapeHtml(x.name)}} · 한국 관련주: ${{escapeHtml(x.krStocks || '-')}}">
+              <div class="usm-ss-tname"><span>${{x.icon || '📊'}}</span><span>${{escapeHtml(x.name)}}</span></div>
+              <div class="usm-ss-tpct">${{_usFmtPct(v)}}</div>
+              <div class="usm-ss-tcnt">${{x.count}}종목 ›</div>
+            </div>`;
+          }}).join('')}}
+        </div>
+      ` : `<div style="padding:22px; text-align:center; color:#94a3b8; font-size:13px;">검색 조건에 맞는 테마 섹터가 없습니다.</div>`;
+
+      host.innerHTML = toolbarHtml + gridHtml;
+    }}
 
     function populateUsSectorSelect() {{
       const sel = document.getElementById('usSectorSelect');
@@ -6913,6 +7234,7 @@ def build_web_dashboard(here):
             <div class="usm-hero-pills">
               <span class="usm-pill ${{regCls}}">📈 ${{escapeHtml(m.regimeKo || '마감 요약')}}</span>
               <span class="usm-pill ${{krCls}}">🇰🇷 ${{escapeHtml(m.krImpactKo || '한국장 중립')}}</span>
+              <span class="usm-pill neu" style="cursor:pointer;" onclick="const el=document.getElementById('usmSectorStrengthCard'); if(el) el.scrollIntoView({{behavior:'smooth', block:'start'}});">🧱 섹터 강도 보드 (${{(m.sectorStrength || []).length}}) ↓</span>
             </div>
           </div>
           <div class="usm-bullets">
@@ -7141,7 +7463,19 @@ def build_web_dashboard(here):
         </div>
       `;
 
-      wrap.innerHTML = heroHtml + idxHtml + macroSplitHtml + btHtml + secAndStocksHtml + newsHtml;
+      // 3.5) SECTOR STRENGTH · 미국 세부 테마 섹터 강도 보드 (한국장 연동)
+      const ssCount = (m.sectorStrength || []).length;
+      const sectorStrengthHtml = `
+        <div class="usm-card" id="usmSectorStrengthCard">
+          <div class="usm-sec-title" style="margin-bottom:10px;">
+            <span><span class="usm-ss-badge">SECTOR STRENGTH</span>섹터 강도 보드 <span style="font-size:11.5px; color:#64748b; font-weight:600;">전체 ${{ssCount}}개 · 셀 클릭 시 미국 종목 & 🇰🇷 한국 관련주 상세</span></span>
+          </div>
+          <div id="usmSectorStrengthBody"></div>
+        </div>
+      `;
+
+      wrap.innerHTML = heroHtml + idxHtml + macroSplitHtml + sectorStrengthHtml + btHtml + secAndStocksHtml + newsHtml;
+      renderUsSectorStrengthBoard();
     }}
 
     function renderUsMarketView() {{

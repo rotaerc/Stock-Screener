@@ -114,6 +114,156 @@ FEAR_GREED_KO = {
     "extreme greed": "극단적 탐욕",
 }
 
+# 미국 세부 테마·섹터 강도 보드 (48개 테마 · 한국 증시 연동 관련주 매핑 포함)
+# 각 항목: (id, 테마명, 아이콘, 한국 증시 연관 업종/대표주, [(미국티커, 한글/약칭), ...])
+THEME_BASKETS = [
+    ("quantum", "양자컴퓨팅", "⚛️", "아이윈플러스 · 케이씨에스 · 우리로 · 코위버", [
+        ("IONQ", "아이온큐"), ("RGTI", "리게티"), ("QBTS", "디웨이브"), ("QUBT", "퀀텀컴퓨팅"),
+    ]),
+    ("space", "우주항공산업", "🚀", "한화에어로스페이스 · 한국항공우주 · 쎄트렉아이 · AP위성", [
+        ("RKLB", "로켓랩"), ("ASTS", "AST스페이스"), ("LUNR", "인튜이티브머신"), ("PL", "플래닛랩스"), ("BA", "보잉"),
+    ]),
+    ("battery_ss", "2차전지(전고체)", "🔋", "삼성SDI · 에코프로비엠 · 이수스페셜티 · 레이크머티리얼즈", [
+        ("QS", "퀀텀스케이프"), ("ALB", "앨버말"), ("SQM", "SQM"), ("ENVX", "이노빅스"), ("SLDP", "솔리드파워"),
+    ]),
+    ("ess", "ESS(전력저장장치)", "⚡", "LG에너지솔루션 · 삼성SDI · 서진시스템 · 한중엔시에스", [
+        ("FLNC", "플루언스"), ("EOSE", "이오스에너지"), ("ENPH", "엔페이즈"), ("SEDG", "솔라엣지"), ("TSLA", "테슬라"), ("STEM", "스템"),
+    ]),
+    ("memory", "메모리/SSD/HDD", "💾", "삼성전자 · SK하이닉스 · 한미반도체 · 파두", [
+        ("MU", "마이크론"), ("WDC", "웨스턴디지털"), ("STX", "시게이트"), ("PSTG", "퓨어스토리지"), ("SIMO", "실리콘모션"),
+    ]),
+    ("semicon_core", "반도체 (대표)", "🧩", "삼성전자 · SK하이닉스 · 리노공업 · DB하이텍", [
+        ("NVDA", "엔비디아"), ("AVGO", "브로드컴"), ("AMD", "AMD"), ("TSM", "TSMC"), ("MU", "마이크론"), ("QCOM", "퀄컴"), ("TXN", "텍사스인스트루먼트"),
+    ]),
+    ("semi_equip", "반도체 장비", "🛠️", "한미반도체 · HPSP · 주성엔지니어링 · 원익IPS · 유진테크", [
+        ("ASML", "ASML"), ("AMAT", "어플라이드"), ("LRCX", "램리서치"), ("KLAC", "KLA"), ("TER", "테라다인"), ("ENTG", "인테그리스"),
+    ]),
+    ("foundry", "파운드리/후공정", "🏭", "삼성전자 · DB하이텍 · 하나마이크론 · 두산테스나", [
+        ("TSM", "TSMC"), ("INTC", "인텔"), ("GFS", "글로벌파운드리"), ("UMC", "UMC"), ("AMKR", "앰코테크"),
+    ]),
+    ("system_semi", "시스템 반도체", "🧠", "리노공업 · 가온칩스 · 에이디테크놀로지 · 제주반도체", [
+        ("NVDA", "엔비디아"), ("AMD", "AMD"), ("ARM", "ARM"), ("MRVL", "마벨"), ("QCOM", "퀄컴"), ("CRDO", "크레도"),
+    ]),
+    ("power_semi", "전력반도체", "🔌", "DB하이텍 · KEC · 시지트로닉스 · RFHIC", [
+        ("ON", "온세미"), ("NXPI", "NXP"), ("STM", "ST마이크로"), ("MCHP", "마이크로칩"), ("MPWR", "모놀리식파워"), ("ADI", "아나로그디바이스"),
+    ]),
+    ("glass_sub", "유리 기판", "🪟", "SKC · 필옵틱스 · 와이씨켐 · 제이앤티씨 · HB테크놀러지", [
+        ("GLW", "코닝"), ("AMKR", "앰코테크"), ("INTC", "인텔"),
+    ]),
+    ("optical", "광통신", "🔦", "오이솔루션 · 대한광통신 · 쏠리드 · 이수페타시스", [
+        ("COHR", "코히런트"), ("LITE", "루멘텀"), ("CIEN", "시에나"), ("AAOI", "어플라이드옵토"), ("FN", "파브리넷"), ("GLW", "코닝"),
+    ]),
+    ("cooling", "냉각시스템/열관리", "❄️", "워트 · GST · 유니셈 · 한중엔시에스 · LG전자", [
+        ("VRT", "버티브"), ("MOD", "모딘"), ("NVT", "엔벤트"), ("TT", "트레인"), ("CARR", "캐리어"), ("JCI", "존슨컨트롤즈"),
+    ]),
+    ("power_infra", "전력인프라/변압기", "🏗️", "HD현대일렉트릭 · 효성중공업 · LS ELECTRIC · 산일전기", [
+        ("ETN", "이튼"), ("GEV", "GE버노바"), ("VRT", "버티브"), ("PWR", "콴타서비스"), ("HUBB", "허벨"),
+    ]),
+    ("nuclear", "원자력/SMR", "☢️", "두산에너빌리티 · 현대건설 · 한전기술 · 우진 · 우리기술", [
+        ("CEG", "컨스텔레이션"), ("VST", "비스트라"), ("SMR", "뉴스케일파워"), ("OKLO", "오클로"), ("TLN", "탈렌에너지"), ("GEV", "GE버노바"),
+    ]),
+    ("uranium", "우라늄", "🧪", "두산에너빌리티 · 한전KPS · 보성파워텍", [
+        ("CCJ", "카메코"), ("UEC", "우라늄에너지"), ("UUUU", "에너지퓨얼스"), ("NXE", "넥스젠"), ("DNN", "데니슨마인즈"),
+    ]),
+    ("fuel_cell", "연료전지/수소", "💧", "두산퓨얼셀 · 에스퓨얼셀 · 범한퓨얼셀 · 일진하이솔루스", [
+        ("BE", "블룸에너지"), ("PLUG", "플러그파워"), ("FCEL", "퓨얼셀에너지"), ("BLDP", "발라드파워"),
+    ]),
+    ("renewable", "신재생/태양광", "☀️", "한화솔루션 · OCI홀딩스 · HD현대에너지솔루션", [
+        ("FSLR", "퍼스트솔라"), ("NXT", "넥스트래커"), ("ENPH", "엔페이즈"), ("RUN", "선런"), ("CSIQ", "캐네디언솔라"), ("SHLS", "숄스"),
+    ]),
+    ("wind", "풍력에너지", "🌬️", "씨에스윈드 · SK오션플랜트 · 씨에스베어링 · 유니슨", [
+        ("GEV", "GE버노바"), ("NEE", "넥스트에라"), ("AES", "AES"), ("CWEN", "클리어웨이"),
+    ]),
+    ("robot", "로봇/스마트팩토리", "🤖", "레인보우로보틱스 · 두산로보틱스 · 에스피지 · 로보티즈", [
+        ("ISRG", "인튜이티브서지컬"), ("SYM", "심보틱"), ("ROK", "로크웰"), ("SERV", "서브로보틱스"), ("TER", "테라다인"), ("PATH", "유아이패스"),
+    ]),
+    ("autonomy", "자율주행", "🚘", "현대오토에버 · 퓨런티어 · 모바일어플라이언스 · 에스오에스랩", [
+        ("MBLY", "모빌아이"), ("AUR", "오로라"), ("TSLA", "테슬라"), ("OUST", "아우스터"), ("INVZ", "이노비즈"),
+    ]),
+    ("drone", "드론/UAM", "🚁", "한화시스템 · 베셀 · 제이씨현시스템 · 네온테크", [
+        ("JOBY", "조비에비에이션"), ("ACHR", "아처에비에이션"), ("AVAV", "에어로바이런먼트"), ("KTOS", "크라토스"), ("RCAT", "레드캣"),
+    ]),
+    ("defense", "방산/군수", "🛡️", "한화에어로스페이스 · LIG넥스원 · 현대로템 · 풍산", [
+        ("LMT", "록히드마틴"), ("RTX", "RTX"), ("NOC", "노스롭그루먼"), ("GD", "제너럴다이내믹스"), ("LHX", "L3해리스"), ("PLTR", "팔란티어"),
+    ]),
+    ("network", "네트워크/통신장비", "📡", "이수페타시스 · 다산네트웍스 · 케이엠더블유 · RFHIC", [
+        ("ANET", "아리스타"), ("CSCO", "시스코"), ("CIEN", "시에나"), ("ERIC", "에릭슨"), ("NOK", "노키아"), ("UI", "유비퀴티"),
+    ]),
+    ("ai_sw", "AI 소프트웨어", "💻", "NAVER · 더존비즈온 · 솔트룩스 · 코난테크놀로지 · 한글과컴퓨터", [
+        ("PLTR", "팔란티어"), ("MSFT", "마이크로소프트"), ("ORCL", "오라클"), ("CRM", "세일즈포스"), ("NOW", "서비스나우"), ("SNOW", "스노우플레이크"), ("APP", "앱러빈"),
+    ]),
+    ("ev", "전기차", "🚗", "현대차 · 기아 · LG에너지솔루션 · 포스코퓨처엠", [
+        ("TSLA", "테슬라"), ("RIVN", "리비안"), ("LCID", "루시드"), ("NIO", "니오"), ("LI", "리오토"),
+    ]),
+    ("auto", "전통 자동차", "🚙", "현대차 · 기아 · 현대모비스 · HL만도 · 에스엘", [
+        ("GM", "GM"), ("F", "포드"), ("TM", "도요타"), ("STLA", "스텔란티스"), ("HMC", "혼다"),
+    ]),
+    ("obesity", "비만치료제", "💉", "한미약품 · 펩트론 · 디앤디파마텍 · 일동제약 · 라파스", [
+        ("LLY", "일라이릴리"), ("NVO", "노보노디스크"), ("VKTX", "바이킹테라퓨틱스"), ("AMGN", "암젠"),
+    ]),
+    ("pharma", "제약/대형바이오", "💊", "삼성바이오로직스 · 셀트리온 · 유한양행 · 종근당", [
+        ("JNJ", "존슨앤존슨"), ("ABBV", "애브비"), ("MRK", "머크"), ("PFE", "화이자"), ("BMY", "브리스톨마이어스"),
+    ]),
+    ("biotech", "바이오텍/신약", "🧬", "알테오젠 · HLB · 리가켐바이오 · 에이비엘바이오 · 올릭스", [
+        ("VRTX", "버텍스"), ("REGN", "리제네론"), ("GILD", "길리어드"), ("MRNA", "모더나"), ("CRSP", "크리스퍼"), ("BIIB", "바이오젠"),
+    ]),
+    ("gold", "금 (Gold)", "🥇", "고려아연 · 엘컴텍 · 아이티센 · KRX금현물", [
+        ("NEM", "뉴몬트"), ("AEM", "애그니코이글"), ("WPM", "휘튼귀금속"), ("KGC", "킨로스골드"), ("AU", "앵글로골드"), ("GFI", "골드필즈"),
+    ]),
+    ("silver", "은 (Silver)", "🥈", "고려아연 · 영풍 · 풍산", [
+        ("PAAS", "팬아메리칸실버"), ("HL", "헤클라마이닝"), ("AG", "퍼스트마제스틱"), ("CDE", "쿠어마이닝"), ("EXK", "엔데버실버"),
+    ]),
+    ("copper_mine", "구리/광산", "⛏️", "풍산 · 대원전선 · 가온전선 · LS · 고려아연", [
+        ("FCX", "프리포트맥모란"), ("SCCO", "서던코퍼"), ("BHP", "BHP"), ("RIO", "리오틴토"), ("TECK", "텍리소시스"),
+    ]),
+    ("aluminum", "알루미늄", "🪙", "조일알미늄 · 삼아알미늄 · 남선알미늄 · 알멕", [
+        ("AA", "알코아"), ("CENX", "센추리알루미늄"), ("KALU", "카이저알루미늄"), ("CSTM", "콘스텔리움"),
+    ]),
+    ("steel", "철강", "🧱", "POSCO홀딩스 · 현대제철 · 세아제강 · 동국제강", [
+        ("NUE", "뉴코"), ("STLD", "스틸다이내믹스"), ("CLF", "클리블랜드클리프스"), ("MT", "아르셀로미탈"), ("RS", "릴라이언스"),
+    ]),
+    ("oil", "석유/정유", "🛢️", "S-Oil · SK이노베이션 · GS · 흥구석유 · 중앙에너비스", [
+        ("XOM", "엑슨모빌"), ("CVX", "셰브론"), ("OXY", "옥시덴탈"), ("SLB", "슐럼버거"), ("VLO", "발레로"), ("MPC", "마라톤페트롤리엄"),
+    ]),
+    ("crypto", "가상화폐/비트코인", "₿", "우리기술투자 · 한화투자증권 · 위지트 · 갤럭시아머니트리", [
+        ("MSTR", "스트래티지"), ("COIN", "코인베이스"), ("MARA", "마라홀딩스"), ("RIOT", "라이엇플랫폼"), ("CLSK", "클린스파크"),
+    ]),
+    ("sns_bigtech", "SNS/플랫폼", "📱", "NAVER · 카카오 · 크래프톤 · SOOP", [
+        ("META", "메타"), ("GOOGL", "알파벳"), ("RDDT", "레딧"), ("SNAP", "스냅"), ("PINS", "핀터레스트"), ("NFLX", "넷플릭스"),
+    ]),
+    ("payment", "결제/핀테크", "💳", "카카오페이 · NHN KCP · KG이니시스 · 다날", [
+        ("V", "비자"), ("MA", "마스터카드"), ("PYPL", "페이팔"), ("XYZ", "블록"), ("AXP", "아메리칸익스프레스"), ("SOFI", "소파이"),
+    ]),
+    ("bank", "은행/금융", "🏦", "KB금융 · 신한지주 · 하나금융지주 · 우리금융 · 메리츠금융", [
+        ("JPM", "JP모건"), ("BAC", "BOA"), ("WFC", "웰스파고"), ("C", "씨티그룹"), ("GS", "골드만삭스"), ("MS", "모건스탠리"),
+    ]),
+    ("machinery", "산업재/기계", "⚙️", "HD현대인프라코어 · 두산밥캣 · HD현대건설기계 · 진성티이씨", [
+        ("CAT", "캐터필러"), ("DE", "디어"), ("URI", "유나이티드렌탈"), ("CMI", "커민스"), ("PH", "파커하니핀"),
+    ]),
+    ("airline_casino", "항공/여행/카지노", "✈️", "대한항공 · 파라다이스 · 롯데관광개발 · 하나투어 · GKL", [
+        ("DAL", "델타항공"), ("UAL", "유나이티드항공"), ("LVS", "라스베이거스샌즈"), ("WYNN", "윈리조트"), ("MAR", "메리어트"), ("ABNB", "에어비앤비"),
+    ]),
+    ("cruise", "크루즈/조선해운", "🚢", "HD한국조선해양 · 한화오션 · 삼성중공업 · HMM", [
+        ("RCL", "로얄캐리비안"), ("CCL", "카니발"), ("NCLH", "노르웨이지안"), ("ZIM", "짐인테그레이티드"),
+    ]),
+    ("retail", "소매유통/소비재", "🛒", "이마트 · BGF리테일 · 신세계 · 쿠팡(CPNG)", [
+        ("WMT", "월마트"), ("COST", "코스트코"), ("AMZN", "아마존"), ("TGT", "타겟"), ("HD", "홈디포"), ("CPNG", "쿠팡"),
+    ]),
+    ("homebuild", "주택건설/건자재", "🏠", "현대건설 · GS건설 · DL이앤씨 · LX하우시스 · KCC", [
+        ("DHI", "DR호튼"), ("LEN", "레나"), ("PHM", "풀티그룹"), ("TOL", "톨브라더스"), ("NVR", "NVR"),
+    ]),
+    ("telecom", "통신", "📶", "SK텔레콤 · KT · LG유플러스", [
+        ("TMUS", "T모바일"), ("VZ", "버라이즌"), ("T", "AT&T"), ("CMCSA", "컴캐스트"),
+    ]),
+    ("china", "중국 빅테크/기업", "🐉", "아모레퍼시픽 · LG생활건강 · 호텔신라 · 코스맥스", [
+        ("BABA", "알리바바"), ("PDD", "핀둬둬"), ("JD", "징둥닷컴"), ("BIDU", "바이두"), ("TCOM", "트립닷컴"),
+    ]),
+    ("us_top10", "미국 시총 TOP10", "👑", "TIGER 미국S&P500 · KODEX 미국나스닥100", [
+        ("NVDA", "엔비디아"), ("AAPL", "애플"), ("MSFT", "마이크로소프트"), ("AMZN", "아마존"),
+        ("GOOGL", "알파벳"), ("META", "메타"), ("AVGO", "브로드컴"), ("TSLA", "테슬라"), ("LLY", "일라이릴리"), ("WMT", "월마트"),
+    ]),
+]
+
 
 def _num(x):
     if x is None:
@@ -571,10 +721,12 @@ def collect_us_market(here=HERE):
             cand_map.setdefault(sym, uni_by_sym[sym])
 
     etf_syms = sorted({x[0] for x in BENCHMARK_ETFS} | {x[0] for x in SECTOR_ETFS})
+    theme_syms = sorted({sym for _tid, _tnm, _ico, _kr, members in THEME_BASKETS for sym, _mnm in members})
     morning_syms = sorted(
         {x[0] for x in MAJOR_INDICES}
         | {x[0] for x in MACRO_INDICATORS}
         | {x[0] for x in BIG_TECH_CORE}
+        | set(theme_syms)
     )
     all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms) | set(morning_syms))
 
@@ -582,7 +734,7 @@ def collect_us_market(here=HERE):
     yahoo_stats = {}
     fear_greed = None
     morning_news = []
-    with ThreadPoolExecutor(max_workers=16) as ex:
+    with ThreadPoolExecutor(max_workers=20) as ex:
         fut_fg = ex.submit(fetch_cnn_fear_greed)
         fut_news = ex.submit(fetch_us_morning_news, 10)
         futs = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
@@ -789,6 +941,50 @@ def collect_us_market(here=HERE):
             "rvol": st.get("rvol"),
         })
 
+    # 48개 세부 테마·섹터 강도 보드 집계 (한국 증시 연동 테마 매핑 포함)
+    sector_strength_out = []
+    for tid, tname, ticon, kr_stocks, members in THEME_BASKETS:
+        mem_rows = []
+        for sym, mname in members:
+            st = yahoo_stats.get(sym) or {}
+            base = uni_by_sym.get(sym) or {}
+            price = st.get("price") or base.get("price")
+            chg1d = st.get("chg1d") if st.get("chg1d") is not None else base.get("chg1d")
+            chg5d = st.get("chg5d")
+            dv_b = st.get("dollarVolB") if st.get("dollarVolB") is not None else base.get("dollarVolB")
+            if price is None and chg1d is None:
+                continue
+            mem_rows.append({
+                "symbol": sym,
+                "nameKo": mname,
+                "price": price,
+                "chg1d": chg1d,
+                "chg5d": chg5d,
+                "dollarVolB": dv_b,
+            })
+        if not mem_rows:
+            continue
+        mem_rows.sort(key=lambda x: (x["chg1d"] if x["chg1d"] is not None else -999), reverse=True)
+        c1_vals = [x["chg1d"] for x in mem_rows if x["chg1d"] is not None]
+        c5_vals = [x["chg5d"] for x in mem_rows if x["chg5d"] is not None]
+        avg1d = round(sum(c1_vals) / len(c1_vals), 2) if c1_vals else 0.0
+        avg5d = round(sum(c5_vals) / len(c5_vals), 2) if c5_vals else None
+        up_cnt = sum(1 for v in c1_vals if v > 0)
+        dn_cnt = sum(1 for v in c1_vals if v < 0)
+        sector_strength_out.append({
+            "id": tid,
+            "name": tname,
+            "icon": ticon,
+            "krStocks": kr_stocks,
+            "avgChg1d": avg1d,
+            "avgChg5d": avg5d,
+            "upCount": up_cnt,
+            "downCount": dn_cnt,
+            "count": len(mem_rows),
+            "stocks": mem_rows,
+        })
+    sector_strength_out.sort(key=lambda x: abs(x["avgChg1d"]), reverse=True)
+
     briefing_meta = build_morning_briefing(
         major_indices_out,
         macro_indicators_out,
@@ -820,6 +1016,7 @@ def collect_us_market(here=HERE):
             "macroIndicators": macro_indicators_out,
             "fearGreed": fear_greed,
             "bigTech": big_tech_out,
+            "sectorStrength": sector_strength_out,
             "news": morning_news,
         },
     }
