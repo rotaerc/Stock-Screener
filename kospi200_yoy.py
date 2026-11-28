@@ -5300,6 +5300,9 @@ def build_web_dashboard(here):
       flex-direction: column;
       gap: 12px;
     }}
+    .us-body-wrap > *, .semi-body-wrap > * {{
+      flex-shrink: 0;
+    }}
     .us-idx-grid {{
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6432,7 +6435,9 @@ def build_web_dashboard(here):
     function populateUsSectorSelect() {{
       const sel = document.getElementById('usSectorSelect');
       if (!sel || !US_DATA) return;
-      const secs = (US_DATA.sectorFlows || []).map(x => ({{ k: x.sector, lbl: x.sectorKo || x.sector }}));
+      const secs = [{{ k: 'SEMICON', lbl: '반도체 (SMH)' }}].concat(
+        (US_DATA.sectorFlows || []).map(x => ({{ k: x.sector, lbl: x.sectorKo || x.sector }}))
+      );
       sel.innerHTML = `<option value="">전체 섹터</option>` + secs.map(s => `<option value="${{escapeHtml(s.k)}}">${{escapeHtml(s.lbl)}}</option>`).join('');
       sel.value = currentUsSector;
     }}
@@ -6461,11 +6466,15 @@ def build_web_dashboard(here):
       pushNavHistory();
     }}
 
-    function setUsSector(sec) {{
+    function setUsSector(sec, scrollToList = false) {{
       currentUsSector = (currentUsSector === sec && sec !== '') ? '' : (sec || '');
       const sel = document.getElementById('usSectorSelect');
       if (sel) sel.value = currentUsSector;
       renderUsMarketView();
+      if (scrollToList && currentUsSector) {{
+        const tblCard = document.getElementById('usStockTableCard');
+        if (tblCard) tblCard.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+      }}
     }}
 
     function setUsEtfPeriod(p) {{
@@ -6563,8 +6572,9 @@ def build_web_dashboard(here):
               const v = e[pField];
               const cls = (v === null || v === undefined) ? 'flat'
                 : (v >= 1.5 ? 'up2' : (v > 0.1 ? 'up1' : (v <= -1.5 ? 'dn2' : (v < -0.1 ? 'dn1' : 'flat'))));
-              const isAct = (currentUsSector && currentUsSector === e.sector) ? 'active' : '';
-              return `<div class="us-etf-tile ${{cls}} ${{isAct}}" onclick="setUsSector('${{e.sector}}')" title="${{e.symbol}} (${{e.label}}) · 1일 ${{_usFmtPct(e.chg1d)}} / 5일 ${{_usFmtPct(e.chg5d)}} / 1개월 ${{_usFmtPct(e.chg1m)}} · RVOL ${{e.rvol || '-'}}x">
+              const etfFilterKey = (e.symbol === 'SMH') ? 'SEMICON' : e.sector;
+              const isAct = (currentUsSector && currentUsSector === etfFilterKey) ? 'active' : '';
+              return `<div class="us-etf-tile ${{cls}} ${{isAct}}" onclick="setUsSector('${{etfFilterKey}}', true)" title="${{e.symbol}} (${{e.label}}) · 1일 ${{_usFmtPct(e.chg1d)}} / 5일 ${{_usFmtPct(e.chg5d)}} / 1개월 ${{_usFmtPct(e.chg1m)}} · RVOL ${{e.rvol || '-'}}x">
                 <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800;">
                   <span>${{e.symbol}}</span>
                   <span style="opacity:0.85;">${{escapeHtml(e.label)}}</span>
@@ -6616,7 +6626,11 @@ def build_web_dashboard(here):
       const q = (document.getElementById('usSearchInput') ? document.getElementById('usSearchInput').value : '').trim().toLowerCase();
       const sortBy = document.getElementById('usSortSelect') ? document.getElementById('usSortSelect').value : 'dollarVol';
       let list = stocks.filter(s => {{
-        if (currentUsSector && s.sector !== currentUsSector) return false;
+        if (currentUsSector === 'SEMICON') {{
+          if (!String(s.industry || '').toLowerCase().includes('semiconductor')) return false;
+        }} else if (currentUsSector && s.sector !== currentUsSector) {{
+          return false;
+        }}
         if (currentUsTab === 'SURGE') {{
           if (!s.signal && (s.rvol || 0) < 1.35) return false;
         }}
@@ -6664,7 +6678,7 @@ def build_web_dashboard(here):
       }}).join('');
 
       const tableCardHtml = `
-        <div class="pe-top50-card" style="border-top-color:#2563eb;">
+        <div class="pe-top50-card" id="usStockTableCard" style="border-top-color:#2563eb;">
           <div class="pe-top50-head" style="background:linear-gradient(135deg,#eff6ff,#f8fafc); border-bottom-color:#bfdbfe;">
             <div class="pe-top50-title" style="color:#1e3a8a;">
               <span>🇺🇸 ${{currentUsTab === 'SURGE' ? '거래량 급증 · 기관 매집/이탈 시그널' : '미국 핵심 대형주 거래대금 · 모멘텀'}} (${{list.length}}종목)</span>

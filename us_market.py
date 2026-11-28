@@ -260,6 +260,43 @@ def collect_us_market(here=HERE):
     universe = fetch_nasdaq_universe()
     print(f"  - 유효 미국 보통주 {len(universe):,}종목 수집 완료")
 
+    # 2) Yahoo v8 정밀 보강 대상 선별 (시총 $5B↑ 거래대금 TOP 100 + 급등/급락 모멘텀 TOP 35)
+    large_caps = [s for s in universe if s["mcapB"] >= 5.0]
+    large_caps.sort(key=lambda x: x["dollarVol"], reverse=True)
+    cand_map = {}
+    for s in large_caps[:100]:
+        cand_map[s["symbol"]] = s
+
+    momo_pool = [s for s in universe if s["mcapB"] >= 3.0 and s["dollarVolB"] >= 0.15 and s["chg1d"] is not None]
+    momo_pool.sort(key=lambda x: abs(x["chg1d"]), reverse=True)
+    for s in momo_pool[:35]:
+        cand_map.setdefault(s["symbol"], s)
+
+    etf_syms = sorted({x[0] for x in BENCHMARK_ETFS} | {x[0] for x in SECTOR_ETFS})
+    all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms))
+
+    print(f"[2/3] Yahoo Finance 일봉 조회 중 (ETF {len(etf_syms)}개 + 핵심 종목 {len(cand_map)}개)...")
+    yahoo_stats = {}
+    with ThreadPoolExecutor(max_workers=14) as ex:
+        futs = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
+        for fut in as_completed(futs):
+            sym, st = fut.result()
+            if st:
+                yahoo_stats[sym] = st
+    print(f"  - 일봉 지표(RVOL·5일·1개월) 조회 성공: {len(yahoo_stats)} / {len(all_fetch_syms)}개")
+
+    # Yahoo 최신 거래일 종가/거래대금/등락률을 universe에 우선 반영 (조기폐장/장마감 직후 Nasdaq 지연 보정)
+    for s in universe:
+        st = yahoo_stats.get(s["symbol"])
+        if st:
+            if st.get("price"):
+                s["price"] = st["price"]
+            if st.get("chg1d") is not None:
+                s["chg1d"] = st["chg1d"]
+            if st.get("dollarVolB") is not None:
+                s["dollarVolB"] = st["dollarVolB"]
+                s["dollarVol"] = st["dollarVolB"] * 1e9
+
     # 섹터별 시장 전체 자금 쏠림 집계 (시총 $2B 이상 중대형주 기준)
     sec_agg = {}
     for s in universe:
@@ -314,33 +351,6 @@ def collect_us_market(here=HERE):
             ],
         })
     sector_flows.sort(key=lambda x: x["netFlowB"], reverse=True)
-
-    # 2) Yahoo v8 정밀 보강 대상 선별:
-    #    - 시총 $5B 이상 거래대금 TOP 100
-    #    - 시총 $3B 이상 & 거래대금 $150M 이상 일간 급등/급락 모멘텀 TOP 35
-    large_caps = [s for s in universe if s["mcapB"] >= 5.0]
-    large_caps.sort(key=lambda x: x["dollarVol"], reverse=True)
-    cand_map = {}
-    for s in large_caps[:100]:
-        cand_map[s["symbol"]] = s
-
-    momo_pool = [s for s in universe if s["mcapB"] >= 3.0 and s["dollarVolB"] >= 0.15 and s["chg1d"] is not None]
-    momo_pool.sort(key=lambda x: abs(x["chg1d"]), reverse=True)
-    for s in momo_pool[:35]:
-        cand_map.setdefault(s["symbol"], s)
-
-    etf_syms = sorted({x[0] for x in BENCHMARK_ETFS} | {x[0] for x in SECTOR_ETFS})
-    all_fetch_syms = sorted(set(cand_map.keys()) | set(etf_syms))
-
-    print(f"[2/3] Yahoo Finance 일봉 조회 중 (ETF {len(etf_syms)}개 + 핵심 종목 {len(cand_map)}개)...")
-    yahoo_stats = {}
-    with ThreadPoolExecutor(max_workers=14) as ex:
-        futs = [ex.submit(fetch_yahoo_1mo_stats, sym) for sym in all_fetch_syms]
-        for fut in as_completed(futs):
-            sym, st = fut.result()
-            if st:
-                yahoo_stats[sym] = st
-    print(f"  - 일봉 지표(RVOL·5일·1개월) 조회 성공: {len(yahoo_stats)} / {len(all_fetch_syms)}개")
 
     # 최신 미국 거래일 판별
     trade_dates = [yahoo_stats[s]["tradeDate"] for s in ("SPY", "QQQ", "NVDA", "AAPL") if s in yahoo_stats]
