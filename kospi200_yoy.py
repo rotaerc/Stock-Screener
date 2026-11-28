@@ -2812,8 +2812,9 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
         except Exception as e_nv:
             print(f"  [경고] 네이버 리포트 병합 중 오류(한경 데이터는 정상 유지): {e_nv}")
 
-        # 최근 3개월(90일) 종목별 리포트 발간 횟수 집계 (네이버 90일 전체 + 한경 저장분 통합 중복제거)
+        # 최근 3개월(90일) 종목별 리포트 발간 횟수 및 내역 집계 (네이버 90일 전체 + 한경 저장분 통합 중복제거)
         report_counts_3m = dict(old_data.get("reportCounts3m") or {}) if "old_data" in locals() and isinstance(old_data, dict) else {}
+        report_history_3m = dict(old_data.get("reportHistory3m") or {}) if "old_data" in locals() and isinstance(old_data, dict) else {}
         try:
             from concurrent.futures import ThreadPoolExecutor
             cutoff_90d = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
@@ -2827,19 +2828,23 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 if isinstance(by_date[_dk], list):
                     by_date[_dk] = _dedup_reports_list(by_date[_dk])
 
-            seen_3m_entries = {}  # code -> list of (date, norm_broker, norm_title)
+            seen_3m_entries = {}  # code -> list of (date, norm_broker, norm_title, raw_broker, raw_title)
             def _add_3m_unique(cd, wdt, brk, ttl):
                 nb = _norm_report_broker(brk)
                 nt = _norm_report_title(ttl)
+                raw_b = str(brk or "").strip()
+                raw_t = re.sub(r"\s+", " ", str(ttl or "")).strip()
+                if len(raw_t) > 48:
+                    raw_t = raw_t[:47].rstrip() + "…"
                 lst_e = seen_3m_entries.setdefault(cd, [])
-                for ed, eb, et in lst_e:
+                for ed, eb, et, _, _ in lst_e:
                     if nb and eb and nb == eb:
                         if ed == wdt:
                             return
                         # 18시 롤오버/등록 시차(±1~2일)로 같은 증권사+같은 제목이 겹칠 때도 1회만 카운트
                         if nt and et and (nt == et or (min(len(nt), len(et)) >= 8 and (nt in et or et in nt))):
                             return
-                lst_e.append((wdt, nb, nt))
+                lst_e.append((wdt, nb, nt, raw_b, raw_t))
 
             # 1) 저장된 한경/네이버 리포트 중 최근 90일 반영
             for dt_k, lst in by_date.items():
@@ -2891,10 +2896,12 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         break
 
             for cd in target_codes_3m:
-                cnt_val = len(seen_3m_entries.get(cd) or ())
-                if cnt_val > 0:
-                    report_counts_3m[cd] = cnt_val
-            print(f"  - [3개월 발간통계] {len(target_codes_3m)}종목 최근 90일 리포트 발간 횟수 집계 완료")
+                ent_list = seen_3m_entries.get(cd) or []
+                if ent_list:
+                    ent_list.sort(key=lambda x: x[0], reverse=True)
+                    report_counts_3m[cd] = len(ent_list)
+                    report_history_3m[cd] = [[x[0], x[3], x[4]] for x in ent_list]
+            print(f"  - [3개월 발간통계] {len(target_codes_3m)}종목 최근 90일 리포트 발간 횟수·내역 집계 완료")
         except Exception as e_3m:
             print(f"  [경고] 최근 3개월 발간 횟수 집계 중 오류(기존값 유지): {e_3m}")
 
@@ -2912,6 +2919,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             for lst in pruned_by_date.values() for r in lst if r.get("stock_code")
         }
         pruned_counts_3m = {cd: report_counts_3m[cd] for cd in sorted(active_codes_60d) if cd in report_counts_3m}
+        pruned_history_3m = {cd: report_history_3m[cd] for cd in sorted(active_codes_60d) if cd in report_history_3m}
 
         payload = {
             "date": latest_date,
@@ -2922,6 +2930,7 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
             "byDate": pruned_by_date,
             "reports": latest_reports,
             "reportCounts3m": pruned_counts_3m,
+            "reportHistory3m": pruned_history_3m,
         }
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -8001,12 +8010,37 @@ def build_web_dashboard(here):
 
     let currentReportViewMode = 'SHEET'; // 'SHEET' | 'CARDS'
     const REPORT_COUNTS_3M = (REPORTS_DATA && REPORTS_DATA.reportCounts3m) ? REPORTS_DATA.reportCounts3m : {{}};
+    const REPORT_HIST_3M = (REPORTS_DATA && REPORTS_DATA.reportHistory3m) ? REPORTS_DATA.reportHistory3m : {{}};
 
     function getReportCount3m(code) {{
-      const cd = String(code || '').trim();
+      const cd = String(code || '').trim().padStart(6, '0');
       if (!cd) return 0;
       if (REPORT_COUNTS_3M[cd] !== undefined && REPORT_COUNTS_3M[cd] !== null) return Number(REPORT_COUNTS_3M[cd]) || 0;
       return (REPORTS_BY_CODE[cd] || []).length;
+    }}
+
+    function buildReport3mTooltip(code, name, cnt3m) {{
+      const cd = String(code || '').trim().padStart(6, '0');
+      const hist = REPORT_HIST_3M[cd];
+      const titleLine = `[${{name || cd}} · 최근 3개월(90일) 발간 내역 · 총 ${{cnt3m}}회]`;
+      if (Array.isArray(hist) && hist.length > 0) {{
+        const maxShow = 22;
+        const lines = hist.slice(0, maxShow).map(x => {{
+          const dt = x[0] || '';
+          const brk = x[1] || '-';
+          let ttl = x[2] || '';
+          if (ttl.length > 34) ttl = ttl.slice(0, 33) + '…';
+          return `• ${{dt}} | ${{brk}}${{ttl ? ' — ' + ttl : ''}}`;
+        }});
+        if (hist.length > maxShow) lines.push(`… 외 ${{hist.length - maxShow}}건`);
+        return `${{titleLine}}\\n${{lines.join('\\n')}}`;
+      }}
+      const localReps = REPORTS_BY_CODE[cd] || [];
+      if (localReps.length > 0) {{
+        const lines = localReps.slice(0, 12).map(r => `• ${{r.date || ''}} | ${{r.broker || '-'}} — ${{r.title || ''}}`);
+        return `${{titleLine}}\\n${{lines.join('\\n')}}`;
+      }}
+      return titleLine;
     }}
 
     function getWeeklyCombinedFlowMap(refDate) {{
@@ -8273,7 +8307,7 @@ def build_web_dashboard(here):
               <td class="num">${{tpHtml}}</td>
               <td class="num">${{gapHtml}}</td>
               <td class="num">${{flowHtml}}</td>
-              <td class="ctr"><span class="rep-3m-badge ${{c3Cls}}" title="최근 3개월(90일) 동안 해당 종목에 발간된 증권사 리포트 수">${{c3Txt}}</span></td>
+              <td class="ctr"><span class="rep-3m-badge ${{c3Cls}}" style="cursor:help;" data-tip="${{escapeHtml(buildReport3mTooltip(r.stock_code, r.stock_name, cnt3m))}}">${{c3Txt}}</span></td>
             </tr>`;
           }}).join('');
           const repUpdTxt = (REPORTS_DATA && REPORTS_DATA.updatedAt) ? ` · 🕒 ${{REPORTS_DATA.updatedAt}} 업데이트` : '';
@@ -8369,7 +8403,7 @@ def build_web_dashboard(here):
               <a class="rep-stock-name" data-live-code="${{r.stock_code}}" href="${{naverUrl}}" target="_blank" style="text-decoration:none; color:inherit;" onmouseover="this.style.color='#2563eb';this.style.textDecoration='underline'" onmouseout="this.style.color='inherit';this.style.textDecoration='none'">${{escapeHtml(r.stock_name || '기업명')}}</a>
               <span class="rep-code">(${{escapeHtml(r.stock_code || '-')}})</span>
               <span class="rep-pill chg-${{chg}}" ${{prevTpTip}}>${{chgText}}</span>
-              ${{cnt3m > 0 ? `<span class="rep-3m-badge ${{cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low')}}" title="최근 3개월(90일) 발간 리포트 횟수">📚 3개월 ${{cnt3m}}회</span>` : ''}}
+              ${{cnt3m > 0 ? `<span class="rep-3m-badge ${{cnt3m >= 10 ? 'hi' : (cnt3m >= 5 ? 'mid' : 'low')}}" style="cursor:help;" data-tip="${{escapeHtml(buildReport3mTooltip(r.stock_code, r.stock_name, cnt3m))}}">📚 3개월 ${{cnt3m}}회</span>` : ''}}
               ${{scrBadges.join('')}}
             </div>
             <div class="rep-target-box">
@@ -9425,10 +9459,12 @@ def build_web_dashboard(here):
 
     function positionTip(e) {{
       const tipBox = document.getElementById('tooltipBox');
+      const tipW = Math.max(260, tipBox.offsetWidth || 360);
+      const tipH = Math.max(80, tipBox.offsetHeight || 180);
       let x = e.clientX + 14;
       let y = e.clientY + 14;
-      if (x + 360 > window.innerWidth) x = Math.max(10, e.clientX - 350);
-      if (y + 180 > window.innerHeight) y = Math.max(10, e.clientY - 170);
+      if (x + tipW > window.innerWidth - 8) x = Math.max(8, e.clientX - tipW - 12);
+      if (y + tipH > window.innerHeight - 8) y = Math.max(8, window.innerHeight - tipH - 10);
       tipBox.style.left = x + 'px';
       tipBox.style.top = y + 'px';
     }}
