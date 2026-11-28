@@ -2366,6 +2366,64 @@ def _dedup_reports_list(rep_list):
     return out
 
 
+def _is_same_report_broker_title(nb1, nt1, nb2, nt2):
+    """같은 증권사 + 같은(또는 핵심 포함) 제목인지 판별"""
+    if not (nb1 and nb2 and nb1 == nb2):
+        return False
+    if not (nt1 and nt2):
+        return False
+    if nt1 == nt2:
+        return True
+    return min(len(nt1), len(nt2)) >= 6 and (nt1 in nt2 or nt2 in nt1)
+
+
+def _dedup_reports_by_date_map(by_date, lookback_cal_days=5):
+    """
+    날짜별 리포트 딕셔너리(by_date)를 오래된 날짜 -> 최신 날짜 순으로 훑으며:
+    1) 같은 날 내부의 한경/네이버 중복 제거(먼저 읽은 1건 유지)
+    2) 직전 영업일(최대 lookback_cal_days일 이내 이전 날짜)에 이미 존재한
+       '같은 증권사 + 같은 제목' 리포트는 다음날 중복 등록하지 않고 제거합니다.
+    중복 제거 후 0건이 된 날짜 키는 자동으로 제외합니다.
+    """
+    if not isinstance(by_date, dict):
+        return {}
+    sorted_asc = sorted(k for k, v in by_date.items() if isinstance(v, list) and len(v) > 0)
+    cleaned = {}
+    # 최근 lookback_cal_days 일 동안 기록된 (dt_obj, norm_broker, norm_title)
+    recent_prev = []  # list of (datetime, nb, nt)
+    for dt_k in sorted_asc:
+        try:
+            dt_obj = datetime.strptime(dt_k[:10], "%Y-%m-%d")
+        except Exception:
+            dt_obj = None
+        day_list = _dedup_reports_list(by_date[dt_k])
+        kept = []
+        for r in day_list:
+            nb = _norm_report_broker(r.get("broker"))
+            nt = _norm_report_title(r.get("title"))
+            is_prev_dup = False
+            if dt_obj is not None and nb and nt:
+                for p_dt, p_nb, p_nt in recent_prev:
+                    diff_d = (dt_obj - p_dt).days
+                    if 0 < diff_d <= lookback_cal_days and _is_same_report_broker_title(nb, nt, p_nb, p_nt):
+                        is_prev_dup = True
+                        break
+            if is_prev_dup:
+                continue
+            kept.append(r)
+        if kept:
+            cleaned[dt_k] = kept
+            if dt_obj is not None:
+                for r in kept:
+                    nb = _norm_report_broker(r.get("broker"))
+                    nt = _norm_report_title(r.get("title"))
+                    if nb and nt:
+                        recent_prev.append((dt_obj, nb, nt))
+                # 오래된 캐시 정리
+                recent_prev = [x for x in recent_prev if (dt_obj - x[0]).days <= lookback_cal_days]
+    return cleaned
+
+
 def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
     """
     한경 컨센서스(https://consensus.hankyung.com/analysis/list?skinType=business)에서
@@ -2689,6 +2747,27 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                         if str(r.get("report_idx") or "").startswith("naver_")
                     }
 
+                    # 직전 날짜들(최대 5일 이내)에 이미 수집된 같은 증권사+같은 제목 리포트 목록 확보
+                    prev_day_bt = []
+                    try:
+                        _cur_d_obj = datetime.strptime(dt_key[:10], "%Y-%m-%d")
+                    except Exception:
+                        _cur_d_obj = None
+                    if _cur_d_obj is not None:
+                        for _pdk, _plst in by_date.items():
+                            if _pdk >= dt_key or not isinstance(_plst, list):
+                                continue
+                            try:
+                                _pd_obj = datetime.strptime(_pdk[:10], "%Y-%m-%d")
+                            except Exception:
+                                continue
+                            if 0 < (_cur_d_obj - _pd_obj).days <= 5:
+                                for _pr in _plst:
+                                    _pnb = _norm_report_broker(_pr.get("broker"))
+                                    _pnt = _norm_report_title(_pr.get("title"))
+                                    if _pnb and _pnt:
+                                        prev_day_bt.append((_pnb, _pnt))
+
                     nv_added = []
                     for nv in nv_items:
                         rid = str(nv.get("researchId") or "").strip()
@@ -2705,6 +2784,9 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
 
                         nb = _norm_report_broker(broker)
                         nt = _norm_report_title(title)
+                        # 전날(최대 5일 이내)에 이미 올라온 같은 증권사+같은 제목이면 업데이트 제외
+                        if any(_is_same_report_broker_title(nb, nt, pnb, pnt) for pnb, pnt in prev_day_bt):
+                            continue
                         # 먼저 읽은 리포트(한경 또는 기존 네이버)와 종목+증권사 또는 종목+제목이 겹치면 제외
                         if (st_code, nb) in seen_broker_keys:
                             continue
@@ -2823,10 +2905,8 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
                 for lst in by_date.values() if isinstance(lst, list)
                 for r in lst if r.get("stock_code")
             }
-            # 모든 날짜 리스트 먼저 중복 제거 (한경·네이버 겹침 시 먼저 읽은 1건만 유지)
-            for _dk in list(by_date.keys()):
-                if isinstance(by_date[_dk], list):
-                    by_date[_dk] = _dedup_reports_list(by_date[_dk])
+            # 모든 날짜 리스트 당일 중복 + 전날(±5일) 같은 증권사·같은 제목 중복 제거
+            by_date = _dedup_reports_by_date_map(by_date)
 
             seen_3m_entries = {}  # code -> list of (date, norm_broker, norm_title, raw_broker, raw_title)
             def _add_3m_unique(cd, wdt, brk, ttl):
@@ -2905,12 +2985,13 @@ def fetch_hankyung_reports(here, target_date=None, lookback_days=0):
         except Exception as e_3m:
             print(f"  [경고] 최근 3개월 발간 횟수 집계 중 오류(기존값 유지): {e_3m}")
 
-        # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리 + 날짜별 최종 중복 제거)
+        # 최대 60일 이전까지만 보관 (60일 초과 데이터 자동 정리 + 당일/전날 최종 중복 제거)
         cutoff_str = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
-        pruned_by_date = {
-            d: _dedup_reports_list(lst) for d, lst in sorted(by_date.items(), reverse=True)
+        pruned_raw = {
+            d: lst for d, lst in sorted(by_date.items(), reverse=True)
             if d >= cutoff_str and isinstance(lst, list) and len(lst) > 0
         }
+        pruned_by_date = _dedup_reports_by_date_map(pruned_raw)
         sorted_dates = sorted(pruned_by_date.keys(), reverse=True)
         latest_date = sorted_dates[0] if sorted_dates else today_str
         latest_reports = pruned_by_date.get(latest_date, [])
@@ -2953,10 +3034,7 @@ def _load_hankyung_reports(here):
                 dt = data.get("date") or ""
                 reps = data.get("reports") or []
                 data["byDate"] = {dt: reps} if (dt and reps) else {}
-            data["byDate"] = {
-                k: _dedup_reports_list(v) for k, v in data["byDate"].items()
-                if isinstance(v, list) and len(v) > 0
-            }
+            data["byDate"] = _dedup_reports_by_date_map(data["byDate"])
             data["dates"] = sorted(data["byDate"].keys(), reverse=True)
             if data["dates"]:
                 data["date"] = data["dates"][0]
