@@ -11889,6 +11889,10 @@ def build_web_dashboard(here):
 
     function positionLiveQuote(e) {{
       const box = document.getElementById('liveQuoteBox');
+      if (!box) return;
+      let x = e.clientX + 16;
+      let y = e.clientY + 14;
+      if (x + 260 > window.innerWidth) x = Math.max(10, e.clientX - 264);
       if (y + 220 > window.innerHeight) y = Math.max(10, e.clientY - 224);
       box.style.left = x + 'px';
       box.style.top = y + 'px';
