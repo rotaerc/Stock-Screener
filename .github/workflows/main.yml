@@ -10,10 +10,12 @@ on:
   # [2] 코스피/코스닥 200 스크리너 전용 자동 업데이트 (약 12~15분 소요)
   #   - 08:33 KST = UTC 전날 23:33
   #   - 16:18 KST = UTC 07:18 (16:03 리포트 실행 지연 시 겹침 방지를 위해 15분 간격 확보)
-  # [3] 미국 시장 거래대금·모멘텀·섹터 자금 흐름 자동 업데이트 (약 30초 소요)
-  #   - 07:08 KST (화~토, 미국 정규장 마감 직후) = UTC 월~금 22:08
+  # [3] 미국 시장 거래대금·모멘텀·섹터 자금 흐름 자동 업데이트 (뉴욕 정규장 16:00 마감 + 20분 후 · 서머타임 자동 전환)
+  #   - 서머타임(EDT, 3월~11월): 한국시간 05:20 KST (화~토) = UTC 월~금 20:20
+  #   - 겨울 표준시(EST, 11월~3월): 한국시간 06:20 KST (화~토) = UTC 월~금 21:20
   schedule:
-    - cron: '8 22 * * 1-5'
+    - cron: '20 20 * * 1-5'
+    - cron: '20 21 * * 1-5'
     - cron: '4 23 * * *'
     - cron: '15 0 * * *'
     - cron: '5 4 * * *'
@@ -72,9 +74,23 @@ jobs:
                 ;;
             esac
           elif [ "$EVENT_NAME" = "schedule" ]; then
+            NY_TZ=$(TZ=America/New_York date +%Z)
             case "$SCHEDULE_CRON" in
-              "8 22 * * 1-5")
-                MODE="us"
+              "20 20 * * 1-5")
+                # 서머타임(EDT, 05:20 KST) 기간에만 실행
+                if [ "$NY_TZ" = "EDT" ]; then
+                  MODE="us"
+                else
+                  MODE="skip"
+                fi
+                ;;
+              "20 21 * * 1-5")
+                # 겨울 표준시(EST, 06:20 KST) 기간에만 실행
+                if [ "$NY_TZ" = "EST" ]; then
+                  MODE="us"
+                else
+                  MODE="skip"
+                fi
                 ;;
               "4 23 * * *"|"15 0 * * *"|"5 4 * * *"|"3 7 * * *")
                 MODE="reports"
@@ -90,17 +106,20 @@ jobs:
             MODE="all"
           fi
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
-          echo "Resolved update mode: $MODE (event=$EVENT_NAME, cron=$SCHEDULE_CRON, input=$INPUT_MODE)"
+          echo "Resolved update mode: $MODE (event=$EVENT_NAME, cron=$SCHEDULE_CRON, ny_tz=${NY_TZ:-N/A}, input=$INPUT_MODE)"
 
       - name: 파이썬 설치
+        if: steps.resolve_mode.outputs.mode != 'skip'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: 필수 프로그램(라이브러리) 설치
+        if: steps.resolve_mode.outputs.mode != 'skip'
         run: pip install -r requirements.txt
 
       - name: 리포트 또는 스크리너 업데이트 및 웹페이지 생성
+        if: steps.resolve_mode.outputs.mode != 'skip'
         env:
           TZ: Asia/Seoul
           RUN_MODE: ${{ steps.resolve_mode.outputs.mode }}
@@ -131,6 +150,7 @@ jobs:
           fi
 
       - name: 최신 웹페이지(index.html)·데이터 GitHub 자동 저장
+        if: steps.resolve_mode.outputs.mode != 'skip'
         env:
           RUN_MODE: ${{ steps.resolve_mode.outputs.mode }}
         run: |
